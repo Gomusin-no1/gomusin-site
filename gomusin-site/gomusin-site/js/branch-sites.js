@@ -33,7 +33,7 @@
       quote: { text: "멀어도 여기말고 다른매장은 못가겠어요", by: "간석점 네이버 방문자 리뷰 · psc****" }
     },
     sungui: {
-      branch: "숭의점", store: "s3", url: "https://gomusin-sungui.vercel.app",
+      branch: "숭의점", store: "s3", url: "https://gomusin-sungui-site.vercel.app",
       gallery: [
         { src: "assets/brand/store-sungui-day.jpg", caption: "숭의점" },
         { src: "assets/brand/store-sungui-crowd.jpg", caption: "매장 앞 손님들" },
