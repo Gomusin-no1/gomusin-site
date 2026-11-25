@@ -1,0 +1,229 @@
+/* =========================================================
+   고무신 테마 — 블랙 · 골드
+   레시피 기본(클린 블루)으로 되돌리려면 index.html 에서 이 파일 줄만 지우면 돼요.
+   radius · 폰트 · 버튼 모양(외곽선)은 레시피 그대로, 색만 브랜드에 맞췄어요.
+   ========================================================= */
+:root {
+  --color-primary: #D4B26A;    /* 골드: 주요 버튼·링크·강조 */
+  --color-secondary: #E8CF94;  /* 밝은 골드: 호버 배경 */
+  --color-accent: #A39E95;     /* 보조 글자 */
+  --color-text: #F3EFE6;       /* 본문 (따뜻한 흰색) */
+  --color-bg: #0A0A0B;         /* 배경 (블랙) */
+  --color-surface: #17171A;    /* 카드·입력창 */
+  --color-line: #2A2A2F;
+  --color-danger: #FF6B6B;
+  --color-success: #9DBF7A;
+  --ink: #0A0A0B;              /* 골드 위 글자색 */
+  --shadow: 0 12px 36px rgba(0, 0, 0, .6);
+  color-scheme: dark;
+}
+
+/* 골드 버튼 호버: 밝은 골드 배경 + 검정 글자 */
+.btn:hover, .btn.is-on, .cal button[aria-pressed="true"] { background: var(--color-secondary); border-color: var(--color-secondary); color: var(--ink); }
+.btn.ghost { color: var(--color-text); border-color: rgba(243, 239, 230, .35); }
+.btn.ghost:hover { border-color: var(--color-secondary); }
+.btn.danger:hover { color: #fff; }
+.badge { background: var(--color-primary); color: var(--ink); }
+.skip { color: var(--ink); }
+
+/* 흰 배경이던 부분을 어둡게 */
+.topbar { background: rgba(10, 10, 11, .82); border-bottom-color: rgba(212, 178, 106, .18); }
+.icon-btn { color: var(--color-text); }
+.icon-btn:hover { background: var(--color-surface); color: var(--color-primary); }
+.dropdown, .modal, .suggest, .infowin, .card, .product, .store-list button, .pagination button, .chip, .noti-list button { background: #121214; }
+.noti-list button { border-bottom-color: var(--color-line); }
+.noti-list .unread { background: #1C1913; }
+.infowin::after { border-top-color: #121214; }
+.infowin.below::after { border-bottom-color: #121214; }
+@media (max-width: 767px) { .nav { background: #0E0E10; } }
+.search-box input:focus, .input:focus, .textarea:focus, .select:focus { background: #1D1D21; border-color: var(--color-primary); }
+.search-box input::placeholder { color: #77726A; }
+.field.invalid .input, .field.invalid .textarea { background: #2A1414; }
+.form-error { background: #2A1414; }
+.board-table th { border-bottom-color: var(--color-primary); }
+.board-table tr:hover td { background: #141416; }
+mark { background: rgba(212, 178, 106, .22); color: var(--color-secondary); }
+.result { border-bottom-color: var(--color-line); }
+.applied, .status.ok { background: rgba(212, 178, 106, .14); color: var(--color-primary); }
+.dropzone { background: #141416; border-color: #3A3A40; }
+.dropzone:hover, .dropzone.over { background: #1C1913; }
+.toast { background: #F3EFE6; color: var(--ink); }
+.toast.error { color: #fff; }
+.backdrop { background: rgba(0, 0, 0, .7); }
+.avatar { background: #24211A; color: var(--color-primary); }
+.spinner { border-color: #2A2A2F; border-top-color: var(--color-primary); }
+.skeleton { background: linear-gradient(90deg, #17171A 25%, #222226 50%, #17171A 75%); background-size: 200% 100%; }
+.img.type span { color: var(--color-primary); }
+.bg-grid figcaption { background: rgba(10, 10, 11, .78); color: var(--color-text); }
+.map-note { background: rgba(10, 10, 11, .85); }
+.marker svg { stroke: #0A0A0B; }
+.map { background-color: #121418;
+  background-image:
+    linear-gradient(115deg, transparent 47%, #24262B 47%, #24262B 50%, transparent 50%),
+    linear-gradient(25deg, transparent 60%, #24262B 60%, #24262B 62.5%, transparent 62.5%),
+    linear-gradient(#1A1C20 1px, transparent 1px), linear-gradient(90deg, #1A1C20 1px, transparent 1px); }
+.map .river { background: #16202C; }
+
+/* 검색 첫 화면: 보케 사진 위에 금색 로고 */
+.center { position: relative; background: #050506 url("../assets/brand/hero-bokeh.jpg") center bottom / cover no-repeat; }
+.center::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 42%, rgba(5, 5, 6, .55), rgba(5, 5, 6, .1) 70%); pointer-events: none; }
+.center > * { position: relative; }
+.logo a.has-img img { height: clamp(96px, 20vw, 150px); }
+.tagline { color: #E6DCC6; font-size: clamp(1.02rem, 2.6vw, 1.25rem); margin-top: -4px; }
+.search-box input { background: rgba(23, 23, 26, .9); border-color: rgba(212, 178, 106, .3); }
+.recent .chip { background: rgba(18, 18, 20, .85); }
+body.searching .center { background: rgba(10, 10, 11, .96); border-bottom-color: rgba(212, 178, 106, .18); }
+body.searching .center::before { display: none; }
+body.searching .logo a.has-img img { height: 44px; filter: none; }
+.brand.has-img img { height: 34px; }
+
+/* 지점 전화·바로가기 띠 (첫 화면 아래) */
+.brand-hero { padding-top: 40px; }
+.bh-inner { background: #0E0E10; border: 1px solid rgba(212, 178, 106, .22); padding: 32px 20px; }
+
+/* ===== 매장 지도 (2026-11-25 자문 반영: 고정 지도 · 금색 고정핀 · 매장별 네이버지도/T맵) ===== */
+.store-layout { grid-template-columns: minmax(0, 1.35fr) minmax(300px, 1fr); align-items: start; }
+@media (max-width: 860px) { .store-layout { grid-template-columns: 1fr; } }
+.map-col { position: sticky; top: 76px; }
+@media (max-width: 860px) { .map-col { position: static; } }
+.map { min-height: 440px; border: 1px solid #3A3426; box-shadow: 0 12px 30px rgba(0,0,0,.45); touch-action: pan-y; }
+@media (max-width: 860px) { .map { min-height: 320px; } }
+.map.map-mock { background-color: #1B1D22;
+  background-image: linear-gradient(#23262C 1px, transparent 1px), linear-gradient(90deg, #23262C 1px, transparent 1px);
+  background-size: 48px 48px; }
+.map-mock .road { position: absolute; background: #3B3F48; box-shadow: 0 0 0 2px #2C2F36; border-radius: 6px; }
+.map-mock .road.r1 { left: -5%; right: -5%; top: 40%; height: 14px; transform: rotate(-8deg); }
+.map-mock .road.r2 { top: -5%; bottom: -5%; left: 52%; width: 12px; transform: rotate(14deg); }
+.map-mock .road.r3 { left: -5%; right: -5%; top: 74%; height: 9px; transform: rotate(5deg); }
+.map-note { color: var(--color-secondary); }
+
+/* 금색 고정핀 + 항상 보이는 이름표 */
+.pin { position: absolute; transform: translate(-50%, -100%); border: 0; background: none; padding: 0; cursor: pointer; z-index: 3; }
+.pin-kakao { position: relative; transform: none; }
+.pin-wrap { display: flex; flex-direction: column; align-items: center; }
+.pin-svg { width: 40px; height: 52px; filter: drop-shadow(0 3px 4px rgba(0,0,0,.6)); order: 2; transition: transform .15s; transform-origin: 50% 100%; }
+.pin-body { fill: #D4B26A; stroke: #0A0A0B; stroke-width: 2.5; }
+.pin-dot { fill: #0A0A0B; }
+.pin-label { order: 1; margin-bottom: 3px; padding: 4px 11px; border-radius: 999px; background: #0A0A0B; color: #E8CF94; border: 1.5px solid #D4B26A;
+  font-weight: 800; font-size: .86rem; line-height: 1.2; white-space: nowrap; box-shadow: 0 3px 8px rgba(0,0,0,.55); }
+.pin.active { z-index: 4; }
+.pin.active .pin-svg { transform: scale(1.18); }
+.pin.active .pin-body { fill: #E8CF94; }
+.pin.active .pin-label { background: #D4B26A; color: #0A0A0B; border-color: #E8CF94; }
+.pin:focus-visible { outline: none; }
+.pin:focus-visible .pin-label { outline: 3px solid #E8CF94; outline-offset: 2px; }
+
+/* 랜드마크 (지하철역 등) */
+.lm { position: absolute; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px 3px 4px; border-radius: 999px;
+  background: rgba(243,239,230,.92); color: #1A1A1D; font-size: .74rem; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,.4); z-index: 1; pointer-events: none; }
+.lm-kakao { position: relative; transform: none; }
+.lm-ico { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: #2F6BD8; color: #fff; font-size: .66rem; font-weight: 800; }
+
+/* 매장 목록: 카드 + 바로 아래 길찾기 버튼 */
+.store-item { border: 1.5px solid var(--color-line); border-radius: var(--radius-card); background: #121214; overflow: hidden; transition: border-color .15s; }
+.store-item.active { border-color: var(--color-primary); box-shadow: 0 0 0 1px var(--color-primary) inset; }
+.store-list .store-pick { border: 0; border-radius: 0; background: transparent; padding: 14px 16px 10px; }
+.store-list .store-pick strong { display: flex; align-items: center; gap: 6px; font-size: 1.05rem; margin-bottom: 4px; }
+.list-pin .pin-svg { width: 16px; height: 21px; filter: none; }
+.store-guide { display: block; margin-top: 6px; color: var(--color-secondary); font-size: .85rem; }
+.store-meta { display: block; margin-top: 2px; }
+.nav-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 0 12px 12px; }
+.nav-btn { display: flex; align-items: center; justify-content: center; gap: 5px; min-height: 44px; padding: 6px 4px; border-radius: 10px; font-size: .84rem; font-weight: 700;
+  text-decoration: none; border: 1px solid #2E2E33; background: #1C1C20; color: var(--color-text); white-space: nowrap; }
+.nav-btn:hover { border-color: var(--color-secondary); }
+.nav-btn b { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 5px; font-size: .7rem; color: #fff; }
+.nav-naver b { background: #03C75A; }
+.nav-tmap b { background: linear-gradient(135deg, #E5212D, #6A3CF0); }
+.nav-kakao b { background: #FEE500; color: #191919; }
+.nav-call { background: #D4B26A; color: #0A0A0B; border-color: #D4B26A; }
+@media (max-width: 400px) { .nav-row { grid-template-columns: repeat(2, 1fr); } }
+
+/* ===== 고객 리뷰 (홈) ===== */
+.brand-reviews { max-width: 1080px; margin: 0 auto; padding: 64px 16px 48px; width: 100%; text-align: center; }
+body.searching .brand-reviews { display: none !important; }
+.rv-title { margin-bottom: 14px; }
+.rv-lead { max-width: 620px; margin: 0 auto 36px; color: var(--color-accent); line-height: 1.7; }
+.rv-sum { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px 40px; margin: 0 0 28px; }
+.rv-sum > div { display: flex; flex-direction: column-reverse; gap: 4px; }
+.rv-sum dt { color: var(--color-accent); font-size: .86rem; }
+.rv-sum dd { margin: 0; color: var(--color-primary); font-weight: 700; }
+.rv-sum b { font-size: clamp(2rem, 5vw, 2.8rem); letter-spacing: -0.03em; }
+.rv-kw { list-style: none; padding: 0; margin: 0 0 36px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.rv-kw li { border: 1px solid #3A3426; background: #141312; color: var(--color-text); border-radius: 999px; padding: 8px 14px; font-size: .9rem; }
+.rv-kw b { margin-left: 8px; color: var(--color-primary); }
+.rv-list { list-style: none; padding: 0; margin: 0 0 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; text-align: left; }
+@media (max-width: 860px) { .rv-list { grid-template-columns: 1fr; } }
+.rv-card { position: relative; border: 1px solid var(--color-line); border-top: 2px solid var(--color-primary); border-radius: var(--radius-card); background: var(--color-surface); padding: 22px 20px 18px; display: flex; flex-direction: column; }
+.rv-tag { align-self: flex-start; font-size: .75rem; font-weight: 700; color: #0A0A0B; background: var(--color-primary); border-radius: 999px; padding: 3px 10px; margin-bottom: 10px; }
+.rv-stars { color: var(--color-primary); letter-spacing: 2px; font-size: .9rem; }
+.rv-card blockquote { margin: 10px 0 16px; font-size: 1.02rem; line-height: 1.7; flex: 1; }
+.rv-card blockquote em { font-style: normal; color: var(--color-secondary); font-weight: 700; }
+.rv-who { margin: 0; font-size: .88rem; color: var(--color-accent); }
+.rv-who strong { color: var(--color-text); }
+.rv-src { margin: 4px 0 0; font-size: .76rem; color: #03C75A; }
+.rv-shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin: 0 0 32px; }
+.rv-shots img { width: 100%; border-radius: var(--radius-card); border: 1px solid var(--color-line); }
+.rv-links p { margin: 0 0 10px; color: var(--color-accent); font-size: .9rem; }
+.rv-links > div { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
+.rv-links .nav-btn { padding: 8px 16px; }
+.rv-sumwrap { display: inline-block; border: 1px solid #3A3426; border-radius: var(--radius-card); padding: 18px 28px 6px; margin: 0 0 32px; background: #121212; }
+.rv-sumhead { margin: 0 0 12px; font-size: .88rem; color: var(--color-accent); display: flex; align-items: center; justify-content: center; gap: 6px; }
+.rv-sumhead b { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 5px; background: #03C75A; color: #fff; font-size: .7rem; }
+.rv-sumwrap .rv-sum { margin-bottom: 12px; }
+.rv-card blockquote { white-space: pre-line; word-break: keep-all; overflow-wrap: anywhere; }
+.rv-card.featured { grid-column: 1 / -1; padding: 32px clamp(20px, 4vw, 44px); background: linear-gradient(135deg, #1A1712, #121214 60%); border-color: #3A3426; }
+.rv-card.featured blockquote { font-size: clamp(1.05rem, 2.2vw, 1.25rem); line-height: 1.85; }
+.rv-card.featured blockquote::before { content: "\201C"; display: block; font-size: 3rem; line-height: .8; color: var(--color-primary); margin-bottom: 6px; }
+.rv-note { margin: -20px 0 32px; font-size: .78rem; color: var(--color-accent); }
+
+/* ===== 첫 화면 신뢰 띠 (2026-11-25 고객 눈 점검 반영) ===== */
+.hero-proof { width: 100%; max-width: 640px; margin: 28px auto 0; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+body.searching .hero-proof { display: none; }
+.hp-stats { list-style: none; margin: 0; padding: 0; width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid #3A3426; border-radius: var(--radius-card); background: rgba(10,10,11,.72); backdrop-filter: blur(4px); }
+.hp-stats li { padding: 12px 6px; display: flex; flex-direction: column; gap: 2px; }
+.hp-stats li + li { border-left: 1px solid #3A3426; }
+.hp-stats b { color: var(--color-primary); font-size: clamp(1.05rem, 3.6vw, 1.45rem); letter-spacing: -0.02em; white-space: nowrap; }
+.hp-stats span { color: var(--color-accent); font-size: .74rem; }
+.hp-quote { display: block; color: var(--color-text); font-size: clamp(.95rem, 3vw, 1.08rem); font-weight: 600; text-decoration: none; line-height: 1.5; }
+.hp-quote:hover { text-decoration: none; color: var(--color-secondary); }
+.hp-quote .rv-stars { display: block; font-size: .8rem; margin-bottom: 2px; }
+.hp-quote small { display: block; margin-top: 2px; font-size: .74rem; font-weight: 400; color: var(--color-accent); }
+.hp-ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.hp-ctas .btn { min-height: 46px; padding: 0 20px; }
+.bh-branches small { display: block; font-size: .76rem; color: rgba(255,255,255,.6); margin-top: 2px; }
+.bh-hours { margin: -12px 0 22px; font-size: .86rem; color: rgba(255,255,255,.7); }
+.rv-morebtn { display: none; margin: -12px auto 28px; }
+@media (max-width: 860px) {
+  .brand-reviews:not(.rv-open) .rv-extra { display: none; }
+  .brand-reviews:not(.rv-open) .rv-morebtn { display: inline-flex; }
+}
+.hero-proof { margin-top: 4px; text-align: center; }
+.hp-stats li { align-items: center; text-align: center; }
+.hp-ctas .btn:not(.ghost) { background: var(--color-primary); color: #0A0A0B; border-color: var(--color-primary); font-weight: 700; }
+.hp-ctas .btn:not(.ghost):hover { background: var(--color-secondary); }
+/* 휴대폰: 15년·58,000건·3곳을 한 줄로 (스크롤 줄이기) */
+@media (max-width: 640px) {
+  .tr-stats { grid-template-columns: repeat(3, 1fr); }
+  .tr-stats > div { padding: 18px 4px; }
+  .tr-stats > div + div { border-top: 0; border-left: 1px solid var(--color-line); }
+  .tr-stats b { font-size: 1.7rem; }
+  .tr-stats dt { font-size: .72rem; }
+  .brand-trust { padding-top: 48px; }
+}
+@media (max-width: 640px) { .tr-stats dd { white-space: nowrap; font-size: .9rem; } .tr-stats b { font-size: 1.45rem; } }
+
+/* ===== 카카오톡 · 네이버 · 인스타그램 공식 색상 버튼 ===== */
+.sns-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 760px; margin: 0 auto 22px; }
+.sns-btn { flex: 1 1 200px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 18px; border-radius: 12px; font-weight: 700; font-size: .98rem; text-decoration: none; transition: filter .15s, transform .15s; }
+.sns-btn:hover { text-decoration: none; filter: brightness(1.06); transform: translateY(-1px); }
+.sns-mark { display: inline-grid; place-items: center; width: 24px; height: 24px; }
+.sns-mark svg { width: 22px; height: 22px; }
+.sns-kakao { background: #FEE500; color: rgba(0,0,0,.85); }
+.sns-kakao:hover { color: #000; }
+.sns-naver { background: #03C75A; color: #fff; }
+.sns-naver .sns-mark svg { width: 16px; height: 16px; }
+.sns-naver:hover { color: #fff; }
+.sns-insta { background: linear-gradient(45deg, #F58529, #DD2A7B 45%, #8134AF 75%, #515BD4); color: #fff; }
+.sns-insta:hover { color: #fff; }
+@media (max-width: 480px) { .sns-btn { flex-basis: 100%; } }
+.bh-links { flex-wrap: nowrap; } .bh-links a { flex: 1 1 0; white-space: nowrap; padding: 12px 6px; font-size: .86rem; }
