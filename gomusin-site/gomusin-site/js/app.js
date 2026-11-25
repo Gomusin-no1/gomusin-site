@@ -108,22 +108,31 @@
   function wow() {
     const calm = matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window);
     const nums = $$(".hp-stats b, .tr-stats b, .rv-sum b");
+    // 숫자: 처음엔 0으로 두었다가, 화면에 충분히 보이면 빠르게 올라가요 (예: 0 → 1,550건)
     const run = (el) => {
-      const m = el.textContent.match(/^([\d,]+)(.*)$/); if (!m) return;
-      const end = +m[1].replace(/,/g, ""), tail = m[2], t0 = performance.now(), dur = 1400;
-      const step = (t) => { const k = Math.min(1, (t - t0) / dur), v = Math.round(end * (1 - Math.pow(1 - k, 3)));
-        el.textContent = v.toLocaleString("ko-KR") + tail; if (k < 1) requestAnimationFrame(step); };
-      requestAnimationFrame(step);
+      const m = (el.dataset.final || "").match(/^([\d,]+)(.*)$/); if (!m) return;
+      const end = +m[1].replace(/,/g, ""), tail = m[2], dur = el.closest(".rv-sum") ? 1600 : 1300;
+      setTimeout(() => {
+        const t0 = performance.now();
+        const step = (t) => { const k = Math.min(1, (t - t0) / dur), v = Math.round(end * (1 - Math.pow(1 - k, 3)));
+          el.textContent = v.toLocaleString("ko-KR") + tail; if (k < 1) requestAnimationFrame(step); };
+        requestAnimationFrame(step);
+      }, 200);
     };
     const secs = $$(".brand-trust, .brand-gallery, .brand-reviews, .brand-hero, .tr-promises li, .rv-card");
     if (calm) return;
+    nums.forEach((el) => { const m = el.textContent.match(/^([\d,]+)(.*)$/); if (!m) return; el.dataset.final = el.textContent; el.textContent = "0" + m[2]; });
     secs.forEach((s) => s.classList.add("reveal"));
     const io = new IntersectionObserver((es) => es.forEach((e) => {
       if (!e.isIntersecting) return;
-      io.unobserve(e.target);
-      if (e.target.matches("b")) run(e.target); else e.target.classList.add("in");
+      io.unobserve(e.target); e.target.classList.add("in");
     }), { threshold: 0.15 });
-    nums.concat(secs).forEach((el) => io.observe(el));
+    secs.forEach((el) => io.observe(el));
+    const nio = new IntersectionObserver((es) => es.forEach((e) => {
+      if (!e.isIntersecting) return;
+      nio.unobserve(e.target); run(e.target);
+    }), { threshold: 0.6, rootMargin: "0px 0px -8% 0px" });
+    nums.forEach((el) => nio.observe(el));
   }
 
   function applyBrand() {

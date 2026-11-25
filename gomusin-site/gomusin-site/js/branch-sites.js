@@ -16,9 +16,9 @@
       gallery: [
         { src: "assets/brand/interior-bupyeong-4.jpg", caption: "부평본점 · 매장 안" },
         { src: "assets/brand/banner-bupyeong-15y.jpg", caption: "", fit: "contain" },
-        { src: "assets/brand/banner-bupyeong-red.jpg", caption: "", fit: "contain" }
+        { src: "assets/brand/banner-bupyeong-red.jpg?v=2", caption: "", fit: "contain" }
       ],
-      video: { src: "assets/brand/bupyeong-night.mp4", poster: "assets/brand/bupyeong-night.jpg", caption: "부평본점 · 밤에도 환한 매장" },
+      video: { src: "assets/brand/bupyeong-night.mp4?v=2", poster: "assets/brand/bupyeong-night.jpg?v=2", caption: "부평본점 · 밤에도 환한 매장" },
       quote: { text: "가족들 다 바꿀 때 본점만 오는 것 같아요!!", by: "부평본점 네이버 방문자 리뷰 · fir****" }
     },
     ganseok: {
