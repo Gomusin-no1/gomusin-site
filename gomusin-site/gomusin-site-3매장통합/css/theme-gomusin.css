@@ -1,0 +1,412 @@
+/* =========================================================
+   고무신 테마 — 블랙 · 골드
+   레시피 기본(클린 블루)으로 되돌리려면 index.html 에서 이 파일 줄만 지우면 돼요.
+   radius · 폰트 · 버튼 모양(외곽선)은 레시피 그대로, 색만 브랜드에 맞췄어요.
+   ========================================================= */
+:root {
+  --color-primary: #D4B26A;    /* 골드: 주요 버튼·링크·강조 */
+  --color-secondary: #E8CF94;  /* 밝은 골드: 호버 배경 */
+  --color-accent: #A39E95;     /* 보조 글자 */
+  --color-text: #F3EFE6;       /* 본문 (따뜻한 흰색) */
+  --color-bg: #0A0A0B;         /* 배경 (블랙) */
+  --color-surface: #17171A;    /* 카드·입력창 */
+  --color-line: #2A2A2F;
+  --color-danger: #FF6B6B;
+  --color-success: #9DBF7A;
+  --ink: #0A0A0B;              /* 골드 위 글자색 */
+  --shadow: 0 12px 36px rgba(0, 0, 0, .6);
+  color-scheme: dark;
+}
+
+/* 골드 버튼 호버: 밝은 골드 배경 + 검정 글자 */
+.btn:hover, .btn.is-on, .cal button[aria-pressed="true"] { background: var(--color-secondary); border-color: var(--color-secondary); color: var(--ink); }
+.btn.ghost { color: var(--color-text); border-color: rgba(243, 239, 230, .35); }
+.btn.ghost:hover { border-color: var(--color-secondary); }
+.btn.danger:hover { color: #fff; }
+.badge { background: var(--color-primary); color: var(--ink); }
+.skip { color: var(--ink); }
+
+/* 흰 배경이던 부분을 어둡게 */
+.topbar { background: rgba(10, 10, 11, .82); border-bottom-color: rgba(212, 178, 106, .18); }
+.icon-btn { color: var(--color-text); }
+.icon-btn:hover { background: var(--color-surface); color: var(--color-primary); }
+.dropdown, .modal, .suggest, .infowin, .card, .product, .store-list button, .pagination button, .chip, .noti-list button { background: #121214; }
+.noti-list button { border-bottom-color: var(--color-line); }
+.noti-list .unread { background: #1C1913; }
+.infowin::after { border-top-color: #121214; }
+.infowin.below::after { border-bottom-color: #121214; }
+@media (max-width: 767px) { .nav { background: #0E0E10; } }
+.search-box input:focus, .input:focus, .textarea:focus, .select:focus { background: #1D1D21; border-color: var(--color-primary); }
+.search-box input::placeholder { color: #77726A; }
+.field.invalid .input, .field.invalid .textarea { background: #2A1414; }
+.form-error { background: #2A1414; }
+.board-table th { border-bottom-color: var(--color-primary); }
+.board-table tr:hover td { background: #141416; }
+mark { background: rgba(212, 178, 106, .22); color: var(--color-secondary); }
+.result { border-bottom-color: var(--color-line); }
+.applied, .status.ok { background: rgba(212, 178, 106, .14); color: var(--color-primary); }
+.dropzone { background: #141416; border-color: #3A3A40; }
+.dropzone:hover, .dropzone.over { background: #1C1913; }
+.toast { background: #F3EFE6; color: var(--ink); }
+.toast.error { color: #fff; }
+.backdrop { background: rgba(0, 0, 0, .7); }
+.avatar { background: #24211A; color: var(--color-primary); }
+.spinner { border-color: #2A2A2F; border-top-color: var(--color-primary); }
+.skeleton { background: linear-gradient(90deg, #17171A 25%, #222226 50%, #17171A 75%); background-size: 200% 100%; }
+.img.type span { color: var(--color-primary); }
+.bg-grid figcaption { background: rgba(10, 10, 11, .78); color: var(--color-text); }
+.map-note { background: rgba(10, 10, 11, .85); }
+.marker svg { stroke: #0A0A0B; }
+.map { background-color: #121418;
+  background-image:
+    linear-gradient(115deg, transparent 47%, #24262B 47%, #24262B 50%, transparent 50%),
+    linear-gradient(25deg, transparent 60%, #24262B 60%, #24262B 62.5%, transparent 62.5%),
+    linear-gradient(#1A1C20 1px, transparent 1px), linear-gradient(90deg, #1A1C20 1px, transparent 1px); }
+.map .river { background: #16202C; }
+
+/* 검색 첫 화면: 보케 사진 위에 금색 로고 */
+.center { position: relative; background: #050506 url("../assets/brand/hero-bokeh.jpg") center bottom / cover no-repeat; }
+.center::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 42%, rgba(5, 5, 6, .55), rgba(5, 5, 6, .1) 70%); pointer-events: none; }
+.center > * { position: relative; }
+.logo a.has-img img { height: clamp(96px, 20vw, 150px); }
+.tagline { color: #E6DCC6; font-size: clamp(1.02rem, 2.6vw, 1.25rem); margin-top: -4px; }
+.search-box input { background: rgba(23, 23, 26, .9); border-color: rgba(212, 178, 106, .3); }
+.recent .chip { background: rgba(18, 18, 20, .85); }
+body.searching .center { background: rgba(10, 10, 11, .96); border-bottom-color: rgba(212, 178, 106, .18); }
+body.searching .center::before { display: none; }
+body.searching .logo a.has-img img { height: 44px; filter: none; }
+.brand.has-img img { height: 34px; }
+
+/* 지점 전화·바로가기 띠 (첫 화면 아래) */
+.brand-hero { padding-top: 40px; }
+.bh-inner { background: #0E0E10; border: 1px solid rgba(212, 178, 106, .22); padding: 32px 20px; }
+
+/* ===== 매장 지도 (2026-11-25 자문 반영: 고정 지도 · 금색 고정핀 · 매장별 네이버지도/T맵) ===== */
+.store-layout { grid-template-columns: minmax(0, 1.35fr) minmax(300px, 1fr); align-items: start; }
+@media (max-width: 860px) { .store-layout { grid-template-columns: 1fr; } }
+.map-col { position: sticky; top: 76px; }
+@media (max-width: 860px) { .map-col { position: static; } }
+.map { min-height: 440px; border: 1px solid #3A3426; box-shadow: 0 12px 30px rgba(0,0,0,.45); touch-action: pan-y; }
+@media (max-width: 860px) { .map { min-height: 320px; } }
+.map.map-mock { background-color: #1B1D22;
+  background-image: linear-gradient(#23262C 1px, transparent 1px), linear-gradient(90deg, #23262C 1px, transparent 1px);
+  background-size: 48px 48px; }
+.map-mock .road { position: absolute; background: #3B3F48; box-shadow: 0 0 0 2px #2C2F36; border-radius: 6px; }
+.map-mock .road.r1 { left: -5%; right: -5%; top: 40%; height: 14px; transform: rotate(-8deg); }
+.map-mock .road.r2 { top: -5%; bottom: -5%; left: 52%; width: 12px; transform: rotate(14deg); }
+.map-mock .road.r3 { left: -5%; right: -5%; top: 74%; height: 9px; transform: rotate(5deg); }
+.map-note { color: var(--color-secondary); }
+
+/* 금색 고정핀 + 항상 보이는 이름표 */
+.pin { position: absolute; transform: translate(-50%, -100%); border: 0; background: none; padding: 0; cursor: pointer; z-index: 3; }
+.pin-kakao { position: relative; transform: none; }
+.pin-wrap { display: flex; flex-direction: column; align-items: center; }
+.pin-svg { width: 40px; height: 52px; filter: drop-shadow(0 3px 4px rgba(0,0,0,.6)); order: 2; transition: transform .15s; transform-origin: 50% 100%; }
+.pin-body { fill: #D4B26A; stroke: #0A0A0B; stroke-width: 2.5; }
+.pin-dot { fill: #0A0A0B; }
+.pin-label { order: 1; margin-bottom: 3px; padding: 4px 11px; border-radius: 999px; background: #0A0A0B; color: #E8CF94; border: 1.5px solid #D4B26A;
+  font-weight: 800; font-size: .86rem; line-height: 1.2; white-space: nowrap; box-shadow: 0 3px 8px rgba(0,0,0,.55); }
+.pin.active { z-index: 4; }
+.pin.active .pin-svg { transform: scale(1.18); }
+.pin.active .pin-body { fill: #E8CF94; }
+.pin.active .pin-label { background: #D4B26A; color: #0A0A0B; border-color: #E8CF94; }
+.pin:focus-visible { outline: none; }
+.pin:focus-visible .pin-label { outline: 3px solid #E8CF94; outline-offset: 2px; }
+
+/* 랜드마크 (지하철역 등) */
+.lm { position: absolute; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px 3px 4px; border-radius: 999px;
+  background: rgba(243,239,230,.92); color: #1A1A1D; font-size: .74rem; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,.4); z-index: 1; pointer-events: none; }
+.lm-kakao { position: relative; transform: none; }
+.lm-ico { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: #2F6BD8; color: #fff; font-size: .66rem; font-weight: 800; }
+
+/* 매장 목록: 카드 + 바로 아래 길찾기 버튼 */
+.store-item { border: 1.5px solid var(--color-line); border-radius: var(--radius-card); background: #121214; overflow: hidden; transition: border-color .15s; }
+.store-item.active { border-color: var(--color-primary); box-shadow: 0 0 0 1px var(--color-primary) inset; }
+.store-list .store-pick { border: 0; border-radius: 0; background: transparent; padding: 14px 16px 10px; }
+.store-list .store-pick strong { display: flex; align-items: center; gap: 6px; font-size: 1.05rem; margin-bottom: 4px; }
+.list-pin .pin-svg { width: 16px; height: 21px; filter: none; }
+.store-guide { display: block; margin-top: 6px; color: var(--color-secondary); font-size: .85rem; }
+.store-meta { display: block; margin-top: 2px; }
+.nav-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 0 12px 12px; }
+.nav-btn { display: flex; align-items: center; justify-content: center; gap: 5px; min-height: 44px; padding: 6px 4px; border-radius: 10px; font-size: .84rem; font-weight: 700;
+  text-decoration: none; border: 1px solid #2E2E33; background: #1C1C20; color: var(--color-text); white-space: nowrap; }
+.nav-btn:hover { border-color: var(--color-secondary); }
+.nav-btn b { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 5px; font-size: .7rem; color: #fff; }
+.nav-naver b { background: #03C75A; }
+.nav-tmap b { background: linear-gradient(135deg, #E5212D, #6A3CF0); }
+.nav-kakao b { background: #FEE500; color: #191919; }
+.nav-call { background: #D4B26A; color: #0A0A0B; border-color: #D4B26A; }
+@media (max-width: 400px) { .nav-row { grid-template-columns: repeat(2, 1fr); } }
+
+/* ===== 고객 리뷰 (홈) ===== */
+.brand-reviews { max-width: 1080px; margin: 0 auto; padding: 64px 16px 48px; width: 100%; text-align: center; }
+body.searching .brand-reviews { display: none !important; }
+.rv-title { margin-bottom: 14px; }
+.rv-lead { max-width: 620px; margin: 0 auto 36px; color: var(--color-accent); line-height: 1.7; }
+.rv-sum { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px 40px; margin: 0 0 28px; }
+.rv-sum > div { display: flex; flex-direction: column-reverse; gap: 4px; }
+.rv-sum dt { color: var(--color-accent); font-size: .86rem; }
+.rv-sum dd { margin: 0; color: var(--color-primary); font-weight: 700; }
+.rv-sum b { font-size: clamp(2rem, 5vw, 2.8rem); letter-spacing: -0.03em; }
+.rv-kw { list-style: none; padding: 0; margin: 0 0 36px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.rv-kw li { border: 1px solid #3A3426; background: #141312; color: var(--color-text); border-radius: 999px; padding: 8px 14px; font-size: .9rem; }
+.rv-kw b { margin-left: 8px; color: var(--color-primary); }
+.rv-list { list-style: none; padding: 0; margin: 0 0 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; text-align: left; }
+@media (max-width: 860px) { .rv-list { grid-template-columns: 1fr; } }
+.rv-card { position: relative; border: 1px solid var(--color-line); border-top: 2px solid var(--color-primary); border-radius: var(--radius-card); background: var(--color-surface); padding: 22px 20px 18px; display: flex; flex-direction: column; }
+.rv-tag { align-self: flex-start; font-size: .75rem; font-weight: 700; color: #0A0A0B; background: var(--color-primary); border-radius: 999px; padding: 3px 10px; margin-bottom: 10px; }
+.rv-stars { color: var(--color-primary); letter-spacing: 2px; font-size: .9rem; }
+.rv-card blockquote { margin: 10px 0 16px; font-size: 1.02rem; line-height: 1.7; flex: 1; }
+.rv-card blockquote em { font-style: normal; color: var(--color-secondary); font-weight: 700; }
+.rv-who { margin: 0; font-size: .88rem; color: var(--color-accent); }
+.rv-who strong { color: var(--color-text); }
+.rv-src { margin: 4px 0 0; font-size: .76rem; color: #03C75A; }
+.rv-shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin: 0 0 32px; }
+.rv-shots img { width: 100%; border-radius: var(--radius-card); border: 1px solid var(--color-line); }
+.rv-links p { margin: 0 0 10px; color: var(--color-accent); font-size: .9rem; }
+.rv-links > div { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
+.rv-links .nav-btn { padding: 8px 16px; }
+.rv-sumwrap { display: inline-block; border: 1px solid #3A3426; border-radius: var(--radius-card); padding: 18px 28px 6px; margin: 0 0 32px; background: #121212; }
+.rv-sumhead { margin: 0 0 12px; font-size: .88rem; color: var(--color-accent); display: flex; align-items: center; justify-content: center; gap: 6px; }
+.rv-sumhead b { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 5px; background: #03C75A; color: #fff; font-size: .7rem; }
+.rv-sumwrap .rv-sum { margin-bottom: 12px; }
+.rv-card blockquote { white-space: pre-line; word-break: keep-all; overflow-wrap: anywhere; }
+.rv-card.featured { grid-column: 1 / -1; padding: 32px clamp(20px, 4vw, 44px); background: linear-gradient(135deg, #1A1712, #121214 60%); border-color: #3A3426; }
+.rv-card.featured blockquote { font-size: clamp(1.05rem, 2.2vw, 1.25rem); line-height: 1.85; }
+.rv-card.featured blockquote::before { content: "\201C"; display: block; font-size: 3rem; line-height: .8; color: var(--color-primary); margin-bottom: 6px; }
+.rv-note { margin: -20px 0 32px; font-size: .78rem; color: var(--color-accent); }
+
+/* ===== 첫 화면 신뢰 띠 (2026-11-25 고객 눈 점검 반영) ===== */
+.hero-proof { width: 100%; max-width: 640px; margin: 28px auto 0; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+body.searching .hero-proof { display: none; }
+.hp-stats { list-style: none; margin: 0; padding: 0; width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid #3A3426; border-radius: var(--radius-card); background: rgba(10,10,11,.72); backdrop-filter: blur(4px); }
+.hp-stats li { padding: 12px 6px; display: flex; flex-direction: column; gap: 2px; }
+.hp-stats li + li { border-left: 1px solid #3A3426; }
+.hp-stats b { color: var(--color-primary); font-size: clamp(1.05rem, 3.6vw, 1.45rem); letter-spacing: -0.02em; white-space: nowrap; }
+.hp-stats span { color: var(--color-accent); font-size: .74rem; }
+.hp-quote { display: block; color: var(--color-text); font-size: clamp(.95rem, 3vw, 1.08rem); font-weight: 600; text-decoration: none; line-height: 1.5; }
+.hp-quote:hover { text-decoration: none; color: var(--color-secondary); }
+.hp-quote .rv-stars { display: block; font-size: .8rem; margin-bottom: 2px; }
+.hp-quote small { display: block; margin-top: 2px; font-size: .74rem; font-weight: 400; color: var(--color-accent); }
+.hp-ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.hp-ctas .btn { min-height: 46px; padding: 0 20px; }
+.bh-branches small { display: block; font-size: .76rem; color: rgba(255,255,255,.6); margin-top: 2px; }
+.bh-hours { margin: -12px 0 22px; font-size: .86rem; color: rgba(255,255,255,.7); }
+.rv-morebtn { display: none; margin: -12px auto 28px; }
+@media (max-width: 860px) {
+  .brand-reviews:not(.rv-open) .rv-extra { display: none; }
+  .brand-reviews:not(.rv-open) .rv-morebtn { display: inline-flex; }
+}
+.hero-proof { margin-top: 4px; text-align: center; }
+.hp-stats li { align-items: center; text-align: center; }
+.hp-ctas .btn:not(.ghost) { background: var(--color-primary); color: #0A0A0B; border-color: var(--color-primary); font-weight: 700; }
+.hp-ctas .btn:not(.ghost):hover { background: var(--color-secondary); }
+/* 휴대폰: 15년·58,000건·3곳을 한 줄로 (스크롤 줄이기) */
+@media (max-width: 640px) {
+  .tr-stats { grid-template-columns: repeat(3, 1fr); }
+  .tr-stats > div { padding: 18px 4px; }
+  .tr-stats > div + div { border-top: 0; border-left: 1px solid var(--color-line); }
+  .tr-stats b { font-size: 1.7rem; }
+  .tr-stats dt { font-size: .72rem; }
+  .brand-trust { padding-top: 48px; }
+}
+@media (max-width: 640px) { .tr-stats dd { white-space: nowrap; font-size: .9rem; } .tr-stats b { font-size: 1.45rem; } }
+
+/* ===== 카카오톡 · 네이버 · 인스타그램 공식 색상 버튼 ===== */
+.sns-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 760px; margin: 0 auto 22px; }
+.sns-btn { flex: 1 1 200px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 18px; border-radius: 12px; font-weight: 700; font-size: .98rem; text-decoration: none; transition: filter .15s, transform .15s; }
+.sns-btn:hover { text-decoration: none; filter: brightness(1.06); transform: translateY(-1px); }
+.sns-mark { display: inline-grid; place-items: center; width: 24px; height: 24px; }
+.sns-mark svg { width: 22px; height: 22px; }
+.sns-kakao { background: #FEE500; color: rgba(0,0,0,.85); }
+.sns-kakao:hover { color: #000; }
+.sns-naver { background: #03C75A; color: #fff; }
+.sns-naver .sns-mark svg { width: 16px; height: 16px; }
+.sns-naver:hover { color: #fff; }
+.sns-insta { background: linear-gradient(45deg, #F58529, #DD2A7B 45%, #8134AF 75%, #515BD4); color: #fff; }
+.sns-insta:hover { color: #fff; }
+@media (max-width: 480px) { .sns-btn { flex-basis: 100%; } }
+.bh-links { flex-wrap: nowrap; } .bh-links a { flex: 1 1 0; white-space: nowrap; padding: 12px 6px; font-size: .86rem; }
+
+/* ===== 지점 카드 + 지점별 네이버 플레이스 버튼 ===== */
+.bh-branches { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; max-width: 760px; margin: 0 auto 18px; }
+@media (max-width: 720px) { .bh-branches { grid-template-columns: 1fr; } }
+.bh-branches li { display: flex; flex-direction: column; gap: 8px; width: auto; }
+.bh-branches .bh-call { display: block; width: auto; padding: 12px 10px; border: 1.5px solid rgba(255,255,255,.3); border-radius: 12px; color: #fff; text-align: center; }
+.bh-branches .bh-call:hover { background: rgba(212,178,106,.12); color: #fff; border-color: var(--color-primary); }
+.bh-branches .bh-call:hover strong { color: #E8CF94; }
+.bh-branches .bh-call:hover small { color: rgba(255,255,255,.75); }
+.bh-naver { flex: 0 0 auto; min-height: 44px; font-size: .88rem; padding: 0 10px; white-space: nowrap; }
+.bh-naver .sns-mark svg { width: 14px; height: 14px; }
+@media (max-width: 480px) { .bh-branches li, .bh-branches a { width: auto; } }
+@media (max-width: 720px) { .bh-branches { gap: 18px; } }
+
+/* ===== 공지사항 ===== */
+.notice-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--color-primary); }
+.notice-list li { border-bottom: 1px solid var(--color-line); }
+.notice-list a { display: flex; align-items: center; gap: 10px; padding: 18px 8px; color: var(--color-text); text-decoration: none; }
+.notice-list a:hover strong { color: var(--color-secondary); }
+.notice-list strong { flex: 1; font-weight: 600; }
+.notice-date { color: var(--color-accent); font-size: .86rem; white-space: nowrap; }
+.notice-pin { display: inline-block; font-size: .72rem; font-weight: 800; color: #0A0A0B; background: var(--color-primary); border-radius: 6px; padding: 2px 8px; margin-right: 6px; vertical-align: middle; }
+.post-head .notice-pin { margin-bottom: 8px; }
+
+/* ===== 와~ : 대표 멘트 크게, 웅장하게 (2026-11-25) ===== */
+:root { --serif: "Noto Serif KR", "Nanum Myeongjo", serif; --gold-grad: linear-gradient(100deg, #B8914A 0%, #F3DDA2 28%, #D4B26A 50%, #FFF1C9 66%, #C9A35A 100%); }
+.gold-shine, .hp-stats b, .tr-stats b, .rv-sum b {
+  background: var(--gold-grad); background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+@media (prefers-reduced-motion: no-preference) { .gold-shine { animation: shine 5s ease-in-out infinite; } }
+@keyframes shine { 0%, 100% { background-position: 0% 0; } 50% { background-position: 100% 0; } }
+
+/* 첫 화면 대표 문구 */
+.logo a.has-img img { height: clamp(84px, 17vw, 130px); }
+.logo { margin-bottom: 18px; }
+.tagline { font-family: var(--serif); font-weight: 900; color: #F7F1E3; font-size: clamp(1.95rem, 7.6vw, 3.7rem); line-height: 1.28; letter-spacing: -0.03em; margin: 0 0 30px; text-shadow: 0 4px 30px rgba(0,0,0,.6); }
+.tagline em { font-style: normal; }
+.tg-eyebrow { display: block; font-family: var(--font); font-weight: 600; font-size: clamp(.72rem, 2.4vw, .9rem); letter-spacing: .32em; color: var(--color-primary); margin-bottom: 14px; text-shadow: none; }
+.tg-eyebrow::before, .tg-eyebrow::after { content: ""; display: inline-block; width: 28px; height: 1px; background: currentColor; vertical-align: middle; margin: 0 12px; opacity: .7; }
+
+/* 첫 화면 숫자 띠 */
+.hp-stats { border-color: rgba(212,178,106,.45); box-shadow: 0 0 0 1px rgba(212,178,106,.08), 0 18px 50px rgba(0,0,0,.55); }
+.hp-stats li { padding: 16px 4px 14px; }
+.hp-stats b { font-family: var(--serif); font-weight: 900; font-size: clamp(1.45rem, 6.2vw, 2.4rem); line-height: 1.15; }
+.hp-stats span { font-size: clamp(.7rem, 2.3vw, .84rem); }
+.hp-quote { font-family: var(--serif); font-weight: 700; font-size: clamp(1.1rem, 4.2vw, 1.4rem); }
+
+/* 섹션 제목 */
+.tr-title, .bg-head h2, .rv-title, .bh-title { font-family: var(--serif); font-weight: 900; letter-spacing: -0.03em; line-height: 1.3; }
+.tr-title, .bg-head h2, .rv-title { font-size: clamp(1.85rem, 6.6vw, 3.2rem); }
+.bh-title { font-size: clamp(1.35rem, 4.6vw, 1.9rem); }
+.tr-eyebrow { font-size: clamp(.78rem, 2.4vw, .95rem); }
+.tr-title { margin-bottom: 44px; }
+
+/* 15년 · 58,000건+ · 3곳 — 크게 */
+.tr-stats b { font-family: var(--serif); font-weight: 900; font-size: clamp(3.2rem, 9vw, 5.4rem); letter-spacing: -0.04em; line-height: 1; }
+.tr-stats dd { font-size: clamp(1.1rem, 2.4vw, 1.5rem); color: var(--color-primary); }
+.tr-stats dt { font-size: clamp(.86rem, 2vw, 1rem); }
+.tr-stats > div { padding: 34px 12px; }
+@media (max-width: 640px) {
+  .tr-stats { grid-template-columns: 1fr; }
+  .tr-stats > div { padding: 22px 8px; }
+  .tr-stats > div + div { border-left: 0; border-top: 1px solid var(--color-line); }
+  .tr-stats b { font-size: 3.6rem; }
+  .tr-stats dd { font-size: 1.3rem; }
+  .tr-stats dt { font-size: .9rem; }
+}
+
+/* 대표 인용구 */
+.tr-quote { font-family: var(--serif); font-weight: 700; font-size: clamp(1.5rem, 5.4vw, 2.5rem); line-height: 1.5; max-width: 860px; }
+.tr-quote em { background: var(--gold-grad); background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.tr-quote::before { font-size: 4.5rem; }
+
+/* 리뷰 숫자 */
+.rv-sum b { font-family: var(--serif); font-weight: 900; font-size: clamp(2.4rem, 7vw, 3.4rem); }
+.rv-card.featured blockquote { font-size: clamp(1.1rem, 2.6vw, 1.4rem); }
+
+/* 스크롤 등장 */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .9s ease, transform .9s cubic-bezier(.2,.7,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+/* 정직한 시세 · 끝까지 책임 · 직접 비교 카드 */
+.tr-promises li { padding: 30px 26px; border-color: #3A3426; background: linear-gradient(160deg, #1A1712, #121214 70%); }
+.tr-no { font-family: var(--serif); font-weight: 900; font-size: clamp(2rem, 5vw, 2.6rem); letter-spacing: 0; line-height: 1; margin-bottom: 14px;
+  background: var(--gold-grad); background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.tr-promises strong { font-family: var(--serif); font-weight: 900; font-size: clamp(1.35rem, 3.4vw, 1.7rem); margin-bottom: 10px; }
+.tr-promises p { font-size: clamp(.98rem, 2.2vw, 1.08rem); line-height: 1.65; }
+.tagline, .tr-title, .bg-head h2, .rv-title, .tr-quote, .hp-quote, .bh-title { text-wrap: balance; }
+
+/* ===== 문의하기 (전화 · 카카오톡 안내) ===== */
+#cartBtn[hidden], .dropdown-wrap[hidden], #authSlot[hidden] { display: none !important; }
+.ci-main { display: flex; flex-direction: column; gap: 10px; margin: 22px 0; }
+.ci-main .sns-btn, .ci-main .ci-tel { flex: 0 0 auto; width: 100%; min-height: 56px; font-size: 1.05rem; }
+.ci-tel { background: var(--color-primary); color: #0A0A0B; border-color: var(--color-primary); font-weight: 800; }
+.ci-branches { list-style: none; padding: 0; margin: 0 0 26px; display: grid; gap: 10px; }
+.ci-branches a { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; align-items: center; padding: 14px 16px; border: 1px solid var(--color-line); border-radius: var(--radius-card); background: var(--color-surface); color: var(--color-text); text-decoration: none; }
+.ci-branches a:hover { border-color: var(--color-primary); }
+.ci-branches strong { color: var(--color-secondary); }
+.ci-branches span { justify-self: end; font-variant-numeric: tabular-nums; }
+.ci-branches small { grid-column: 1 / -1; color: var(--color-accent); }
+
+/* ===== "15년" 섹션 뒤 흐릿한 매장 내부 상담 사진 (2026-11-25, 사진: assets/brand/bg-trust.jpg) ===== */
+body { overflow-x: clip; }
+.brand-trust { position: relative; isolation: isolate; }
+.brand-trust::before { content: ""; position: absolute; top: 0; bottom: 0; left: calc(50% - 50vw); right: calc(50% - 50vw); z-index: -1;
+  background:
+    linear-gradient(180deg, #0A0A0B 0%, rgba(10,10,11,.68) 14%, rgba(10,10,11,.6) 50%, rgba(10,10,11,.78) 82%, #0A0A0B 100%),
+    url("../assets/brand/bg-trust.jpg?v=2") center 45% / cover no-repeat; }
+.brand-trust .tr-promises li { background: linear-gradient(160deg, rgba(26,23,18,.9), rgba(18,18,20,.88) 70%); backdrop-filter: blur(2px); }
+.tagline { font-size: clamp(1.45rem, 5vw, 2.4rem); line-height: 1.35; margin-bottom: 26px; }
+.tagline em.gold-shine { background: linear-gradient(180deg, #FBE7AE 0%, #D9B566 60%, #B98F45 100%); background-size: 100% 100%; -webkit-background-clip: text; background-clip: text; animation: none; }
+
+/* ===== 매장별 사이트: 지점 카드 하나를 버튼 줄과 같은 폭으로 가운데 ===== */
+.bh-branches.one { grid-template-columns: 1fr; max-width: 760px; }
+.bh-branches.one li { gap: 10px; }
+.bh-branches.one .bh-call { padding: 20px 16px; border-color: rgba(212,178,106,.55); }
+.bh-branches.one .bh-call strong { font-size: 1.15rem; }
+.bh-branches.one .bh-call { font-size: 1.3rem; font-weight: 700; letter-spacing: .02em; }
+.bh-branches.one small { font-size: .9rem; font-weight: 400; letter-spacing: 0; margin-top: 6px; }
+.bh-branches.one .bh-call-hours { margin-top: 2px; color: var(--color-primary); }
+.bh-branches.one .bh-naver { min-height: 52px; font-size: 1rem; }
+/* 바로가기 4칸: 휴대폰에서는 2×2 로 (화면 밖으로 넘치지 않게) */
+@media (max-width: 560px) {
+  .bh-links:has(a:nth-child(4)) { display: grid; grid-template-columns: 1fr 1fr; }
+  .bh-links:has(a:nth-child(4)) a { border-left: 0; padding: 13px 6px; }
+  .bh-links:has(a:nth-child(4)) a:nth-child(even) { border-left: 1px solid rgba(255,255,255,.25); }
+  .bh-links:has(a:nth-child(4)) a:nth-child(n+3) { border-top: 1px solid rgba(255,255,255,.18); }
+}
+
+/* ===== 대표 문구 작게 (예전 크기로, 2026-11-25 요청) — 고·무·신 금색은 유지 ===== */
+.tagline { font-family: var(--font); font-weight: 500; font-size: clamp(1.2rem, 4.6vw, 1.56rem); line-height: 1.45; letter-spacing: -0.01em; color: #F2EEE6; margin: 0 0 26px; text-shadow: 0 2px 12px rgba(0,0,0,.6); }
+.tagline em.gold-shine { font-weight: 700; }
+
+/* ===== 스크롤 부드럽게 (2026-11-25) =====
+   흐림 효과(backdrop-filter)는 스크롤할 때마다 다시 계산돼서 버벅임의 원인이 돼요.
+   같은 느낌의 진한 반투명 배경으로 바꿨어요. 배경 사진은 파일 자체를 미리 흐리게 만들어 둬요. */
+.topbar { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(10, 10, 11, .94); }
+.hp-stats { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(10, 10, 11, .8); }
+.brand-trust .tr-promises li { -webkit-backdrop-filter: none; backdrop-filter: none; background: linear-gradient(160deg, rgba(26,23,18,.94), rgba(18,18,20,.92) 70%); }
+.brand-trust::before { transform: translateZ(0); }
+.reveal { will-change: auto; }
+.reveal:not(.in) { will-change: opacity, transform; }
+
+/* ===== 매장 사진 3장: 위에 큰 대표 사진 1장 + 아래 2장 ===== */
+.bg-grid.n3 figure:first-child { grid-column: span 6; aspect-ratio: 16 / 8; }
+.bg-grid.n3 figure:nth-child(n+2) { grid-column: span 3; aspect-ratio: 4 / 3; }
+@media (max-width: 640px) {
+  .bg-grid.n3 figure:first-child { grid-column: span 2; aspect-ratio: 4 / 3; }
+  .bg-grid.n3 figure:nth-child(n+2) { grid-column: span 1; aspect-ratio: 1 / 1; }
+}
+/* 리뷰 접기: PC에서도 처음엔 정해진 개수만 (3칸씩 꽉 차게) */
+.brand-reviews:not(.rv-open) .rv-extra { display: none; }
+.brand-reviews:not(.rv-open) .rv-morebtn { display: flex; }
+/* 글씨가 들어간 배너 사진은 잘리지 않게 통째로 */
+.bg-grid figure.fit { background: #fff; }
+.bg-grid figure.fit img { object-fit: contain; }
+.bg-grid figure.fit:hover img { transform: none; }
+/* 매장 영상 (사진 위, 소리 없이 반복) */
+.bg-video { position: relative; margin: 0 0 12px; border-radius: var(--radius-card); overflow: hidden; background: #000; aspect-ratio: 16 / 9; }
+.bg-video video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.bg-video figcaption { position: absolute; left: 12px; bottom: 12px; background: rgba(10,10,11,.78); color: var(--color-text); font-size: .82rem; padding: 4px 10px; border-radius: 8px; }
+@media (max-width: 640px) { .bg-video { margin-bottom: 8px; } }
+
+/* 숫자가 올라갈 때 글자 폭이 흔들리지 않게 */
+.hp-stats b, .tr-stats b, .rv-sum b { font-variant-numeric: tabular-nums; }
+/* 긴 제목·문장이 좁은 화면에서 잘리지 않게 줄바꿈 */
+.rv-title, .rv-lead, .tr-title, .bg-head h2 { max-width: 100%; word-break: keep-all; overflow-wrap: anywhere; }
+
+/* ===== 배경 음악 버튼 (오른쪽 아래, 금색) ===== */
+.music-btn { position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 40; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; padding: 0; cursor: pointer;
+  background: rgba(10,10,11,.86); border: 1.5px solid rgba(212,178,106,.7); color: var(--color-primary); box-shadow: 0 6px 20px rgba(0,0,0,.45); transition: transform .15s, background .15s; }
+.music-btn:hover { transform: translateY(-1px); background: rgba(26,23,18,.95); }
+.music-btn svg { width: 20px; height: 20px; }
+.music-btn:not(.on) svg { opacity: .55; }
+.music-btn:not(.on)::after { content: ""; position: absolute; width: 26px; height: 1.5px; background: var(--color-primary); transform: rotate(-45deg); opacity: .8; }
+.music-eq { position: absolute; bottom: 7px; display: none; gap: 2px; align-items: flex-end; height: 8px; }
+.music-btn.on .music-eq { display: flex; }
+.music-btn.on svg { transform: translateY(-3px); }
+.music-eq i { width: 2px; background: var(--color-primary); border-radius: 1px; height: 3px; }
+@media (prefers-reduced-motion: no-preference) {
+  .music-btn.on .music-eq i { animation: eq 1.1s ease-in-out infinite; }
+  .music-btn.on .music-eq i:nth-child(2) { animation-delay: .25s; }
+  .music-btn.on .music-eq i:nth-child(3) { animation-delay: .5s; }
+}
+@keyframes eq { 0%, 100% { height: 3px; } 50% { height: 8px; } }

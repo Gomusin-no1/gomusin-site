@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>고무신 — 휴대폰성지 폰명장</title>
+  <meta name="description" content="고객님들의 무한한 신뢰를 받는 매장, 휴대폰성지 폰명장 고무신">
+  <!-- 공유 미리보기(og) 태그: 페이지가 바뀌면 js/ui.js 의 setMeta()가 제목을 갱신해요 -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="고무신">
+  <meta property="og:title" content="고무신 — 휴대폰성지 폰명장">
+  <meta property="og:description" content="고객님들의 무한한 신뢰를 받는 매장, 휴대폰성지 폰명장 고무신">
+  <meta property="og:image" content="assets/brand/og-gomusin.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=1126g">
+  <!-- 브랜드 색 테마 (지우면 레시피 기본 블루로 돌아가요) -->
+  <link rel="stylesheet" href="css/theme-gomusin.css?v=1126g">
+</head>
+<body>
+  <a class="skip" href="#app">본문 바로가기</a>
+
+  <!-- 상단 바 -->
+  <header class="topbar">
+    <a class="brand" href="#/" aria-label="홈으로" data-brand-logo>LOGO</a>
+    <button class="icon-btn menu-toggle" id="menuToggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mainNav"></button>
+    <nav class="nav" id="mainNav" aria-label="주 메뉴">
+      <a href="#/notice">공지사항</a>
+      <a href="#/shop">상점</a>
+      <a href="#/booking">예약</a>
+      <a href="#/store">매장</a>
+      <a href="#/contact">문의</a>
+    </nav>
+    <div class="top-actions">
+      <button class="icon-btn" id="shareBtn" aria-label="이 페이지 공유하기"></button>
+      <a class="icon-btn" id="cartBtn" href="#/cart" aria-label="장바구니"><span class="badge" id="cartBadge" hidden>0</span></a>
+      <div class="dropdown-wrap">
+        <button class="icon-btn" id="bellBtn" aria-label="알림" aria-haspopup="true" aria-expanded="false"><span class="badge" id="bellBadge" hidden>0</span></button>
+        <div class="dropdown" id="notiDropdown" role="dialog" aria-label="알림 목록" hidden></div>
+      </div>
+      <div id="authSlot"></div>
+    </div>
+  </header>
+
+  <div id="app" tabindex="-1">
+    <!-- 검색 화면 (베이스 시작 코드 구조 그대로) -->
+    <div data-page="search">
+      <main class="center" id="searchMain">
+        <h1 class="logo"><a href="#/" data-brand-logo>LOGO</a></h1>
+        <p class="tagline" id="tagline" hidden></p>
+        <form class="search" id="searchForm" role="search" autocomplete="off">
+          <div class="search-box">
+            <span class="search-icon" aria-hidden="true"></span>
+            <input id="q" name="q" placeholder="무엇이든 검색" aria-label="검색어" maxlength="60">
+            <button type="button" class="clear-btn" id="clearQ" aria-label="검색어 지우기" hidden></button>
+            <ul class="suggest" id="suggest" role="listbox" hidden></ul>
+          </div>
+          <div class="actions"><button class="btn" type="submit">검색</button><button class="btn ghost" type="button" id="randomBtn">아무거나</button></div>
+          <div class="recent" id="recent" aria-label="최근 검색어"></div>
+        </form>
+        <!-- 첫 화면 신뢰 띠: js/brand.js 의 proof -->
+        <div class="hero-proof" id="heroProof" hidden></div>
+      </main>
+      <!-- 신뢰 지표: js/brand.js 의 trust -->
+      <section class="brand-trust" id="brandTrust" aria-labelledby="trustTitle" hidden></section>
+      <!-- 매장 사진 갤러리: js/brand.js 에 사진을 넣으면 나타나요 -->
+      <section class="brand-gallery" id="brandGallery" aria-labelledby="galleryTitle" hidden></section>
+      <!-- 고객 리뷰: js/brand.js 의 reviews (실제 리뷰만 넣어 주세요) -->
+      <section class="brand-reviews" id="brandReviews" aria-labelledby="reviewsTitle" hidden></section>
+      <!-- 브랜드 배너: js/brand.js 의 hero·branches·links -->
+      <section class="brand-hero" id="brandHero" aria-label="매장 소개" hidden></section>
+      <section class="results" id="results" aria-live="polite" hidden>
+
+      </section>
+    </div>
+
+    <!-- 그 밖의 페이지는 여기에 그려져요 -->
+    <div data-page="other" id="page" hidden></div>
+  </div>
+
+  <footer class="footer">
+    <div class="biz" id="bizInfo" hidden></div>
+    <p>© 2026 고무신모바일 · 휴대폰성지 폰명장. All rights reserved.</p>
+    <p><a href="#/contact">문의하기</a> · <a href="#/store">오시는 길</a></p>
+  </footer>
+
+  <div class="toast-wrap" id="toasts" aria-live="polite"></div>
+  <div class="modal-root" id="modalRoot"></div>
+
+  <!-- 설정값(공개 가능한 값만). PART 2에서 채워요 -->
+  <script src="js/config.js?v=1126g"></script>
+  <!-- 로고·매장 사진·사업자 정보 (assets/brand/README.md 참고) -->
+  <script src="js/brand.js?v=1126g"></script>
+  <!-- 순서 중요: 가짜 데이터 → API → 화면 도우미 → 각 기능 → 시작 -->
+  <script src="js/mock-data.js?v=1126g"></script>
+  <script src="js/branch-sites.js?v=1126g"></script>
+  <script src="js/api.js?v=1126g"></script>
+  <!-- PART 2: 위 api.js 대신 아래 두 줄을 켜면 실제 Supabase 와 연결돼요
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="js/api-supabase.js?v=1126g"></script>
+  -->
+  <script src="js/ui.js?v=1126g"></script>
+  <script src="js/views/search.js?v=1126g"></script>
+  <script src="js/views/account.js?v=1126g"></script>
+  <script src="js/notices.js?v=1126g"></script>
+  <script src="js/views/notice.js?v=1126g"></script>
+  <script src="js/views/board.js?v=1126g"></script>
+  <script src="js/views/contact.js?v=1126g"></script>
+  <script src="js/views/store.js?v=1126g"></script>
+  <script src="js/views/shop.js?v=1126g"></script>
+  <script src="js/views/booking.js?v=1126g"></script>
+  <script src="js/music.js?v=1126g"></script>
+  <script src="js/app.js?v=1126g"></script>
+</body>
+</html>
