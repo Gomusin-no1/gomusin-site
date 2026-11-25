@@ -161,19 +161,21 @@
         .filter(([, , u]) => u)
         .map(([k, t, u]) => `<a class="sns-btn sns-${k}" href="${esc(u)}" target="_blank" rel="noopener"><span class="sns-mark">${MARK[k]}</span>${t}</a>`).join("");
       const quick = [["매장 위치 · 길찾기", "#/store"], ["휴대폰 정보", "#/search?q=" + encodeURIComponent("휴대폰")], ["구매 후기", L.reviews || "#/board"]]
-        .filter(([, u]) => u)
+        .filter(([t, u]) => u && !(B.otherSites && t === "휴대폰 정보"))   // 매장 사이트: 휴대폰 정보 대신 다른 지점 바로가기
+        .concat((B.otherSites || []).map((o) => [o.name + " 보기", o.url]))
         .map(([t, u]) => `<a href="${esc(u)}"${/^https?:/.test(u) ? ' target="_blank" rel="noopener"' : ""}>${t}</a>`).join("");
+      const one = (B.branches || []).length === 1;   // 매장별 사이트: 지점 카드 하나를 가운데 넓게
       hero.hidden = false;
       hero.innerHTML = `<div class="bh-inner"${H.background ? ` style="background-image:linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.55)),url('${esc(H.background)}')"` : ""}>
         ${H.eyebrow && !H.logoHasEyebrow ? `<p class="bh-eyebrow">${esc(H.eyebrow)}</p>` : ""}
         ${H.logo ? `<img class="bh-logo" src="${esc(H.logo)}" alt="${esc(B.name || "")}">` : ""}
         ${head ? `<p class="bh-head">${head}</p>` : ""}
         ${H.title ? `<h2 class="bh-title">${esc(H.title)}</h2>` : ""}
-        ${(B.branches || []).length ? `<ul class="bh-branches">${B.branches.map((b) => `<li>
-          <a class="bh-call" href="tel:${esc(b.phone.replace(/[^0-9]/g, ""))}"><strong>${esc(b.name)}</strong> ${esc(b.phone.replace(/-/g, "."))}${b.addr ? `<small>${esc(b.addr)}</small>` : ""}</a>
+        ${(B.branches || []).length ? `<ul class="bh-branches${one ? " one" : ""}">${B.branches.map((b) => `<li>
+          <a class="bh-call" href="tel:${esc(b.phone.replace(/[^0-9]/g, ""))}"><strong>${esc(b.name)}</strong> ${esc(b.phone.replace(/-/g, "."))}${b.addr ? `<small>${esc(b.addr)}</small>` : ""}${one && B.hours ? `<small class="bh-call-hours">${esc(B.hours)}</small>` : ""}</a>
           ${b.naver ? `<a class="sns-btn sns-naver bh-naver" href="${esc(b.naver)}" target="_blank" rel="noopener"><span class="sns-mark">${MARK.naver}</span>${esc(b.name)} 네이버 플레이스</a>` : ""}
         </li>`).join("")}</ul>` : ""}
-        ${B.hours ? `<p class="bh-hours">${esc(B.hours)}</p>` : ""}
+        ${B.hours && !one ? `<p class="bh-hours">${esc(B.hours)}</p>` : ""}
         ${brandBtns ? `<div class="sns-row">${brandBtns}</div>` : ""}
         ${quick ? `<nav class="bh-links" aria-label="바로가기">${quick}</nav>` : ""}
       </div>`;
@@ -192,7 +194,7 @@
     if (photos.length) {
       g.hidden = false;
       g.innerHTML = `<div class="bg-head"><h2 id="galleryTitle">${esc(B.galleryTitle || "공간을 소개해요")}</h2>${B.galleryText ? `<p class="muted">${esc(B.galleryText)}</p>` : ""}</div>
-        <div class="bg-grid n${Math.min(photos.length, 6)}">${photos.slice(0, 6).map((p, i) => `<figure><img src="${esc(p.src)}" alt="${esc(p.caption || "매장 사진 " + (i + 1))}" loading="lazy">${p.caption ? `<figcaption>${esc(p.caption)}</figcaption>` : ""}</figure>`).join("")}</div>
+        <div class="bg-grid n${Math.min(photos.length, 6)}">${photos.slice(0, 6).map((p, i) => `<figure><img src="${esc(p.src)}" alt="${esc(p.caption || "매장 사진 " + (i + 1))}" loading="lazy" decoding="async">${p.caption ? `<figcaption>${esc(p.caption)}</figcaption>` : ""}</figure>`).join("")}</div>
         <p class="bg-more"><a class="btn" href="#/store">매장 위치 보기</a></p>`;
     }
     // 고객 리뷰
@@ -203,7 +205,7 @@
       rv.hidden = false;
       rv.innerHTML = `${R.eyebrow ? `<p class="tr-eyebrow">${esc(R.eyebrow)}</p>` : ""}<h2 class="tr-title rv-title" id="reviewsTitle">${esc(R.title || "고객 리뷰")}</h2>
         ${R.text ? `<p class="rv-lead">${esc(R.text)}</p>` : ""}
-        ${sum.length ? `<div class="rv-sumwrap"><p class="rv-sumhead"><b>N</b>네이버 방문자 리뷰</p><dl class="rv-sum">${sum.map((s) => `<div><dt>${esc(s.label)}</dt><dd><b>${esc(s.num)}</b>${esc(s.unit || "")}</dd></div>`).join("")}</dl></div>` : ""}
+        ${sum.length ? `<div class="rv-sumwrap"><p class="rv-sumhead"><b>N</b>네이버 리뷰</p><dl class="rv-sum">${sum.map((s) => `<div><dt>${esc(s.label)}</dt><dd><b>${esc(s.num)}</b>${esc(s.unit || "")}</dd></div>`).join("")}</dl></div>` : ""}
         ${R.note ? `<p class="rv-note">${esc(R.note)}</p>` : ""}
         ${kw.length ? `<ul class="rv-kw" aria-label="손님들이 많이 고른 키워드">${kw.map((k) => `<li>"${esc(k.text)}"${k.count ? `<b>${esc(String(k.count))}</b>` : ""}</li>`).join("")}</ul>` : ""}
         ${items.length ? `<ul class="rv-list">${items.map((r, i) => `<li class="rv-card${r.featured ? " featured" : ""}${i > 6 ? " rv-extra" : ""}">
