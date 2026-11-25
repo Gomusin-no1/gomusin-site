@@ -1,0 +1,82 @@
+/* =========================================================
+   고무신 테마 — 블랙 · 골드
+   레시피 기본(클린 블루)으로 되돌리려면 index.html 에서 이 파일 줄만 지우면 돼요.
+   radius · 폰트 · 버튼 모양(외곽선)은 레시피 그대로, 색만 브랜드에 맞췄어요.
+   ========================================================= */
+:root {
+  --color-primary: #D4B26A;    /* 골드: 주요 버튼·링크·강조 */
+  --color-secondary: #E8CF94;  /* 밝은 골드: 호버 배경 */
+  --color-accent: #A39E95;     /* 보조 글자 */
+  --color-text: #F3EFE6;       /* 본문 (따뜻한 흰색) */
+  --color-bg: #0A0A0B;         /* 배경 (블랙) */
+  --color-surface: #17171A;    /* 카드·입력창 */
+  --color-line: #2A2A2F;
+  --color-danger: #FF6B6B;
+  --color-success: #9DBF7A;
+  --ink: #0A0A0B;              /* 골드 위 글자색 */
+  --shadow: 0 12px 36px rgba(0, 0, 0, .6);
+  color-scheme: dark;
+}
+
+/* 골드 버튼 호버: 밝은 골드 배경 + 검정 글자 */
+.btn:hover, .btn.is-on, .cal button[aria-pressed="true"] { background: var(--color-secondary); border-color: var(--color-secondary); color: var(--ink); }
+.btn.ghost { color: var(--color-text); border-color: rgba(243, 239, 230, .35); }
+.btn.ghost:hover { border-color: var(--color-secondary); }
+.btn.danger:hover { color: #fff; }
+.badge { background: var(--color-primary); color: var(--ink); }
+.skip { color: var(--ink); }
+
+/* 흰 배경이던 부분을 어둡게 */
+.topbar { background: rgba(10, 10, 11, .82); border-bottom-color: rgba(212, 178, 106, .18); }
+.icon-btn { color: var(--color-text); }
+.icon-btn:hover { background: var(--color-surface); color: var(--color-primary); }
+.dropdown, .modal, .suggest, .infowin, .card, .product, .store-list button, .pagination button, .chip, .noti-list button { background: #121214; }
+.noti-list button { border-bottom-color: var(--color-line); }
+.noti-list .unread { background: #1C1913; }
+.infowin::after { border-top-color: #121214; }
+.infowin.below::after { border-bottom-color: #121214; }
+@media (max-width: 767px) { .nav { background: #0E0E10; } }
+.search-box input:focus, .input:focus, .textarea:focus, .select:focus { background: #1D1D21; border-color: var(--color-primary); }
+.search-box input::placeholder { color: #77726A; }
+.field.invalid .input, .field.invalid .textarea { background: #2A1414; }
+.form-error { background: #2A1414; }
+.board-table th { border-bottom-color: var(--color-primary); }
+.board-table tr:hover td { background: #141416; }
+mark { background: rgba(212, 178, 106, .22); color: var(--color-secondary); }
+.result { border-bottom-color: var(--color-line); }
+.applied, .status.ok { background: rgba(212, 178, 106, .14); color: var(--color-primary); }
+.dropzone { background: #141416; border-color: #3A3A40; }
+.dropzone:hover, .dropzone.over { background: #1C1913; }
+.toast { background: #F3EFE6; color: var(--ink); }
+.toast.error { color: #fff; }
+.backdrop { background: rgba(0, 0, 0, .7); }
+.avatar { background: #24211A; color: var(--color-primary); }
+.spinner { border-color: #2A2A2F; border-top-color: var(--color-primary); }
+.skeleton { background: linear-gradient(90deg, #17171A 25%, #222226 50%, #17171A 75%); background-size: 200% 100%; }
+.img.type span { color: var(--color-primary); }
+.bg-grid figcaption { background: rgba(10, 10, 11, .78); color: var(--color-text); }
+.map-note { background: rgba(10, 10, 11, .85); }
+.marker svg { stroke: #0A0A0B; }
+.map { background-color: #121418;
+  background-image:
+    linear-gradient(115deg, transparent 47%, #24262B 47%, #24262B 50%, transparent 50%),
+    linear-gradient(25deg, transparent 60%, #24262B 60%, #24262B 62.5%, transparent 62.5%),
+    linear-gradient(#1A1C20 1px, transparent 1px), linear-gradient(90deg, #1A1C20 1px, transparent 1px); }
+.map .river { background: #16202C; }
+
+/* 검색 첫 화면: 보케 사진 위에 금색 로고 */
+.center { position: relative; background: #050506 url("../assets/brand/hero-bokeh.jpg") center bottom / cover no-repeat; }
+.center::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 42%, rgba(5, 5, 6, .55), rgba(5, 5, 6, .1) 70%); pointer-events: none; }
+.center > * { position: relative; }
+.logo a.has-img img { height: clamp(96px, 20vw, 150px); }
+.tagline { color: #E6DCC6; font-size: clamp(1.02rem, 2.6vw, 1.25rem); margin-top: -4px; }
+.search-box input { background: rgba(23, 23, 26, .9); border-color: rgba(212, 178, 106, .3); }
+.recent .chip { background: rgba(18, 18, 20, .85); }
+body.searching .center { background: rgba(10, 10, 11, .96); border-bottom-color: rgba(212, 178, 106, .18); }
+body.searching .center::before { display: none; }
+body.searching .logo a.has-img img { height: 44px; filter: none; }
+.brand.has-img img { height: 34px; }
+
+/* 지점 전화·바로가기 띠 (첫 화면 아래) */
+.brand-hero { padding-top: 40px; }
+.bh-inner { background: #0E0E10; border: 1px solid rgba(212, 178, 106, .22); padding: 32px 20px; }
