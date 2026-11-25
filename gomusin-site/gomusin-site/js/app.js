@@ -151,7 +151,23 @@
       pf.hidden = false;
       pf.innerHTML = `${(P.stats || []).length ? `<ul class="hp-stats">${P.stats.map((s) => `<li><b>${esc(s.num)}</b><span>${esc(s.label)}</span></li>`).join("")}</ul>` : ""}
         ${P.quote ? `<a class="hp-quote" href="#brandReviews"><span class="rv-stars" aria-label="별점 5점">★★★★★</span> “${esc(P.quote.text)}”<small>${esc(P.quote.by || "")}</small></a>` : ""}
-        ${(P.ctas || []).length ? `<div class="hp-ctas">${P.ctas.map((c) => `<a class="btn${c.primary ? "" : " ghost"}" href="${esc(c.href)}">${esc(c.label)}</a>`).join("")}</div>` : ""}`;
+        ${(P.ctas || []).length ? `<div class="hp-ctas">${P.ctas.map((c) => `<a class="btn${c.primary ? "" : " ghost"}" href="${esc(c.href)}">${esc(c.label)}</a>`).join("")}</div>` : ""}
+        ${B.promoVideo ? `<figure class="hp-video"><video src="${esc(B.promoVideo.src)}" poster="${esc(B.promoVideo.poster || "")}" muted loop playsinline preload="metadata" aria-label="${esc(B.promoVideo.caption || "매장 영상")}"></video><button type="button" class="hp-sound" aria-pressed="false">🔊 소리 켜기</button>${B.promoVideo.caption ? `<figcaption>${esc(B.promoVideo.caption)}</figcaption>` : ""}</figure>` : ""}`;
+      // 첫 화면 영상: 소리 없이 자동 재생 → "소리 켜기" 누르면 처음부터 소리와 함께 (배경 음악은 잠시 멈춤)
+      const pv = $(".hp-video video", pf), sb = $(".hp-sound", pf);
+      if (pv) {
+        const setSound = (on) => {
+          pv.muted = !on; sb.classList.toggle("on", on); sb.setAttribute("aria-pressed", String(on));
+          sb.textContent = on ? "🔇 소리 끄기" : "🔊 소리 켜기";
+          window.dispatchEvent(new CustomEvent("gomusin:video-sound", { detail: on }));
+        };
+        sb.addEventListener("click", () => { const on = pv.muted; if (on) { pv.currentTime = 0; pv.play().catch(() => {}); } setSound(on); });
+        if ("IntersectionObserver" in window) new IntersectionObserver((es) => es.forEach((e) => {
+          if (e.isIntersecting) { pv.preload = "auto"; pv.play().catch(() => {}); }
+          else { pv.pause(); if (!pv.muted) setSound(false); }
+        }), { threshold: 0.3 }).observe(pv);
+        else pv.setAttribute("controls", "");
+      }
       const q = $(".hp-quote", pf); q && q.addEventListener("click", (e) => { e.preventDefault(); $("#brandReviews").scrollIntoView({ behavior: "smooth" }); });
     }
     // 브랜드 배너 (지점 전화 + 바로가기)

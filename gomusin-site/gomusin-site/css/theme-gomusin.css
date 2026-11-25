@@ -392,3 +392,28 @@ body { overflow-x: clip; }
 .hp-stats b, .tr-stats b, .rv-sum b { font-variant-numeric: tabular-nums; }
 /* 긴 제목·문장이 좁은 화면에서 잘리지 않게 줄바꿈 */
 .rv-title, .rv-lead, .tr-title, .bg-head h2 { max-width: 100%; word-break: keep-all; overflow-wrap: anywhere; }
+
+/* ===== 배경 음악 버튼 (오른쪽 아래, 금색) ===== */
+.music-btn { position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 40; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; padding: 0; cursor: pointer;
+  background: rgba(10,10,11,.86); border: 1.5px solid rgba(212,178,106,.7); color: var(--color-primary); box-shadow: 0 6px 20px rgba(0,0,0,.45); transition: transform .15s, background .15s; }
+.music-btn:hover { transform: translateY(-1px); background: rgba(26,23,18,.95); }
+.music-btn svg { width: 20px; height: 20px; }
+.music-btn:not(.on) svg { opacity: .55; }
+.music-btn:not(.on)::after { content: ""; position: absolute; width: 26px; height: 1.5px; background: var(--color-primary); transform: rotate(-45deg); opacity: .8; }
+.music-eq { position: absolute; bottom: 7px; display: none; gap: 2px; align-items: flex-end; height: 8px; }
+.music-btn.on .music-eq { display: flex; }
+.music-btn.on svg { transform: translateY(-3px); }
+.music-eq i { width: 2px; background: var(--color-primary); border-radius: 1px; height: 3px; }
+@media (prefers-reduced-motion: no-preference) {
+  .music-btn.on .music-eq i { animation: eq 1.1s ease-in-out infinite; }
+  .music-btn.on .music-eq i:nth-child(2) { animation-delay: .25s; }
+  .music-btn.on .music-eq i:nth-child(3) { animation-delay: .5s; }
+}
+@keyframes eq { 0%, 100% { height: 3px; } 50% { height: 8px; } }
+
+/* ===== 첫 화면 세로 영상 (간석점) ===== */
+.hp-video { position: relative; width: min(100%, 360px); margin: 22px auto 0; border-radius: 18px; overflow: hidden; border: 1px solid rgba(212,178,106,.45); background: #000; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+.hp-video video { display: block; width: 100%; aspect-ratio: 9 / 16; object-fit: cover; background: #000; }
+.hp-video figcaption { position: absolute; left: 12px; top: 12px; font-size: .78rem; color: #fff; background: rgba(0,0,0,.55); padding: 4px 10px; border-radius: 999px; }
+.hp-sound { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); padding: 10px 18px; border-radius: 999px; border: 1.5px solid rgba(212,178,106,.85); background: rgba(10,10,11,.82); color: #f3e3bd; font-weight: 700; font-size: .95rem; cursor: pointer; white-space: nowrap; }
+.hp-sound.on { background: rgba(212,178,106,.92); color: #111; }

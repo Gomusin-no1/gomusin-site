@@ -39,6 +39,11 @@ window.BRAND = {
     ]
   },
 
+  // 배경 음악 (잔잔한 라운지 재즈) — 손님이 화면을 처음 누르면 작은 소리로 시작, 오른쪽 아래 금색 버튼으로 끄고 켜요
+  //  음원: 홈페이지용으로 직접 만든 오리지널 곡이라 저작권 걱정이 없어요. 다른 곡으로 바꾸려면 mp3 를 assets/brand/ 에 넣고 src 만 바꾸세요.
+  //  volume: 0 ~ 1 (0.22 = 작게). src 를 "" 로 비우면 음악이 꺼져요.
+  music: { src: "assets/brand/lounge-jazz.mp3", volume: 0.22 },
+
   // 기능 켜기/끄기 — 아직 실제 서버(Supabase)가 없어서, 손님이 오해할 수 있는 예시 기능은 꺼 두었어요.
   //  shop: 상점·장바구니 / booking: 상담 예약 / account: 로그인·알림 / contactForm: 문의 입력 폼
   //  (false 인 동안 "문의"는 전화·카카오톡 안내 화면으로 보여요. 서버 연결 후 true 로 바꾸면 다시 켜져요)
@@ -136,7 +141,7 @@ window.BRAND = {
 
   // 매장 사진 갤러리
   gallery: [
-    { src: "assets/brand/main-crowd.jpg", caption: "부평본점 · 줄 서서 폰 사는 집" },
+    { src: "assets/brand/interior-bupyeong-4.jpg", caption: "부평본점 · 매장 안" },
     { src: "assets/brand/store-ganseok.jpg", caption: "간석점" },
     { src: "assets/brand/store-sungui-day.jpg", caption: "숭의점" }
   ],

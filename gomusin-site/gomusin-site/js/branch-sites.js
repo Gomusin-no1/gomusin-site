@@ -22,12 +22,13 @@
       quote: { text: "가족들 다 바꿀 때 본점만 오는 것 같아요!!", by: "부평본점 네이버 방문자 리뷰 · fir****" }
     },
     ganseok: {
-      branch: "간석점", store: "s2", url: "https://gomusin-ganseok.vercel.app",
+      branch: "간석점", store: "s2", url: "https://gomusin-ganseok-site.vercel.app",
       gallery: [
         { src: "assets/brand/store-ganseok.jpg", caption: "간석점" },
         { src: "assets/brand/interior-ganseok-3.jpg", caption: "매장 안 상담" },
         { src: "assets/brand/interior-ganseok.jpg", caption: "손님이 붐비는 매장 안" }
       ],
+      promo: { src: "assets/brand/ganseok-promo.mp4?v=1", poster: "assets/brand/ganseok-promo.jpg?v=1", caption: "단골 손님 인터뷰" },   // 첫 화면 세로 영상 (소리 켜기 버튼 있음)
       trustBg: "assets/brand/bg-trust-ganseok.jpg",   // 15년 섹션 뒤 흐린 배경 (손님 얼굴은 가림 처리)
       quote: { text: "멀어도 여기말고 다른매장은 못가겠어요", by: "간석점 네이버 방문자 리뷰 · psc****" }
     },
@@ -89,6 +90,7 @@
 
   B.gallery = S.gallery;
   B.galleryVideo = S.video || null;
+  B.promoVideo = S.promo || null;
   if (S.trustBg) {   // 15년 섹션 배경을 그 매장 사진으로
     const st = document.createElement("style");
     st.textContent = `.brand-trust::before { background: linear-gradient(180deg, #0A0A0B 0%, rgba(10,10,11,.68) 14%, rgba(10,10,11,.6) 50%, rgba(10,10,11,.78) 82%, #0A0A0B 100%), url("${S.trustBg}") center 45% / cover no-repeat; }`;
