@@ -8,9 +8,9 @@
 window.BRAND = {
   name: "고무신모바일",
   // 금색 붓글씨 로고 (검정 배경용). 흰 배경에 쓸 땐 logo-dark.png, 흰 로고는 logo-white.png
-  logo: "assets/brand/logo-gold.png",
-  tagline: "고객님들의 [무한한 신뢰]를\n받는 매장",   // [ ] = 금색 강조, \n = 줄바꿈
-  taglineEyebrow: "SINCE 2012 · 인천 휴대폰성지",
+  logo: "assets/brand/logo-gold-w.png",   // 위 작은 글씨(휴대폰성지 폰명장)는 흰색, 간격 넓힘. 원본: logo-gold.png
+  tagline: "[고]객님들의 [무]한한 [신]뢰를 받는 매장",   // 금색 세 글자 = 고·무·신   // [ ] = 금색 강조, \n = 줄바꿈
+  taglineEyebrow: "SINCE 2012",
 
   // 홈 검색창 아래 브랜드 배너 (검정 배경 + 금색 로고)
   hero: {

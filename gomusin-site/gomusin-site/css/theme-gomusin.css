@@ -334,3 +334,5 @@ body { overflow-x: clip; }
     linear-gradient(180deg, #0A0A0B 0%, rgba(10,10,11,.68) 14%, rgba(10,10,11,.6) 50%, rgba(10,10,11,.78) 82%, #0A0A0B 100%),
     url("../assets/brand/bg-trust.jpg?v=2") center 45% / cover no-repeat; }
 .brand-trust .tr-promises li { background: linear-gradient(160deg, rgba(26,23,18,.9), rgba(18,18,20,.88) 70%); backdrop-filter: blur(2px); }
+.tagline { font-size: clamp(1.45rem, 5vw, 2.4rem); line-height: 1.35; margin-bottom: 26px; }
+.tagline em.gold-shine { background: linear-gradient(180deg, #FBE7AE 0%, #D9B566 60%, #B98F45 100%); background-size: 100% 100%; -webkit-background-clip: text; background-clip: text; animation: none; }
