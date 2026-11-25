@@ -367,3 +367,23 @@ body { overflow-x: clip; }
 .brand-trust::before { transform: translateZ(0); }
 .reveal { will-change: auto; }
 .reveal:not(.in) { will-change: opacity, transform; }
+
+/* ===== 매장 사진 3장: 위에 큰 대표 사진 1장 + 아래 2장 ===== */
+.bg-grid.n3 figure:first-child { grid-column: span 6; aspect-ratio: 16 / 8; }
+.bg-grid.n3 figure:nth-child(n+2) { grid-column: span 3; aspect-ratio: 4 / 3; }
+@media (max-width: 640px) {
+  .bg-grid.n3 figure:first-child { grid-column: span 2; aspect-ratio: 4 / 3; }
+  .bg-grid.n3 figure:nth-child(n+2) { grid-column: span 1; aspect-ratio: 1 / 1; }
+}
+/* 리뷰 접기: PC에서도 처음엔 정해진 개수만 (3칸씩 꽉 차게) */
+.brand-reviews:not(.rv-open) .rv-extra { display: none; }
+.brand-reviews:not(.rv-open) .rv-morebtn { display: flex; }
+/* 글씨가 들어간 배너 사진은 잘리지 않게 통째로 */
+.bg-grid figure.fit { background: #fff; }
+.bg-grid figure.fit img { object-fit: contain; }
+.bg-grid figure.fit:hover img { transform: none; }
+/* 매장 영상 (사진 위, 소리 없이 반복) */
+.bg-video { position: relative; margin: 0 0 12px; border-radius: var(--radius-card); overflow: hidden; background: #000; aspect-ratio: 16 / 9; }
+.bg-video video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.bg-video figcaption { position: absolute; left: 12px; bottom: 12px; background: rgba(10,10,11,.78); color: var(--color-text); font-size: .82rem; padding: 4px 10px; border-radius: 8px; }
+@media (max-width: 640px) { .bg-video { margin-bottom: 8px; } }

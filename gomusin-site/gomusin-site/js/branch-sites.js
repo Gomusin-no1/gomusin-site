@@ -14,16 +14,19 @@
     bupyeong: {
       branch: "부평본점", store: "s1", url: "https://gomusin.vercel.app",
       gallery: [
-        { src: "assets/brand/main-crowd.jpg", caption: "부평본점 · 줄 서서 폰 사는 집" },
-        { src: "assets/brand/store-bupyeong.jpg", caption: "부평본점" }
+        { src: "assets/brand/interior-bupyeong-4.jpg", caption: "부평본점 · 매장 안" },
+        { src: "assets/brand/banner-bupyeong-15y.jpg", caption: "", fit: "contain" },
+        { src: "assets/brand/banner-bupyeong-red.jpg", caption: "", fit: "contain" }
       ],
+      video: { src: "assets/brand/bupyeong-night.mp4", poster: "assets/brand/bupyeong-night.jpg", caption: "부평본점 · 밤에도 환한 매장" },
       quote: { text: "가족들 다 바꿀 때 본점만 오는 것 같아요!!", by: "부평본점 네이버 방문자 리뷰 · fir****" }
     },
     ganseok: {
       branch: "간석점", store: "s2", url: "https://gomusin-ganseok.vercel.app",
       gallery: [
-        { src: "assets/brand/interior-ganseok.jpg", caption: "간석점 · 매장 안" },
-        { src: "assets/brand/store-ganseok.jpg", caption: "간석점" }
+        { src: "assets/brand/store-ganseok.jpg", caption: "간석점" },
+        { src: "assets/brand/interior-ganseok-3.jpg", caption: "매장 안 상담" },
+        { src: "assets/brand/interior-ganseok.jpg", caption: "손님이 붐비는 매장 안" }
       ],
       trustBg: "assets/brand/bg-trust-ganseok.jpg",   // 15년 섹션 뒤 흐린 배경 (손님 얼굴은 가림 처리)
       quote: { text: "멀어도 여기말고 다른매장은 못가겠어요", by: "간석점 네이버 방문자 리뷰 · psc****" }
@@ -31,8 +34,9 @@
     sungui: {
       branch: "숭의점", store: "s3", url: "https://gomusin-sungui.vercel.app",
       gallery: [
-        { src: "assets/brand/interior-sungui.jpg", caption: "숭의점 · 매장 안" },
-        { src: "assets/brand/store-sungui.jpg", caption: "숭의점" }
+        { src: "assets/brand/store-sungui-day.jpg", caption: "숭의점" },
+        { src: "assets/brand/store-sungui-crowd.jpg", caption: "매장 앞 손님들" },
+        { src: "assets/brand/interior-sungui.jpg", caption: "매장 안 상담" }
       ],
       trustBg: "assets/brand/bg-trust-sungui.jpg",   // 15년 섹션 뒤 흐린 배경 (손님 얼굴은 가림 처리)
       quote: { text: "휴대폰 성지 알아보다가 왔는데 너무 저렴하게 잘 해주셨어요", by: "숭의점 네이버 방문자 리뷰 · weny****" }
@@ -71,14 +75,20 @@
   B.links.reviews = br.naver;
   B.links.naverPlace = br.naver;
 
-  const items = R.items.filter((r) => r.branch === S.branch).map((r) => Object.assign({}, r, { featured: false }));
-  if (items.length) items[0].featured = true;
+  // 리뷰: 3칸씩 꽉 차게 (마지막 줄에 1~2개만 남지 않게)
+  //  · 개수-1 이 3의 배수면 첫 리뷰를 크게 + 나머지 3칸씩 (예: 7개 = 큰 1 + 3×2)
+  //  · 아니면 크게 없이 3의 배수만큼 (예: 9개 = 3×3)
+  let items = R.items.filter((r) => r.branch === S.branch).map((r) => Object.assign({}, r, { featured: false }));
+  if (items.length && (items.length - 1) % 3 === 0) items[0].featured = true;
+  else items = items.slice(0, Math.max(3, items.length - items.length % 3));
   R.items = items;
+  R.visible = items.length;   // 매장 사이트는 모두 펼쳐서 보여요
   R.summary = sum ? [sum] : [];
   R.links = R.links.filter((l) => l.name === S.branch);
   R.text = S.branch + "을 다녀가신 손님들이 네이버에 직접 남긴 이야기예요. 원문 그대로 읽어 보세요.";
 
   B.gallery = S.gallery;
+  B.galleryVideo = S.video || null;
   if (S.trustBg) {   // 15년 섹션 배경을 그 매장 사진으로
     const st = document.createElement("style");
     st.textContent = `.brand-trust::before { background: linear-gradient(180deg, #0A0A0B 0%, rgba(10,10,11,.68) 14%, rgba(10,10,11,.6) 50%, rgba(10,10,11,.78) 82%, #0A0A0B 100%), url("${S.trustBg}") center 45% / cover no-repeat; }`;

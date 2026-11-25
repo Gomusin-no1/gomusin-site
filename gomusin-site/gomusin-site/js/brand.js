@@ -108,6 +108,22 @@ window.BRAND = {
       { tag: "일주일 만에 또", text: "며칠전에 와이프 휴대폰 바꿀때 너무 잘해주셔서\n[일주일만에 저도 바꾸러 왔습니다]\n오늘도 너무 잘해주셔서 단골 약속하고 갑니다!", author: "rlar****", branch: "부평본점", source: "네이버 방문자 리뷰" },
       { tag: "입소문", text: "[동네에서 잘해준다고 소문나서] 매장\n와봤는데 진짜너무친절하시고\n휴대폰요금 나오는것도 절반이상\n줄여주셔서 너무만족하고변경햇습니다", author: "poo****", branch: "간석점", source: "네이버 방문자 리뷰" },
       { tag: "온 가족 단골", text: "동네에 성지매장 행사한다해서\n휴대폰변경했어요 항상너무잘해주셔서\n[모든가족이 믿고올수있는매장]이라\n넘좋아요^^", author: "rice****", branch: "간석점", source: "네이버 방문자 리뷰" },
+      { tag: "웃으며 응대", text: "직원분들 완전 친절해요🙂\n몇번씩와서 물어봤는데도 [항상웃으며 응대해주셨어요] 와이프랑 같이 바꿨습니다 ㅎㅎ 주변사람들 추천해주려요 오늘 개통잘하고 갑니다^^", author: "a06****", branch: "부평본점", source: "네이버 방문자 리뷰" },
+      { tag: "소개 강추", text: "엄청 친절하게 상담 받았고, [가격도 엄청 저렴하게] 해주시고 너무 고맙게 잘하고  갑니다\n감사했습니다~[다른분들한테도 소개 강추]", author: "mun****", branch: "부평본점", source: "네이버 방문자 리뷰" },
+      { tag: "부모님과 함께", text: "어머니 휴대폰 바꾸러 왔어요!! \n저렴하고 무엇보다 [정확한 상담] 해주시고 친절하세요 \n또 올게요!!", author: "ozo****", branch: "부평본점", source: "네이버 방문자 리뷰" },
+      { tag: "온 가족 단골", text: "인터넷 바꾸면서 아들 휴대폰도\n바꿔줬어요! 항상 이렇게 저렴하게\n해주시니 [안올수가 있나요]ㅎ\n감사합니다!", author: "jhk1****", branch: "부평본점", source: "네이버 방문자 리뷰" },
+      { tag: "차근차근 설명", text: "넘 친절하시고 차근차근 알려주시니 \n[다른 매장 가고 싶지 않네요.]\n여기 매장이 딱  입니다.", author: "미소****", branch: "간석점", source: "네이버 방문자 리뷰" },
+      { tag: "할인 많이", text: "아이폰 개통하러 방문했다가 너무 쉽고 친절하게 설명해주셔서 [할인 많이받고 가요]~  너무 감사합니다~^^", author: "lmh****", branch: "간석점", source: "네이버 방문자 리뷰" },
+      { tag: "처음 온 매장", text: "충전이안되서 방문했는데 꼼꼼히봐주고 혜택좋은행사있어서 거저바꿔가요~ [처음오는매장인데 너무친절하고 너무좋네요] 화이팅입니다!!", author: "wjj****", branch: "숭의점", source: "네이버 방문자 리뷰" },
+      { tag: "늘 친절", text: "딸폰바꾸러왔지요~~ [늘친절하게 잘해주셔서] 너무감사드립니다^^", author: "qsc****", branch: "숭의점", source: "네이버 방문자 리뷰" },
+      { tag: "만족", text: "갤럭시S26울트라 랑 고민하다가 폴드로 바꿨는데 [너무 만족스러워요] 감사합니다ㅎㅎ", author: "hks****", branch: "숭의점", source: "네이버 방문자 리뷰" },
+      { tag: "다시 찾은 매장", text: "[작년에구매한매장인데] 요금줄여주는행사하네요~~~~ 너무친절하고 부담없이해줘서 너무고마워요@@", author: "jks5****", branch: "숭의점", source: "네이버 방문자 리뷰" },
+      { tag: "직원 모두 데려올게요", text: "세칸폰이 필요해서 예약하구 왔구여. 무료로 너무 잘해주셨어요. 너무 만족스럽습니다. [직원들하고 전부다 여기로 데려올 예정입니다] ㅋ", author: "jis1****", branch: "부평본점", source: "네이버 방문자 리뷰" },
+      { tag: "꾸준한 관리", text: "휴대폰 요금 줄일 겸 왔네요. [항상 좋은 일 있을 때마다 전화와서 관리해주고] 너무 좋아요.", author: "sim****", branch: "간석점", source: "네이버 방문자 리뷰" },
+      { tag: "데이터 복구", text: "핸드폰 망가져서 왔는데 [정보도 다 살려주고] 너무 좋아요,, 강추", author: "ios3****", branch: "간석점", source: "네이버 방문자 리뷰" },
+      { tag: "싸게 잘", text: "[핸드폰 싸게 잘 바꾸고] 가는 것 같아요. 너무 고마워요.", author: "jae****", branch: "간석점", source: "네이버 방문자 리뷰" },
+      { tag: "소개받고 방문", text: "[소개받고 방문했어요.] 너무 친절하시고 최고에요!!", author: "alsw****", branch: "숭의점", source: "네이버 방문자 리뷰" },
+      { tag: "조건 하나하나 확인", text: "용현동 휴대폰성지나 인하대역 휴대폰성지를 찾아보고 있다면 매장에서 직접 상담을 받아보고 조건을 비교해 보는 것도 방법 중 하나! [직원분께서 통신사와 요금제, 약정 여부 등 여러 가지 조건을 하나씩 확인해 주셨습니다.]", author: "spec****", branch: "숭의점", source: "네이버 블로그 후기" },
       { tag: "꼼꼼한 상담", text: "친절하고 꼼꼼한 상담 덕분에 기분 좋게 휴대폰 개통했습니다! 요금제 비교도 딱 필요한 것만 알기 쉽게 설명해 주시고, 데이터 이동까지 깔끔하게 도와주셔서 너무 편했어요. [과한 권유 없이 합리적으로] 잘 맞춘 것 같아 만족스럽습니다. 번창하세요!", author: "전**", branch: "숭의점", source: "네이버 방문자 리뷰" }
     ],
     shots: [],
@@ -122,12 +138,12 @@ window.BRAND = {
   gallery: [
     { src: "assets/brand/main-crowd.jpg", caption: "부평본점 · 줄 서서 폰 사는 집" },
     { src: "assets/brand/store-ganseok.jpg", caption: "간석점" },
-    { src: "assets/brand/store-sungui.jpg", caption: "숭의점" }
+    { src: "assets/brand/store-sungui-day.jpg", caption: "숭의점" }
   ],
   galleryTitle: "고객이 소개하고, 가족이 찾아오는 곳",
   galleryText: "한 분의 만족이 다음 인연이 되었습니다.",
 
-  storePhotos: { s1: "assets/brand/store-bupyeong.jpg", s2: "assets/brand/store-ganseok.jpg", s3: "assets/brand/store-sungui.jpg" },   // s1 부평본점 · s2 간석점 · s3 숭의점
+  storePhotos: { s1: "assets/brand/store-bupyeong.jpg", s2: "assets/brand/store-ganseok.jpg", s3: "assets/brand/store-sungui-day.jpg" },   // s1 부평본점 · s2 간석점 · s3 숭의점
   productPhotos: {},   // 예: { g1: "assets/brand/product-1.jpg" }
 
   business: {

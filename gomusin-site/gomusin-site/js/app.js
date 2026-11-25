@@ -194,28 +194,35 @@
     if (photos.length) {
       g.hidden = false;
       g.innerHTML = `<div class="bg-head"><h2 id="galleryTitle">${esc(B.galleryTitle || "공간을 소개해요")}</h2>${B.galleryText ? `<p class="muted">${esc(B.galleryText)}</p>` : ""}</div>
-        <div class="bg-grid n${Math.min(photos.length, 6)}">${photos.slice(0, 6).map((p, i) => `<figure><img src="${esc(p.src)}" alt="${esc(p.caption || "매장 사진 " + (i + 1))}" loading="lazy" decoding="async">${p.caption ? `<figcaption>${esc(p.caption)}</figcaption>` : ""}</figure>`).join("")}</div>
+        ${B.galleryVideo ? `<figure class="bg-video"><video src="${esc(B.galleryVideo.src)}" poster="${esc(B.galleryVideo.poster || "")}" muted loop playsinline preload="none" aria-label="${esc(B.galleryVideo.caption || "매장 영상")}"></video>${B.galleryVideo.caption ? `<figcaption>${esc(B.galleryVideo.caption)}</figcaption>` : ""}</figure>` : ""}
+        <div class="bg-grid n${Math.min(photos.length, 6)}">${photos.slice(0, 6).map((p, i) => `<figure${p.fit === "contain" ? ' class="fit"' : ""}><img src="${esc(p.src)}" alt="${esc(p.caption || "매장 사진 " + (i + 1))}" loading="lazy" decoding="async">${p.caption ? `<figcaption>${esc(p.caption)}</figcaption>` : ""}</figure>`).join("")}</div>
         <p class="bg-more"><a class="btn" href="#/store">매장 위치 보기</a></p>`;
+    }
+    // 매장 영상: 화면에 보일 때만 재생 (안 보이면 멈춰서 스크롤이 가벼워요)
+    const vid = $(".bg-video video");
+    if (vid) {
+      if ("IntersectionObserver" in window) new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { vid.preload = "auto"; vid.play().catch(() => {}); } else vid.pause(); }), { threshold: 0.25 }).observe(vid);
+      else vid.setAttribute("controls", "");
     }
     // 고객 리뷰
     const R = B.reviews, rv = $("#brandReviews");
     if (R && rv) {
       const mark = (t) => esc(t || "").replace(/\[([\s\S]+?)\]/g, "<em>$1</em>");
-      const items = R.items || [], shots = R.shots || [], sum = R.summary || [], kw = R.keywords || [];
+      const items = R.items || [], shots = R.shots || [], sum = R.summary || [], kw = R.keywords || [], vis = R.visible || 10;   // 처음에 보이는 리뷰 수 (큰 1 + 3×3)
       rv.hidden = false;
       rv.innerHTML = `${R.eyebrow ? `<p class="tr-eyebrow">${esc(R.eyebrow)}</p>` : ""}<h2 class="tr-title rv-title" id="reviewsTitle">${esc(R.title || "고객 리뷰")}</h2>
         ${R.text ? `<p class="rv-lead">${esc(R.text)}</p>` : ""}
         ${sum.length ? `<div class="rv-sumwrap"><p class="rv-sumhead"><b>N</b>네이버 리뷰</p><dl class="rv-sum">${sum.map((s) => `<div><dt>${esc(s.label)}</dt><dd><b>${esc(s.num)}</b>${esc(s.unit || "")}</dd></div>`).join("")}</dl></div>` : ""}
         ${R.note ? `<p class="rv-note">${esc(R.note)}</p>` : ""}
         ${kw.length ? `<ul class="rv-kw" aria-label="손님들이 많이 고른 키워드">${kw.map((k) => `<li>"${esc(k.text)}"${k.count ? `<b>${esc(String(k.count))}</b>` : ""}</li>`).join("")}</ul>` : ""}
-        ${items.length ? `<ul class="rv-list">${items.map((r, i) => `<li class="rv-card${r.featured ? " featured" : ""}${i > 6 ? " rv-extra" : ""}">
+        ${items.length ? `<ul class="rv-list">${items.map((r, i) => `<li class="rv-card${r.featured ? " featured" : ""}${i >= vis ? " rv-extra" : ""}">
             ${r.tag ? `<span class="rv-tag">${esc(r.tag)}</span>` : ""}
             <span class="rv-stars" aria-label="별점 5점 만점">★★★★★</span>
             <blockquote>${mark(r.text)}</blockquote>
             <p class="rv-who"><strong>${esc(r.author || "고객님")}</strong>${r.branch ? ` · ${esc(r.branch)}` : ""}${r.date ? ` · ${esc(r.date)}` : ""}</p>
             ${r.source ? `<p class="rv-src">${esc(r.source)}</p>` : ""}
           </li>`).join("")}</ul>` : ""}
-        ${items.length > 7 ? `<button class="btn ghost rv-morebtn" type="button" data-rv-more>리뷰 ${items.length - 7}개 더 보기</button>` : ""}
+        ${items.length > vis ? `<button class="btn ghost rv-morebtn" type="button" data-rv-more>리뷰 ${items.length - vis}개 더 보기</button>` : ""}
         ${shots.length ? `<div class="rv-shots">${shots.map((s, i) => `<img src="${esc(s)}" alt="실제 고객 리뷰 화면 ${i + 1}" loading="lazy">`).join("")}</div>` : ""}
         ${(R.links || []).length ? `<div class="rv-links"><p>네이버에서 전체 리뷰 보기</p><div>${R.links.map((l) => `<a class="nav-btn nav-naver" target="_blank" rel="noopener" href="${esc(l.url)}"><b>N</b>${esc(l.name)} 리뷰</a>`).join("")}</div></div>` : ""}`;
     }
