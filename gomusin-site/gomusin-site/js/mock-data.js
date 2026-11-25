@@ -5,41 +5,17 @@
 window.MOCK = {
   // 검색 대상 문서
   docs: [
-    { id: "h1", title: "휴대폰 구매 전 꼭 확인할 것: 공시지원금 vs 선택약정", url: "gomusin.example.com/guide/subsidy", summary: "기기값을 바로 깎는 공시지원금과 매달 요금을 25% 할인받는 선택약정, 내 사용 패턴에 맞는 쪽을 매장에서 함께 계산해 드려요." },
-    { id: "h2", title: "번호이동 · 기기변경 · 신규가입 차이", url: "gomusin.example.com/guide/join-type", summary: "통신사를 바꾸는 번호이동, 같은 통신사에서 폰만 바꾸는 기기변경, 새 번호를 만드는 신규가입. 조건이 다르니 상담 때 꼭 말씀해 주세요." },
-    { id: "h3", title: "중고폰 매입: 쓰던 휴대폰 제값 받는 법", url: "gomusin.example.com/guide/trade-in", summary: "액정·배터리 상태와 구성품에 따라 매입가가 달라져요. 초기화 전에 사진과 연락처 백업을 먼저 해 두세요." },
-    { id: "h4", title: "요금제 고르는 법: 데이터 사용량부터 확인하세요", url: "gomusin.example.com/guide/plan", summary: "최근 3개월 데이터 사용량을 보면 맞는 요금제가 보여요. 필요 이상 비싼 요금제를 권하지 않는 것이 고무신의 원칙이에요." },
-    { id: "h5", title: "개통 당일 준비물과 걸리는 시간", url: "gomusin.example.com/guide/activation", summary: "신분증과 본인 명의 결제 수단을 챙겨 오세요. 데이터 옮기기까지 매장에서 도와드려요." },
-    { id: "h6", title: "구매 후기: 고객님들이 직접 남긴 이야기", url: "gomusin.example.com/reviews", summary: "1·2·3호점에서 휴대폰을 바꾸신 고객님들의 솔직한 후기를 모았어요. 게시판에서도 볼 수 있어요." },
-    { id: "d1", title: "1인 기업 시작 가이드: 사업자 등록부터 첫 매출까지", url: "simple.example.com/guide/start", summary: "혼자 시작하는 사업, 무엇부터 해야 할까요? 사업자 등록, 통장 분리, 세금 신고 일정까지 처음 하는 사람 기준으로 차근차근 정리했어요." },
-    { id: "d2", title: "AI로 고객 문의 자동 응대하기", url: "simple.example.com/ai/chatbot", summary: "자주 묻는 질문을 정리해 AI 상담봇에 학습시키면 밤에도 문의에 답할 수 있어요. 설정 방법과 주의할 점을 알려드려요." },
-    { id: "d3", title: "무료로 시작하는 홈페이지 만들기", url: "simple.example.com/web/free-site", summary: "Supabase 무료 플랜과 Vercel 무료 배포만으로 회원가입, 게시판, 예약까지 되는 홈페이지를 만드는 방법이에요." },
-    { id: "d4", title: "간편결제 도입 체크리스트", url: "simple.example.com/pay/checklist", summary: "카드 결제와 카카오페이·네이버페이·토스페이를 붙이려면 사업자 등록과 PG 심사가 필요해요. 준비 서류를 한 번에 확인하세요." },
-    { id: "d5", title: "쿠폰으로 첫 구매 전환율 높이기", url: "simple.example.com/marketing/coupon", summary: "첫 구매 10% 할인, 3만원 이상 3천원 할인처럼 조건이 분명한 쿠폰이 효과가 좋아요. 쿠폰 설계 예시를 모았어요." },
-    { id: "d6", title: "예약 시스템으로 노쇼 줄이기", url: "simple.example.com/booking/no-show", summary: "예약 확인 알림, 시간 슬롯 정원 관리, 예약금 설정으로 노쇼를 줄이는 방법을 소개해요." },
-    { id: "d7", title: "블로그 글 하루 10분 만에 쓰는 법", url: "simple.example.com/content/blog-10min", summary: "AI에게 개요를 받고, 내 경험 한 줄을 더하면 짧은 시간에도 진정성 있는 글을 쓸 수 있어요." },
-    { id: "d8", title: "스마트스토어 vs 자사몰, 무엇이 유리할까", url: "simple.example.com/commerce/compare", summary: "수수료, 고객 데이터, 마케팅 자유도를 기준으로 두 방식을 비교했어요. 처음에는 둘을 함께 쓰는 것도 방법이에요." },
-    { id: "d9", title: "세금 신고 달력: 1인 사업자 필수 일정", url: "simple.example.com/tax/calendar", summary: "부가가치세, 종합소득세, 원천세 신고 기한을 달력으로 정리했어요. 놓치면 가산세가 붙으니 미리 챙기세요." },
-    { id: "d10", title: "카카오맵으로 매장 위치 안내하기", url: "simple.example.com/web/kakao-map", summary: "카카오맵 JavaScript 키를 발급받고 도메인을 등록하면 홈페이지에 지도와 길찾기 버튼을 넣을 수 있어요." },
-    { id: "d11", title: "이메일 뉴스레터로 단골 만들기", url: "simple.example.com/marketing/newsletter", summary: "한 달에 두 번, 유용한 정보와 짧은 소식만 보내도 재구매율이 올라가요. 무료 도구로 시작하는 방법이에요." },
-    { id: "d12", title: "AI 이미지로 상품 사진 꾸미기", url: "simple.example.com/ai/product-photo", summary: "스마트폰으로 찍은 사진의 배경을 AI로 바꾸면 전문 촬영 없이도 깔끔한 상품 사진을 만들 수 있어요." },
-    { id: "d13", title: "개인정보 처리방침 쉽게 작성하기", url: "simple.example.com/legal/privacy", summary: "문의 폼, 회원가입을 받는다면 개인정보 처리방침이 꼭 필요해요. 필수 항목과 무료 생성기를 소개해요." },
-    { id: "d14", title: "고객 리뷰 모으는 7가지 방법", url: "simple.example.com/marketing/review", summary: "구매 후 3일째 리뷰 요청 메시지, 사진 리뷰 적립금 등 실제로 효과 있었던 방법을 정리했어요." },
-    { id: "d15", title: "노션으로 1인 기업 업무 관리하기", url: "simple.example.com/tools/notion", summary: "할 일, 고객 목록, 콘텐츠 일정을 노션 하나로 관리하는 템플릿과 사용법이에요." },
-    { id: "d16", title: "검색에 잘 걸리는 홈페이지 만들기 (SEO 기초)", url: "simple.example.com/web/seo", summary: "페이지 제목, 설명 문구, og 이미지 같은 메타 태그를 잘 쓰면 검색과 공유 미리보기가 좋아져요." },
-    { id: "d17", title: "AI 비서에게 일 맡기는 프롬프트 예시", url: "simple.example.com/ai/prompts", summary: "견적서 작성, 고객 답장, 상품 설명 쓰기 등 바로 복사해서 쓸 수 있는 프롬프트 모음이에요." },
-    { id: "d18", title: "배송비 정책 정하는 법", url: "simple.example.com/commerce/shipping", summary: "무료배송 기준 금액을 정하면 객단가가 올라가요. 업종별 평균 배송비 정책을 비교해 봤어요." },
-    { id: "d19", title: "알림톡으로 주문·예약 안내 보내기", url: "simple.example.com/tools/alimtalk", summary: "카카오 알림톡을 쓰면 주문 완료, 예약 확인 메시지를 자동으로 보낼 수 있어요. 비용과 신청 절차를 알려드려요." },
-    { id: "d20", title: "혼자 일할 때 번아웃 피하기", url: "simple.example.com/life/burnout", summary: "일과 휴식의 경계를 정하고, 반복 업무는 자동화하세요. 1인 기업가들이 실제로 쓰는 루틴을 모았어요." },
-    { id: "d21", title: "상담 신청 폼에 꼭 넣어야 할 항목", url: "simple.example.com/web/contact-form", summary: "이름, 연락처, 문의 내용, 개인정보 동의 체크면 충분해요. 너무 많은 항목은 오히려 문의를 줄여요." },
-    { id: "d22", title: "무료 디자인 도구로 로고 만들기", url: "simple.example.com/design/logo", summary: "글자 로고 하나로도 충분히 브랜드가 돼요. 색 두 가지와 폰트 하나로 시작하는 방법이에요." },
-    { id: "d23", title: "정기 구독 상품 만들기", url: "simple.example.com/commerce/subscription", summary: "매달 꾸준한 매출을 만드는 구독 상품. 가격 설정과 해지 정책까지 고려해야 할 점을 정리했어요." },
-    { id: "d24", title: "AI로 월간 매출 보고서 자동으로 만들기", url: "simple.example.com/ai/report", summary: "스프레드시트 데이터를 AI에게 주면 매출 추이와 다음 달 할 일을 정리한 보고서를 받을 수 있어요." }
+    { id: "h1", title: "휴대폰 구매 전 꼭 확인할 것: 공시지원금 vs 선택약정", url: "", summary: "기기값을 바로 깎는 공시지원금과 매달 요금을 25% 할인받는 선택약정, 내 사용 패턴에 맞는 쪽을 매장에서 함께 계산해 드려요." },
+    { id: "h2", title: "번호이동 · 기기변경 · 신규가입 차이", url: "", summary: "통신사를 바꾸는 번호이동, 같은 통신사에서 폰만 바꾸는 기기변경, 새 번호를 만드는 신규가입. 조건이 다르니 상담 때 꼭 말씀해 주세요." },
+    { id: "h3", title: "중고폰 매입: 쓰던 휴대폰 제값 받는 법", url: "", summary: "액정·배터리 상태와 구성품에 따라 매입가가 달라져요. 초기화 전에 사진과 연락처 백업을 먼저 해 두세요." },
+    { id: "h4", title: "요금제 고르는 법: 데이터 사용량부터 확인하세요", url: "", summary: "최근 3개월 데이터 사용량을 보면 맞는 요금제가 보여요. 필요 이상 비싼 요금제를 권하지 않는 것이 고무신의 원칙이에요." },
+    { id: "h5", title: "개통 당일 준비물과 걸리는 시간", url: "", summary: "신분증과 본인 명의 결제 수단을 챙겨 오세요. 데이터 옮기기까지 매장에서 도와드려요." },
+    { id: "h6", title: "구매 후기: 고객님들이 직접 남긴 이야기", url: "", link: "#/", linkText: "홈에서 리뷰 보기", summary: "네이버 플레이스 방문자 리뷰를 원문 그대로 홈 화면에 모아 두었어요. 지점별 네이버 리뷰도 바로 볼 수 있어요." },
   ],
   // 결과 0건일 때 보여줄 추천 키워드
   suggestKeywords: ["휴대폰", "번호이동", "요금제", "중고폰", "개통", "후기"],
   // "아무거나" 버튼이 고르는 키워드
-  randomKeywords: ["휴대폰", "번호이동", "요금제", "중고폰", "개통", "선택약정", "1인 기업", "AI", "홈페이지", "결제", "쿠폰", "예약", "세금", "노션", "뉴스레터", "리뷰", "배송비", "알림톡", "로고", "구독", "번아웃", "상품 사진"],
+  randomKeywords: ["휴대폰", "번호이동", "요금제", "중고폰", "개통", "선택약정", "공시지원금", "기기변경", "후기", "데이터"],
 
   // 데모 계정 (로그인 테스트용)
   users: [

@@ -11,10 +11,10 @@
     [/^\/?$/, () => showSearch({}), true],
     [/^\/search$/, (m, q) => showSearch({ q: q.get("q") || "", page: +q.get("page") || 1 }), true],
     [/^\/doc\/([\w-]+)$/, (m) => Views.search.showDoc(m[1], page)],
-    [/^\/board$/, (m, q) => Views.board.list(page, +q.get("page") || 1)],
-    [/^\/board\/new$/, () => Views.board.form(page)],
-    [/^\/board\/([\w-]+)\/edit$/, (m) => Views.board.form(page, m[1])],
-    [/^\/board\/([\w-]+)$/, (m) => Views.board.detail(page, m[1])],
+    // 공지사항 (매장이 올리는 글, js/notices.js). 예전 게시판 주소도 공지사항으로 보내요.
+    [/^\/notice$/, () => Views.notice.list(page)],
+    [/^\/notice\/([\w-]+)$/, (m) => Views.notice.detail(page, m[1])],
+    [/^\/board(\/.*)?$/, () => { location.replace("#/notice"); }],
     [/^\/me$/, (m, q) => Views.account.mypage(page, q.get("tab") || "posts")],
     [/^\/contact$/, () => Views.contact.show(page)],
     [/^\/store$/, () => Views.store.show(page)],
@@ -30,10 +30,30 @@
     Views.search.show(args);
   }
 
+  // 꺼 둔 기능 (js/brand.js 의 features)
+  const F = Object.assign({ shop: true, booking: true, account: true, contactForm: true }, (window.BRAND || {}).features);
+  const blocked = (path) => (!F.shop && /^\/(shop|cart|checkout|pay)/.test(path)) || (!F.booking && /^\/booking/.test(path)) || (!F.account && /^\/me/.test(path));
+  function contactInfo(page) {
+    const B = window.BRAND || {}, L = B.links || {}, biz = B.business || {}, esc = UI.esc;
+    setMeta("문의하기", "전화 · 카카오톡으로 편하게 문의해 주세요.");
+    page.innerHTML = `<div class="page narrow contact-info">
+      <div class="page-head"><h2>문의하기</h2></div>
+      <p class="muted">궁금한 점은 전화나 카카오톡으로 편하게 물어봐 주세요. ${esc(B.hours || "")}</p>
+      <div class="ci-main">
+        ${L.kakao ? `<a class="sns-btn sns-kakao" href="${esc(L.kakao)}" target="_blank" rel="noopener">카카오톡 문의하기</a>` : ""}
+        ${biz.phone ? `<a class="btn ci-tel" href="tel:${esc(biz.phone.replace(/[^0-9]/g, ""))}">대표번호 ${esc(biz.phone)}</a>` : ""}
+      </div>
+      <ul class="ci-branches">${(B.branches || []).map((b) => `<li><a href="tel:${esc(b.phone.replace(/[^0-9]/g, ""))}"><strong>${esc(b.name)}</strong><span>${esc(b.phone)}</span>${b.addr ? `<small>${esc(b.addr)}</small>` : ""}</a></li>`).join("")}</ul>
+      <p style="text-align:center"><a class="btn ghost" href="#/store">매장 위치 · 길찾기</a></p>
+    </div>`;
+  }
+
   let lastPath = "";
   function route() {
     const raw = location.hash.replace(/^#/, "") || "/";
     const [path, qs] = raw.split("?");
+    if (blocked(path)) { location.replace("#/"); return; }
+    if (!F.contactForm && path === "/contact") { searchPage.hidden = true; page.hidden = false; document.body.classList.remove("searching"); window.scrollTo(0, 0); contactInfo(page); return; }
     const query = new URLSearchParams(qs || "");
     $("#mainNav").classList.remove("open"); $("#menuToggle").setAttribute("aria-expanded", "false");
     $$("#mainNav a").forEach((a) => a.classList.toggle("active", path.startsWith(a.getAttribute("href").slice(1))));
@@ -84,13 +104,38 @@
   }
 
   // 브랜드 적용: 로고 이미지/이름, 소개 문구, 매장 사진 갤러리, 사업자 정보
+  // 와~ 효과: 숫자가 0부터 올라가고, 섹션이 스르륵 나타나요 (움직임 줄이기 설정이면 꺼져요)
+  function wow() {
+    const calm = matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window);
+    const nums = $$(".hp-stats b, .tr-stats b, .rv-sum b");
+    const run = (el) => {
+      const m = el.textContent.match(/^([\d,]+)(.*)$/); if (!m) return;
+      const end = +m[1].replace(/,/g, ""), tail = m[2], t0 = performance.now(), dur = 1400;
+      const step = (t) => { const k = Math.min(1, (t - t0) / dur), v = Math.round(end * (1 - Math.pow(1 - k, 3)));
+        el.textContent = v.toLocaleString("ko-KR") + tail; if (k < 1) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    };
+    const secs = $$(".brand-trust, .brand-gallery, .brand-reviews, .brand-hero, .tr-promises li, .rv-card");
+    if (calm) return;
+    secs.forEach((s) => s.classList.add("reveal"));
+    const io = new IntersectionObserver((es) => es.forEach((e) => {
+      if (!e.isIntersecting) return;
+      io.unobserve(e.target);
+      if (e.target.matches("b")) run(e.target); else e.target.classList.add("in");
+    }), { threshold: 0.15 });
+    nums.concat(secs).forEach((el) => io.observe(el));
+  }
+
   function applyBrand() {
     const B = window.BRAND || {}; const esc = UI.esc;
     $$("[data-brand-logo]").forEach((a) => {
       a.innerHTML = B.logo ? `<img src="${esc(B.logo)}" alt="${esc(B.name || "로고")}">` : esc(B.name || "LOGO");
       a.classList.toggle("has-img", !!B.logo);
     });
-    const tg = $("#tagline"); tg.textContent = B.tagline || ""; tg.hidden = !B.tagline;
+    const tg = $("#tagline");
+    tg.innerHTML = (B.taglineEyebrow ? `<span class="tg-eyebrow">${esc(B.taglineEyebrow)}</span>` : "") +
+      esc(B.tagline || "").replace(/\[(.+?)\]/g, '<em class="gold-shine">$1</em>').replace(/\n/g, "<br>");
+    tg.hidden = !B.tagline;
     // 첫 화면 신뢰 띠
     const P = B.proof, pf = $("#heroProof");
     if (P && pf) {
@@ -111,7 +156,8 @@
         naver: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14.9 12.6 8.8 3.8H3.8v16.4h5.3v-8.8l6.1 8.8h5V3.8h-5.3v8.8Z"/></svg>',
         insta: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor"/></svg>'
       };
-      const brandBtns = [["kakao", "카카오톡 문의하기", L.kakao], ["naver", "네이버 플레이스", L.naverPlace], ["insta", "인스타그램", L.instagram]]
+      // 네이버 플레이스는 지점마다 따로(아래 지점 카드), 카카오톡·인스타그램은 하나로 같이 써요
+      const brandBtns = [["kakao", "카카오톡 문의하기", L.kakao], ["insta", "인스타그램", L.instagram]]
         .filter(([, , u]) => u)
         .map(([k, t, u]) => `<a class="sns-btn sns-${k}" href="${esc(u)}" target="_blank" rel="noopener"><span class="sns-mark">${MARK[k]}</span>${t}</a>`).join("");
       const quick = [["매장 위치 · 길찾기", "#/store"], ["휴대폰 정보", "#/search?q=" + encodeURIComponent("휴대폰")], ["구매 후기", L.reviews || "#/board"]]
@@ -123,7 +169,10 @@
         ${H.logo ? `<img class="bh-logo" src="${esc(H.logo)}" alt="${esc(B.name || "")}">` : ""}
         ${head ? `<p class="bh-head">${head}</p>` : ""}
         ${H.title ? `<h2 class="bh-title">${esc(H.title)}</h2>` : ""}
-        ${(B.branches || []).length ? `<ul class="bh-branches">${B.branches.map((b) => `<li><a href="tel:${esc(b.phone.replace(/[^0-9]/g, ""))}"><strong>${esc(b.name)}</strong> ${esc(b.phone.replace(/-/g, "."))}${b.addr ? `<small>${esc(b.addr)}</small>` : ""}</a></li>`).join("")}</ul>` : ""}
+        ${(B.branches || []).length ? `<ul class="bh-branches">${B.branches.map((b) => `<li>
+          <a class="bh-call" href="tel:${esc(b.phone.replace(/[^0-9]/g, ""))}"><strong>${esc(b.name)}</strong> ${esc(b.phone.replace(/-/g, "."))}${b.addr ? `<small>${esc(b.addr)}</small>` : ""}</a>
+          ${b.naver ? `<a class="sns-btn sns-naver bh-naver" href="${esc(b.naver)}" target="_blank" rel="noopener"><span class="sns-mark">${MARK.naver}</span>${esc(b.name)} 네이버 플레이스</a>` : ""}
+        </li>`).join("")}</ul>` : ""}
         ${B.hours ? `<p class="bh-hours">${esc(B.hours)}</p>` : ""}
         ${brandBtns ? `<div class="sns-row">${brandBtns}</div>` : ""}
         ${quick ? `<nav class="bh-links" aria-label="바로가기">${quick}</nav>` : ""}
@@ -169,11 +218,12 @@
         ${(R.links || []).length ? `<div class="rv-links"><p>네이버에서 전체 리뷰 보기</p><div>${R.links.map((l) => `<a class="nav-btn nav-naver" target="_blank" rel="noopener" href="${esc(l.url)}"><b>N</b>${esc(l.name)} 리뷰</a>`).join("")}</div></div>` : ""}`;
     }
     const mb = $("[data-rv-more]"); mb && mb.addEventListener("click", () => { $("#brandReviews").classList.add("rv-open"); mb.remove(); });
+    wow();
     const biz = B.business || {};
     const labels = [["company", "상호"], ["ceo", "대표"], ["regNo", "사업자등록번호"], ["mailOrderNo", "통신판매업"], ["address", "주소"], ["phone", "전화"], ["email", "이메일"]];
     const rows = labels.filter(([k]) => biz[k]).map(([k, l]) => `<span>${l} ${esc(biz[k])}</span>`);
     if (rows.length) { $("#bizInfo").hidden = false; $("#bizInfo").innerHTML = rows.join(""); }
-    if (B.name && B.name !== "LOGO") $$(".footer p")[0].innerHTML = `© 2026 ${esc(B.name)} · 지금은 <strong>테스트(가짜 데이터) 모드</strong>예요. 입력한 내용은 이 브라우저에만 저장돼요.`;
+    if (B.name && B.name !== "LOGO") $$(".footer p")[0].innerHTML = `© 2026 ${esc(B.name)}${B.hero && B.hero.eyebrow ? ` · ${esc(B.hero.eyebrow)}` : ""}. All rights reserved.`;
     if (B.name && B.name !== "LOGO") document.querySelector('meta[property="og:site_name"]').setAttribute("content", B.name);
   }
 
@@ -190,6 +240,11 @@
       $("#menuToggle").setAttribute("aria-expanded", String(open));
     });
     $("#shareBtn").addEventListener("click", () => UI.share());
+
+    // 꺼 둔 기능은 메뉴·아이콘에서도 숨겨요
+    if (!F.shop) { $$('#mainNav a[href="#/shop"]').forEach((a) => a.remove()); $("#cartBtn").hidden = true; }
+    if (!F.booking) $$('#mainNav a[href="#/booking"]').forEach((a) => a.remove());
+    if (!F.account) { $(".dropdown-wrap").hidden = true; $("#authSlot").hidden = true; }
 
     Views.search.init();
     Views.account.init();

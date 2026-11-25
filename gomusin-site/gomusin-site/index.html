@@ -15,10 +15,10 @@
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=1125h">
   <!-- 브랜드 색 테마 (지우면 레시피 기본 블루로 돌아가요) -->
-  <link rel="stylesheet" href="css/theme-gomusin.css">
+  <link rel="stylesheet" href="css/theme-gomusin.css?v=1125h">
 </head>
 <body>
   <a class="skip" href="#app">본문 바로가기</a>
@@ -28,7 +28,7 @@
     <a class="brand" href="#/" aria-label="홈으로" data-brand-logo>LOGO</a>
     <button class="icon-btn menu-toggle" id="menuToggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mainNav"></button>
     <nav class="nav" id="mainNav" aria-label="주 메뉴">
-      <a href="#/board">게시판</a>
+      <a href="#/notice">공지사항</a>
       <a href="#/shop">상점</a>
       <a href="#/booking">예약</a>
       <a href="#/store">매장</a>
@@ -73,7 +73,7 @@
       <!-- 브랜드 배너: js/brand.js 의 hero·branches·links -->
       <section class="brand-hero" id="brandHero" aria-label="매장 소개" hidden></section>
       <section class="results" id="results" aria-live="polite" hidden>
-        <article class="result"><a class="title">결과 제목</a><cite>example.com</cite><p>요약 두 줄...</p></article>
+
       </section>
     </div>
 
@@ -83,7 +83,7 @@
 
   <footer class="footer">
     <div class="biz" id="bizInfo" hidden></div>
-    <p>© 2026 심플 검색 · 지금은 <strong>테스트(가짜 데이터) 모드</strong>예요. 입력한 내용은 이 브라우저에만 저장돼요.</p>
+    <p>© 2026 고무신모바일 · 휴대폰성지 폰명장. All rights reserved.</p>
     <p><a href="#/contact">문의하기</a> · <a href="#/store">오시는 길</a></p>
   </footer>
 
@@ -91,24 +91,26 @@
   <div class="modal-root" id="modalRoot"></div>
 
   <!-- 설정값(공개 가능한 값만). PART 2에서 채워요 -->
-  <script src="js/config.js"></script>
+  <script src="js/config.js?v=1125h"></script>
   <!-- 로고·매장 사진·사업자 정보 (assets/brand/README.md 참고) -->
-  <script src="js/brand.js"></script>
+  <script src="js/brand.js?v=1125h"></script>
   <!-- 순서 중요: 가짜 데이터 → API → 화면 도우미 → 각 기능 → 시작 -->
-  <script src="js/mock-data.js"></script>
-  <script src="js/api.js"></script>
+  <script src="js/mock-data.js?v=1125h"></script>
+  <script src="js/api.js?v=1125h"></script>
   <!-- PART 2: 위 api.js 대신 아래 두 줄을 켜면 실제 Supabase 와 연결돼요
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-  <script src="js/api-supabase.js"></script>
+  <script src="js/api-supabase.js?v=1125h"></script>
   -->
-  <script src="js/ui.js"></script>
-  <script src="js/views/search.js"></script>
-  <script src="js/views/account.js"></script>
-  <script src="js/views/board.js"></script>
-  <script src="js/views/contact.js"></script>
-  <script src="js/views/store.js"></script>
-  <script src="js/views/shop.js"></script>
-  <script src="js/views/booking.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/ui.js?v=1125h"></script>
+  <script src="js/views/search.js?v=1125h"></script>
+  <script src="js/views/account.js?v=1125h"></script>
+  <script src="js/notices.js?v=1125h"></script>
+  <script src="js/views/notice.js?v=1125h"></script>
+  <script src="js/views/board.js?v=1125h"></script>
+  <script src="js/views/contact.js?v=1125h"></script>
+  <script src="js/views/store.js?v=1125h"></script>
+  <script src="js/views/shop.js?v=1125h"></script>
+  <script src="js/views/booking.js?v=1125h"></script>
+  <script src="js/app.js?v=1125h"></script>
 </body>
 </html>

@@ -66,7 +66,7 @@ window.Views = window.Views || {};
     r.innerHTML = `<p class="result-meta">검색결과 ${list.length}개 (${ms}초)${pages > 1 ? " · " + page + "/" + pages + "페이지" : ""}</p>` +
       slice.map((d) => `<article class="result">
         <a class="title" href="#/doc/${d.id}">${highlight(d.title, q)}</a>
-        <cite>${highlight(d.url, q)}</cite>
+        <cite>${d.url ? highlight(d.url, q) : "고무신모바일 · 휴대폰 안내"}</cite>
         <p>${highlight(d.summary, q)}</p></article>`).join("");
     r.appendChild(pagination(list.length, PAGE_SIZE, page, (p) => { go(q, p); window.scrollTo(0, 0); }));
   }
@@ -170,10 +170,10 @@ window.Views = window.Views || {};
       page.innerHTML = `<div class="page narrow">
         <a class="back" href="javascript:history.back()">${icon("left")}뒤로</a>
         <article class="card stack">
-          <cite class="muted small" style="font-style:normal">${esc(d.url)}</cite>
+          <cite class="muted small" style="font-style:normal">${esc(d.url || "고무신모바일 · 휴대폰 안내")}</cite>
           <h2>${esc(d.title)}</h2><p>${esc(d.summary)}</p>
-          <p class="muted small">이 화면은 가짜 데이터로 만든 문서 미리보기예요. 실제 서비스에서는 문서 원문 주소로 연결하거나 내 블로그 글을 보여주면 돼요.</p>
-          <div class="row"><button class="btn" data-share>${icon("share")}공유하기</button><a class="btn ghost" href="#/">새로 검색</a></div>
+          <p class="muted small">더 궁금한 점은 가까운 매장이나 카카오톡으로 편하게 물어봐 주세요.</p>
+          <div class="row">${d.link ? `<a class="btn" href="${esc(d.link)}">${esc(d.linkText || "자세히 보기")}</a>` : ""}<a class="btn ghost" href="#/store">매장 · 길찾기</a><button class="btn ghost" data-share>${icon("share")}공유하기</button><a class="btn ghost" href="#/">새로 검색</a></div>
         </article></div>`;
       page.querySelector("[data-share]").addEventListener("click", () => share({ title: d.title }));
     });

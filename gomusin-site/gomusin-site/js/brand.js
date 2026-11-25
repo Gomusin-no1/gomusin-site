@@ -9,7 +9,8 @@ window.BRAND = {
   name: "고무신모바일",
   // 금색 붓글씨 로고 (검정 배경용). 흰 배경에 쓸 땐 logo-dark.png, 흰 로고는 logo-white.png
   logo: "assets/brand/logo-gold.png",
-  tagline: "고객님들의 무한한 신뢰를 받는 매장",
+  tagline: "고객님들의 [무한한 신뢰]를\n받는 매장",   // [ ] = 금색 강조, \n = 줄바꿈
+  taglineEyebrow: "SINCE 2012 · 인천 휴대폰성지",
 
   // 홈 검색창 아래 브랜드 배너 (검정 배경 + 금색 로고)
   hero: {
@@ -38,11 +39,16 @@ window.BRAND = {
     ]
   },
 
+  // 기능 켜기/끄기 — 아직 실제 서버(Supabase)가 없어서, 손님이 오해할 수 있는 예시 기능은 꺼 두었어요.
+  //  shop: 상점·장바구니 / booking: 상담 예약 / account: 로그인·알림 / contactForm: 문의 입력 폼
+  //  (false 인 동안 "문의"는 전화·카카오톡 안내 화면으로 보여요. 서버 연결 후 true 로 바꾸면 다시 켜져요)
+  features: { shop: false, booking: false, account: false, contactForm: false },
+
   // 지점 연락처 (전화 버튼으로 바로 연결돼요)
   branches: [
-    { name: "부평본점", phone: "010-7667-0687", addr: "부평구 열우물로87번길 33" },
-    { name: "간석점", phone: "010-8500-0687", addr: "부평구 배곶남로21번길 1" },
-    { name: "숭의점", phone: "010-5965-0687", addr: "미추홀구 독배로 437" }
+    { name: "부평본점", phone: "010-7667-0687", addr: "부평구 열우물로87번길 33", naver: "https://naver.me/xMnYCBng" },
+    { name: "간석점", phone: "010-8500-0687", addr: "부평구 배곶남로21번길 1", naver: "https://naver.me/FORNRhqv" },
+    { name: "숭의점", phone: "010-5965-0687", addr: "미추홀구 독배로 437", naver: "https://naver.me/GqfUfsQr" }
   ],
   hours: "모든 지점 오전 10:00 ~ 저녁 8:00",
 
