@@ -978,3 +978,5 @@ body.no-admin .adm-link { display: none; }
 .pcw-m .red { color: #E11D48; }
 .pcw-amt { margin: 10px auto; padding: 12px 18px; display: inline-block; border-radius: 16px; background: #FFF1F2; border: 2px solid #FDA4AF; color: #E11D48; font-size: 40px; font-weight: 900; letter-spacing: -.02em; }
 .pcw-chk { margin-top: 12px; display: inline-block; padding: 3px 10px; border-radius: 8px; background: #FEF3C7; color: #92400E; font-size: 12px; font-weight: 700; }
+/* 적용된 할인 금액은 빨간색 (결합 · 복지 · 군인 · 가족 · 카드 등) */
+.row .k small.num[data-o], .row .k small[data-o] { color: #E11D48 !important; font-weight: 800; }
