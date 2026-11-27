@@ -135,6 +135,7 @@
     h += '</div>';
     h += '<div class="home-low">';
     h += '<section class="card"><div class="card-h"><h2>처음 쓰는 분은 이렇게</h2></div><ol class="howto"><li><b>휴대폰</b>을 눌러요.</li><li>고객님이 쓸 <b>통신사</b>를 눌러요.</li><li>원하는 <b>모델</b>을 눌러요.</li><li><b>색상 · 용량</b>을 고르고 아래 <b>요금제</b>를 고르면 매달 내는 돈이 바로 나와요.</li><li><b>상담 저장</b> 또는 <b>견적서 인쇄</b>로 마무리해요.</li></ol></section>';
+    if (!isApp()) h += '<section class="card inst-card"><div class="card-h"><h2>앱으로 설치</h2></div><p class="inst-p">휴대폰 · PC 바탕화면에 아이콘을 만들어 두면 앱처럼 바로 열려요. 인터넷이 잠깐 끊겨도 열려요.</p><button class="btn pri inst-btn" data-act="install">앱 설치하기</button></section>';
     h += '<section class="card"><div class="card-h"><h2>바로 가기</h2></div><div class="quick"><a class="btn" href="#/records">상담 기록</a><a class="btn" href="#/used">중고폰</a></div><div style="margin-top:14px;text-align:right"><a href="#/admin" class="adm-link" style="font-size:12px;color:#9AA3B5;text-decoration:none">사장님 메뉴</a>' + (window.GMS_ME ? ' <span style="font-size:12px;color:#9AA3B5">· ' + esc(window.GMS_ME.n) + ' · <a href="/__logout" style="color:#9AA3B5">로그아웃</a></span>' : '') + '</div></section>';
     h += '</div>';
     app.innerHTML = '<div class="wrap">' + h + '</div>';
@@ -548,6 +549,37 @@
   }
 
   /* ---------- 선택 창 ---------- */
+  /* 앱으로 설치 (안드로이드 · PC 크롬/엣지는 바로 설치, 아이폰은 사파리 안내) */
+  var instEvt = null;
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); instEvt = e; });
+  window.addEventListener('appinstalled', function () { instEvt = null; toast('설치됐어요! 바탕화면 · 홈 화면의 "고무신 상담" 아이콘으로 열어요'); $$('.inst-card').forEach(function (x) { x.style.display = 'none'; }); });
+  function isApp() { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; }
+  function devKind() {
+    var u = navigator.userAgent || '';
+    if (/iPhone|iPad|iPod/.test(u) || (/Macintosh/.test(u) && navigator.maxTouchPoints > 1)) return /CriOS|FxiOS|EdgiOS|KAKAOTALK|NAVER|Instagram/.test(u) ? 'ios-other' : 'ios';
+    if (/KAKAOTALK|NAVER\(|Instagram|FBAN|Line\//.test(u)) return 'inapp';
+    if (/Android/.test(u)) return /SamsungBrowser/.test(u) ? 'samsung' : 'android';
+    return 'pc';
+  }
+  function doInstall() {
+    if (instEvt) { var ev = instEvt; instEvt = null; ev.prompt(); ev.userChoice.then(function (c) { if (c && c.outcome !== 'accepted') instEvt = ev; }).catch(function () {}); return; }
+    var k = devKind(), link = location.origin + '/';
+    var steps = {
+      ios: ['아래쪽(아이패드는 위쪽) <b>공유 버튼</b> <span class="inst-ic">⬆︎</span> 을 눌러요.', '목록을 내려서 <b>홈 화면에 추가</b>를 눌러요.', '오른쪽 위 <b>추가</b>를 누르면 끝! 홈 화면의 <b>고무신 상담</b> 아이콘으로 열어요.'],
+      'ios-other': ['아이폰은 <b>사파리(Safari)</b>에서만 설치돼요.', '아래 <b>주소 복사</b>를 누르고 사파리를 열어 주소창에 붙여 넣어요.', '사파리에서 <b>공유 버튼</b> → <b>홈 화면에 추가</b>를 눌러요.'],
+      inapp: ['카카오톡 · 네이버 같은 앱 안에서는 설치가 안 돼요.', '오른쪽 위 <b>⋮</b> 또는 <b>공유</b>에서 <b>다른 브라우저로 열기</b>(크롬 · 사파리)를 눌러요.', '열린 화면에서 다시 <b>앱 설치하기</b>를 눌러요.'],
+      android: ['크롬 오른쪽 위 <b>⋮</b> (점 세 개)를 눌러요.', '<b>앱 설치</b> 또는 <b>홈 화면에 추가</b>를 눌러요.', '<b>설치</b>를 누르면 끝! 홈 화면의 <b>고무신 상담</b> 아이콘으로 열어요.'],
+      samsung: ['아래쪽 <b>≡</b> (메뉴)를 눌러요.', '<b>현재 페이지 추가</b> → <b>홈 화면</b>을 눌러요.', '홈 화면의 <b>고무신 상담</b> 아이콘으로 열어요.'],
+      pc: ['크롬 · 엣지 주소창 오른쪽 끝의 <b>설치 아이콘</b> <span class="inst-ic">⊕</span> 을 눌러요.', '안 보이면 오른쪽 위 <b>⋮</b> → <b>전송, 저장, 공유</b>(엣지는 <b>앱</b>) → <b>설치</b>를 눌러요.', '바탕화면 · 시작 메뉴의 <b>고무신 상담</b>으로 열어요.']
+    }[k];
+    var body = '<div class="modal-b one inst-m"><ol class="inst-ol">' + steps.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ol>' +
+      '<div class="inst-link"><span>' + esc(link) + '</span><button class="btn" data-copy>주소 복사</button></div>' +
+      '<p class="inst-sm">한 번 설치하면 매일 낮 12시 새 단가 · 정책이 앱에도 자동으로 들어가요. 하루 처음 열 때만 매장 비밀번호를 넣어요.</p>' +
+      '<div style="text-align:right;margin-top:12px"><button class="btn pri" data-close>알겠어요</button></div></div>';
+    var m = modal(k === 'pc' ? 'PC에 앱 설치' : '휴대폰에 앱 설치', body);
+    $('[data-copy]', m).onclick = function () { var done = function () { toast('주소를 복사했어요'); }; if (navigator.clipboard) navigator.clipboard.writeText(link).then(done, function () { prompt('주소', link); }); else prompt('주소', link); };
+  }
+
   function modal(title, body, opts) {
     opts = opts || {};
     closeModal();
@@ -1512,6 +1544,7 @@
       var rec = e.target.closest('tr[data-rid]'); if (rec) { loadRecord(rec.getAttribute('data-rid')); return; }
       var a = e.target.closest('[data-act]'); if (!a) return;
       var act = a.getAttribute('data-act');
+      if (act === 'install') { doInstall(); return; }
       if (act === 'pickDevice') pickDevice();
       else if (act === 'pickModel') pickModel();
       else if (act === 'pickPlan') pickPlan();
