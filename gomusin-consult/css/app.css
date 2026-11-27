@@ -1008,3 +1008,9 @@ body.no-admin .adm-link { display: none; }
 .car-grid .car:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(17, 24, 39, .14); }
 @media (max-width: 760px) { .car-grid .car .nm { font-size: 38px; min-height: 96px; } }
 .car-grid .car.c-kt .nm, .car-grid .car.c-skt .nm, .car-grid .car.c-lgu .nm, .car-grid .car.c-mvno .nm { color: #fff !important; -webkit-text-fill-color: #fff !important; }
+/* 사이트 전체 통신사 색 (사장님 기준 2026-11-27): SKT 남색 #1B2A6B · KT 검정 #000000 · LG U+ #E6007E */
+:root { --c-skt: #1B2A6B; --c-kt: #000000; --c-lgu: #E6007E; }
+.cbadge.c-skt { background: #1B2A6B !important; } .cbadge.c-kt { background: #000000 !important; } .cbadge.c-lgu { background: #E6007E !important; }
+.car-b.on.c-skt { border-color: #1B2A6B !important; color: #1B2A6B !important; box-shadow: inset 0 -6px 0 #1B2A6B !important; }
+.car-b.on.c-kt { border-color: #000000 !important; color: #000000 !important; box-shadow: inset 0 -6px 0 #000000 !important; }
+.car-b.on.c-lgu { border-color: #E6007E !important; color: #E6007E !important; box-shadow: inset 0 -6px 0 #E6007E !important; }
