@@ -422,7 +422,8 @@
 
     var wel = D.welfare || [];
     h += '<section class="card"><div class="card-h"><span class="badge b">B</span><h2>월 요금</h2></div><div class="rows">';
-    h += row('월정액', '<select class="sel" data-k="plan">' + plans.map(function (p) { return '<option value="' + p.id + '"' + (s.plan === p.id ? ' selected' : '') + '>' + esc(p.name) + ' · ' + num(p.fee) + '원</option>'; }).join('') + '</select>', '', r.plan ? '<small>' + esc(r.plan.data || '') + ' · <b class="num">' + won(r.fee) + '</b></small>' : '');
+    var pf = (DB.prefs.planFav || []), plansF = plans.filter(function (p) { return pf.indexOf(p.id) >= 0; }).concat(plans.filter(function (p) { return pf.indexOf(p.id) < 0; }));
+    h += row('월정액', '<select class="sel" data-k="plan">' + plansF.map(function (p) { return '<option value="' + p.id + '"' + (s.plan === p.id ? ' selected' : '') + '>' + (pf.indexOf(p.id) >= 0 ? '★ ' : '') + esc(p.name) + ' · ' + num(p.fee) + '원</option>'; }).join('') + '</select>', '', r.plan ? '<small>' + esc(r.plan.data || '') + ' · <b class="num">' + won(r.fee) + '</b></small>' : '');
     if (!mv && r.subMode === 'select') h += row('선택약정', '<span class="num" data-o="selectOff">' + minus(r.selectOff) + '</span>', 'minus', '<small>' + (r.subMode === 'select' ? '25% 할인' : '미적용') + '</small>');
     if (!mv) h += row('결합 할인', '<button class="sel selbtn' + (s.bundle ? ' w-s' : '') + '" data-act="pickBundle">' + (s.bundle ? esc((D.bundles.find(function (b) { return b.id === s.bundle; }) || {}).name || '선택') : '미적용') + '</button>' + (s.bundle ? numIn('bundleAmt', s.bundleAmt, true, 'w-s') : ''));
     if (!mv) h += row('복지 할인', '<select class="sel" data-k="welfare"><option value="">미적용</option>' + wel.map(function (w) { return opt(w.id, w.name, s.welfare); }).join('') + '</select>', '', s.welfare ? '<small class="num" data-o="welOff">' + minus(r.welOff) + '</small>' : '');
@@ -561,8 +562,9 @@
     var all = DB.plansOf(s.carrier), fav = DB.prefs.planFav = DB.prefs.planFav || [];
     var GC = {}; all.forEach(function (p) { GC[p.id] = planGroup(p, s.carrier); });
     var order = []; ['5G', 'LTE'].forEach(function (nt) { PSEG.forEach(function (sg) { var g = gName(nt, sg, s.carrier); if (order.indexOf(g) < 0 && all.some(function (p) { return GC[p.id] === g; })) order.push(g); }); });
-    var curP = DB.plan(s.plan), grp = curP ? planGroup(curP, s.carrier) : (order[0] || 'all'), q = '', sort = 'base', fData = '', fSub = '', open = '';
-    if (mv) grp = 'all';
+    var favHere = all.filter(function (p) { return fav.indexOf(p.id) >= 0; }).length;
+    var curP = DB.plan(s.plan), grp = favHere ? 'fav' : curP ? planGroup(curP, s.carrier) : (order[0] || 'all'), q = '', sort = 'base', fData = '', fSub = '', open = '';
+    if (mv && !favHere) grp = 'all';
     var head = '<div class="pp-top"><button class="pp-tb" data-pp="tier">' + svgI('tier') + '지급구간</button><button class="pp-tb" data-pp="cmp">' + svgI('cmp') + '요금제 비교</button><span class="pp-note">부가세 포함 · ' + (showSub ? '지원금은 ' + esc((DB.device(s.device) || {}).name || '') + ' 기준' : '단말기를 고르면 지원금이 보여요') + '</span></div>';
     var body = head + '<div class="pp"><div class="pp-l" data-g></div><div class="pp-r"><div class="pp-bar"><select class="sel pp-sort" data-sort><option value="base">기본정렬순</option><option value="hi">요금 높은순</option><option value="lo">요금 낮은순</option>' + (showSub ? '<option value="sub">지원금 많은순</option>' : '') + '</select><div class="pp-s"><input class="search" data-q placeholder="요금제 이름 검색 (예: 라이트, 시니어, 5GB)"><button class="ag-x" data-qx aria-label="지우기">×</button></div></div>' +
       '<div class="pp-f"><label>데이터 <select class="sel" data-fd><option value="">전체</option><option value="unl">무제한</option><option value="big">15GB 이상</option><option value="small">15GB 미만</option></select></label>' + (showSub ? '<label>지원금 <select class="sel" data-fs><option value="">전체</option><option value="y">공통지원금 있는 것</option></select></label>' : '') + '</div>' +
