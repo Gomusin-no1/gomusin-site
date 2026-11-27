@@ -1026,3 +1026,46 @@ body.no-admin .adm-link { display: none; }
 .inst-link{display:flex;gap:8px;align-items:center;margin-top:12px;padding:10px 12px;background:#F3F4F7;border-radius:10px;font-size:13px;word-break:break-all}
 .inst-link span{flex:1}
 .inst-sm{margin:10px 0 0;font-size:12.5px;color:#7A8396;line-height:1.5}
+
+/* ===== 최종 다듬기 (2026-11-28): 색 · 명암 · 간격 통일 =====
+   검정 = 기본 숫자, 빨강 = 할인 · 고객이 내는 최종 금액, 통신사 색 = 통신사 표시만 */
+:root { --red: #E11D48; --red-bg: #FFF1F3; }
+/* 할인(마이너스) 금액은 모두 빨강 */
+.row .v.minus, .in.minus, .li .am { color: #E11D48 !important; }
+/* 중간 합계(월 할부금 · 월 요금)는 검정, 최종(매달 내는 돈 · 월 납부)만 빨강 */
+.row.big.a .v, .hero .eq .a { color: var(--ink) !important; }
+.row.big.b .v, .hero .eq .b { color: var(--ink) !important; }
+.wired-page .row.big.b .v, .row.big.b.fin .v { color: #E11D48 !important; }
+/* 알뜰폰 회사 카드: 보라 바탕 + 흰 글씨 (글씨 안 보이던 문제) */
+.car-grid .car.c-mv { background: linear-gradient(#fff, #fff) padding-box, linear-gradient(135deg, #7C3AED, #C4B5FD 55%, #7C3AED) border-box !important; }
+.car-grid .car.c-mv .nm { background: linear-gradient(160deg, #6D28D9 0%, #8B5CF6 100%) !important; color: #fff !important; -webkit-text-fill-color: #fff !important; }
+.car-grid .car.c-mv .go { color: #6D28D9 !important; -webkit-text-fill-color: #6D28D9 !important; }
+.car-grid.mv .car { min-height: 168px !important; }
+.car-grid.mv .car .nm { flex: 0 0 auto; min-height: 84px; font-size: 24px !important; text-shadow: none; }
+.car-grid.mv .car .ds { margin-top: 12px; }
+.car-grid.mv .car .go { margin: 8px 0 14px; }
+/* 통신사 카드: 아래 빈 공간 줄이기 */
+.car-grid:not(.mv) .car { min-height: 208px !important; }
+@media (max-width: 600px) { .car-grid:not(.mv) .car { min-height: 168px !important; } .car-grid.mv .car .nm { font-size: 18px !important; min-height: 64px; } }
+/* 처음 화면 카드 안쪽 여백 */
+.inst-card .inst-p { padding: 14px var(--s-5) 0; }
+.inst-card .inst-btn { display: block; width: calc(100% - 2 * var(--s-5)); margin: 0 var(--s-5) var(--s-5); }
+.home-low .card > div[style*="text-align:right"] { padding: 0 var(--s-5) var(--s-4); }
+/* 표 머리 · 구분선 명암 정리 */
+.tbl th { color: #4B5563; background: #F7F8FA; }
+.card-h { border-bottom-color: #ECEEF2; }
+/* 인터넷 · TV 회사 버튼: 선택 시 통신사 색으로 채우기 */
+.car-b { transition: background .12s, color .12s, border-color .12s; }
+.car-b.on.c-kt { background: #000 !important; color: #fff !important; box-shadow: none !important; }
+.car-b.on.c-skt { background: #1B2A6B !important; color: #fff !important; box-shadow: none !important; }
+.car-b.on.c-lgu { background: #E6007E !important; color: #fff !important; box-shadow: none !important; }
+.car-b:not(.on):hover { border-color: #9AA3B2; color: var(--text); }
+/* 위쪽 메뉴 글자 위에 별이 겹치지 않게: 별은 오른쪽에만 은은하게 */
+.top .stars { -webkit-mask-image: linear-gradient(90deg, transparent 0, transparent 48%, #000 80%); mask-image: linear-gradient(90deg, transparent 0, transparent 48%, #000 80%); opacity: .7; }
+.nav { position: relative; z-index: 2; }
+@media (max-width: 600px) {
+  .steps { flex-wrap: nowrap !important; overflow-x: auto; scrollbar-width: none; }
+  .steps::-webkit-scrollbar { display: none; }
+  .steps li { flex: none; }
+  .car-grid.mv .car .ds { font-size: 13px; padding: 0 8px; }
+}

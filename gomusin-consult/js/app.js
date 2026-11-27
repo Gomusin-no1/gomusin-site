@@ -1219,7 +1219,7 @@
     h += row('3년 할인 합계', '<span class="num">' + minus((x.inetOff + x.mobOff) * 36) + '</span>', 'minus');
     if (W.gift) h += row('사은품', '<span class="num">' + won(W.gift) + '</span>', 'minus');
     if (W.addMobile) h += row('휴대폰 (휴대폰 상담)', '<span class="num">' + won(x.mob) + '</span>');
-    h += '<div class="row big b"><div class="k">' + (W.addMobile ? '집 전체 월 납부' : '월 납부') + '</div><div class="v"><span class="num">' + won(x.after + x.mob) + '</span></div></div>';
+    h += '<div class="row big b fin"><div class="k">' + (W.addMobile ? '집 전체 월 납부' : '월 납부') + '</div><div class="v"><span class="num">' + won(x.after + x.mob) + '</span></div></div>';
     h += '</div>' + insBox + '<div class="cnote l" style="padding:0 16px">' + esc(D.wiredNote || '') + '</div><div class="acts"><button class="btn" data-act="wcopy">문자로 복사</button><button class="btn red" data-act="wreset">지우기</button></div></section></div>';
     app.innerHTML = '<div class="wrap">' + h + '</div><div class="mbar"><div><div class="lb">결합 후 월 납부</div><div class="m num">' + num(x.after + x.mob) + '원</div></div></div>';
     renderWired.text = '[고무신모바일 인터넷 · TV 상담]\n' + w.name + ' ' + w.inet[W.speed] + (x.tv ? ' + ' + tvLabel(x.tv) + (x.stbSel ? ' (' + x.stbSel.name + ')' : '') : '') + (W.tel ? ' + 인터넷 전화' : '') + '\n설치비 ' + (W.day ? '주말 · 공휴일 ' : '평일 ') + won(x.install[W.day || 0]) + ' (한 번)' + '\n결합 전 월 ' + won(x.before) + '\n결합 후 월 ' + won(x.after) + (W.bundle ? ' (' + w.bundleName + ')' : '') + '\n3년 할인 ' + won((x.inetOff + x.mobOff) * 36) + (W.gift ? '\n사은품 ' + won(W.gift) : '') + '\n문의 ' + DB.data.mainPhone;
