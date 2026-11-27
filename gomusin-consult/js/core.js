@@ -39,6 +39,10 @@
         def.plans.forEach(function (d) { var h = have[d.id]; if (!h) self.data.plans.push(clone(d)); else if (h.name === d.name) { h.data = d.data; h.desc = d.desc; if (d.call) h.call = d.call; if (d.sms) h.sms = d.sms; if (d.seg) h.seg = d.seg; } });
         this.data.planVer = def.planVer;
       }
+      if ((this.data.discVer || 0) < (def.discVer || 0)) { ['welfare', 'bundles', 'cards', 'lightCards'].forEach(function (k) { self.data[k] = clone(def[k]); }); this.data.military = clone(def.military); this.data.dualInfo = clone(def.dualInfo); this.data.famDisc = clone(def.famDisc || {}); this.data.discVer = def.discVer; }
+      if (!this.data.dualInfo) this.data.dualInfo = clone(def.dualInfo || {});
+      if (!this.data.military) this.data.military = clone(def.military || {});
+      if (!this.data.famDisc) this.data.famDisc = clone(def.famDisc || {});
       if ((this.data.addonVer || 1) < (def.addonVer || 1)) { this.data.addons = clone(def.addons); this.data.usims = clone(def.usims); this.data.addonVer = def.addonVer; }
       if (!this.data.subsidy) this.data.subsidy = {};
       if (!Array.isArray(this.data.subsidySched)) this.data.subsidySched = [];
@@ -172,7 +176,8 @@
     var usedOff = pos(s.usedOff);
     var etc = pos(s.etc);
     var light = (D.lightCards || []).find(function (x) { return x.id === s.light; });
-    var lightOff = light ? pos(s.lightAmt) : 0;
+    var lightT = tiers(light), lightMon = light && lightT.length ? n0((lightT[Math.min(lightT.length - 1, n0(s.lightTier))] || [])[1]) : 0;
+    var lightOff = light && !lightT.length ? pos(s.lightAmt) : 0;
     var swap = (D.addons || []).find(function (x) { return x.id === s.swap; });
     var beforeCash = Math.max(0, price - common - extra - passOff - usedOff - etc - lightOff);
     var cash = s.cashMode === 'full' ? beforeCash : s.cashMode === 'part' ? Math.min(beforeCash, pos(s.cash)) : 0;
@@ -190,10 +195,14 @@
     var bundleOff = bundle ? Math.min(afterSelect, pos(s.bundleAmt)) : 0;
     var welfare = (D.welfare || []).find(function (x) { return x.id === s.welfare; });
     var welOff = welfareOff(welfare, Math.max(0, afterSelect - bundleOff));
-    var milOff = s.military ? Math.round((Math.max(0, afterSelect - bundleOff - welOff) * n0(D.militaryRate || 20)) / 100 / 10) * 10 : 0;
+    var mil = (D.military || {})[s.carrier] || {}, milRate = n0(mil.rate || D.militaryRate || 20);
+    var milOff = s.military ? Math.min(Math.max(0, afterSelect - bundleOff - welOff), Math.round((fee * milRate) / 100 / 10) * 10) : 0;
+    var famD = s.fam ? (((D.famDisc || {})[s.carrier]) || []).find(function (x) { return x.id === s.fam; }) : null;
+    var famOff = famD && fee >= n0(famD.minFee) ? Math.min(Math.max(0, afterSelect - bundleOff - welOff - milOff), pos(famD.amount)) : 0;
     var promo = pos(s.promo);
-    var dual = s.dual ? pos(((D.addons || []).find(function (a) { return a.kind === '듀얼'; }) || {}).fee || 3300) : 0;
-    var planMonthly = Math.max(0, fee - selectOff - bundleOff - welOff - milOff - promo) + dual;
+    var dInfo = (D.dualInfo || {})[s.carrier];
+    var dual = s.dual ? (dInfo && n0(dInfo.fee) ? pos(dInfo.fee) : pos(((D.addons || []).find(function (a) { return a.kind === '듀얼'; }) || {}).fee || 3300)) : 0;
+    var planMonthly = Math.max(0, fee - selectOff - bundleOff - welOff - milOff - famOff - promo) + dual;
     var card = (D.cards || []).find(function (x) { return x.id === s.card; });
     var cardT = tiers(card);
     var cardOff = card && cardT.length ? n0((cardT[Math.min(cardT.length - 1, n0(s.cardTier))] || [])[1]) : 0;
@@ -206,15 +215,16 @@
     var usimItem = s.usim ? (usims.find(function (u) { return u.id === s.usim; }) || usims[0] || null) : null;
     var usim = usimItem ? pos(usimItem.fee) : (s.usim && !usims.length ? pos(D.usimFee) : 0);
 
-    var monthly = inst.monthly + planMonthly - cardOff + addonFee;
-    var total24 = (inst.monthly * Math.min(24, months || 24)) + (planMonthly - cardOff) * 24 + cash;
+    lightMon = Math.min(lightMon, inst.monthly);
+    var monthly = inst.monthly - lightMon + planMonthly - cardOff + addonFee;
+    var total24 = ((inst.monthly - lightMon) * Math.min(24, months || 24)) + (planMonthly - cardOff) * 24 + cash;
 
     return {
       mvno: mvno, subMode: subMode, isUsed: isUsed, special: special, dev: dev, plan: plan, car: car,
-      price: price, common: common, extra: extra, passOff: passOff, usedOff: usedOff, etc: etc, lightOff: lightOff,
+      price: price, common: common, extra: extra, passOff: passOff, usedOff: usedOff, etc: etc, lightOff: lightOff, light: light, lightTiers: lightT, lightMon: lightMon, milRate: milRate,
       beforeCash: beforeCash, cash: cash, principal: principal, months: months, rate: rate,
       instMonthly: inst.monthly, instFee: inst.fee,
-      fee: fee, selectOff: selectOff, bundleOff: bundleOff, welOff: welOff, milOff: milOff, promo: promo, dual: dual,
+      fee: fee, selectOff: selectOff, bundleOff: bundleOff, welOff: welOff, milOff: milOff, famOff: famOff, famD: famD, promo: promo, dual: dual,
       planMonthly: planMonthly, cardOff: cardOff, card: card, cardTiers: cardT,
       addons: addons, swap: swap, addonFee: addonFee, usim: usim, usimItem: usimItem, usims: usims,
       monthly: monthly, total24: total24

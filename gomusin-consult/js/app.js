@@ -32,7 +32,7 @@
     return {
       mode: m, carrier: car ? car.id : '', join: m === 'mvno' ? 'new' : 'mnp', subMode: m === 'wireless' ? 'common' : 'select', view: 'consult',
       device: '', color: '', plan: plans[0] ? plans[0].id : '', extra: 0, pass: '', passAmt: 0, usedOff: 0, etc: 0,
-      light: '', lightAmt: 0, swap: '', cashMode: 'none', cash: 0, months: 24,
+      light: '', lightAmt: 0, lightTier: 0, swap: '', cashMode: 'none', cash: 0, months: 24,
       bundle: '', bundleAmt: 0, welfare: '', military: false, promo: 0, dual: false, card: '', cardTier: 0,
       addons: [], usim: true, changePlan: '', customer: '', phone: '', memo: ''
     };
@@ -202,13 +202,36 @@
     drawModels(m, cid, fav);
     $('#mq').oninput = function (e) { listQ = e.target.value; drawModels(m, cid, DB.prefs.fav || []); };
   }
+  /* 모델 검색: 이름 · 모델코드(SM- 없이, 끝 N/K/S 있어도) */
+  function modelHit(x, raw) {
+    var q = String(raw || '').toLowerCase().replace(/[\s\-_]/g, ''); if (!q) return true;
+    var hay = (x.name + x.id + (x.code || '')).toLowerCase().replace(/[\s\-_]/g, '');
+    if (hay.indexOf(q) >= 0) return true;
+    var q2 = q.replace(/^sm/, '').replace(/^([a-z]\d{3})[a-z]{1,2}$/, '$1');
+    return !!x.code && String(x.code).toLowerCase().replace(/[\s\-_]/g, '').indexOf(q2) >= 0;
+  }
+  /* 요금제 검색: 낱말마다 따로 맞춰요 · 숫자는 이름 속 숫자 또는 월정액(115 → 115,000원) */
+  function planHit(p, raw, extra) {
+    var q = String(raw || '').toLowerCase().trim(); if (!q) return true;
+    q = q.replace(/([^\d.\s])(\d)/g, '$1 $2').replace(/(\d)([^\d.\s,])/g, '$1 $2').replace(/,/g, '');
+    var hay = (p.name + ' ' + (p.data || '') + ' ' + (extra || '')).toLowerCase(), hns = hay.replace(/\s/g, '');
+    return q.split(/\s+/).filter(Boolean).every(function (t) {
+      if (/^\d+(\.\d+)?$/.test(t)) {
+        var v = parseFloat(t);
+        if (new RegExp('(^|[^0-9.])' + t.replace('.', '\\.') + '(?![0-9])').test(hay)) return true;
+        return n0(p.fee) === Math.round(v * 1000) || n0(p.fee) === v;
+      }
+      if (t === 'gb' || t === 'g') return true;
+      return hns.indexOf(t) >= 0;
+    });
+  }
   function drawModels(m, cid, fav) {
     var q = listQ.trim().toLowerCase().replace(/\s/g, '');
     var list = modelsFor(m, cid).filter(function (x) {
       var mk = x.special ? '유심만' : x.maker;
       if (listMaker === '즐겨찾기' && fav.indexOf(x.id) < 0) return false;
       if (listMaker !== '전체' && listMaker !== '즐겨찾기' && mk !== listMaker) return false;
-      return !q || (x.name + x.id).toLowerCase().replace(/\s/g, '').indexOf(q) >= 0;
+      return modelHit(x, q);
     });
     if (m === 'mvno') list.sort(function (a, b) { return (b.special ? 1 : 0) - (a.special ? 1 : 0); });
     var root = ROOT[m];
@@ -323,7 +346,7 @@
       var models = modelsFor(m, cid).filter(function (x) {
         var k = x.special ? '유심만' : (x.maker === '삼성' || x.maker === '애플') ? x.maker : '기타';
         if (!qq) { if (tab === '즐겨찾기') { if (fav.indexOf(x.id) < 0) return false; } else if (k !== tab) return false; }
-        return !qq || (x.name + x.id + (x.code || '')).toLowerCase().replace(/[\s\-_]/g, '').indexOf(qq) >= 0;
+        return modelHit(x, qq);
       });
       var rows = [];
       models.forEach(function (x, mi) { DB.skus(x.id).forEach(function (d, di) { rows.push({ m: x, d: d, o: mi * 10 + di, sub: mv || x.special ? 0 : DB.subsidy(d.id, cid, s.plan) }); }); });
@@ -409,7 +432,8 @@
     if (!used && !mv) h += row('프리미엄패스', '<select class="sel' + (s.pass ? ' w-s' : '') + '" data-k="pass"><option value="">미적용</option>' + passes.map(function (p) { return opt(p.id, p.name, s.pass); }).join('') + '</select>' + (s.pass ? numIn('passAmt', s.passAmt, true, 'w-s') : ''), '', '<small>24개월 약정</small>', true, !!s.pass);
     h += row('중고폰 할인', numIn('usedOff', s.usedOff, true), '', '<small>쓰던 폰 반납</small>', true, s.usedOff > 0);
     h += row(used ? '매장 할인' : '기타지원', numIn('etc', s.etc, true), '', '', true, s.etc > 0);
-    if (!used && !mv) h += row('라이트할부카드', '<select class="sel' + (s.light ? ' w-s' : '') + '" data-k="light"><option value="">미적용</option>' + lights.map(function (p) { return opt(p.id, p.name, s.light); }).join('') + '</select>' + (s.light ? numIn('lightAmt', s.lightAmt, true, 'w-s') : ''), '', '<small>카드 연계 할부</small>', true, !!s.light);
+    if (!used && !mv) h += row('라이트할부카드', '<button class="sel selbtn' + (s.light ? ' w-s' : '') + '" data-act="pickLight">' + (r.light ? '[' + esc(r.light.issuer || '') + '] ' + esc(r.light.name) : '미적용') + '</button>' + (r.light && !r.lightTiers.length ? numIn('lightAmt', s.lightAmt, true, 'w-s') : ''), '', r.lightMon ? '<small class="num">월 ' + minus(r.lightMon) + '</small>' : '<small>카드로 할부 결제</small>', true, !!s.light);
+    if (!used && !mv && r.light && r.lightTiers.length) h += row('카드 전월 실적', '<select class="sel" data-k="lightTier">' + r.lightTiers.map(function (t, i) { return opt(i, num(t[0] / 10000) + '만원 이상 → 월 -' + num(t[1]), String(s.lightTier || 0)); }).join('') + '</select>', '', '', true, true);
     if (!mv) h += row('폰교체 프로그램', '<select class="sel" data-k="swap"><option value="">미적용</option>' + swaps.map(function (p) { return opt(p.id, p.name + ' (월 ' + num(p.fee) + '원)', s.swap); }).join('') + '</select>', '', '', true, !!s.swap);
     h += row('수납금', '<div class="seg sm">' + [['none', '미적용'], ['full', '완납'], ['part', '부분']].map(function (c) { return '<button data-set="cashMode" data-v="' + c[0] + '" class="' + (s.cashMode === c[0] ? 'on' : '') + '">' + c[1] + '</button>'; }).join('') + '</div>', '', '<small>현금으로 낸 돈</small>');
     if (s.cashMode === 'part') h += row('부분 납부 금액', numIn('cash', s.cash, true));
@@ -417,7 +441,7 @@
     h += row('할부 개월', '<select class="sel" data-k="months">' + MONTHS.map(function (m) { return opt(m[0], m[1], String(s.months)); }).join('') + '</select>');
     h += '<div class="row sum"><div class="k">할부원금</div><div class="v"><span class="num" data-o="principal">' + won(r.principal) + '</span></div></div>';
     h += row('할부수수료', '<span class="num" data-o="instFee">' + won(r.instFee) + '</span>', '', '<small>연 ' + r.rate + '%</small>');
-    h += '<div class="row big a"><div class="k">월 할부금</div><div class="v"><span class="num" data-o="instMonthly">' + won(r.instMonthly) + '</span></div></div>';
+    h += '<div class="row big a"><div class="k">월 할부금</div><div class="v"><span class="num" data-o="instMonthly">' + won(r.instMonthly - (r.lightMon || 0)) + '</span>' + (r.lightMon ? '<small style="display:block;font-size:12px;color:var(--sub)">라이트할부 월 ' + minus(r.lightMon) + ' 반영</small>' : '') + '</div></div>';
     h += '</div><button class="more-btn" data-act="more">' + (DB.prefs.more ? '간단히 보기 ▲' : '할인 항목 더 보기 ▼') + '</button></section>';
 
     var wel = D.welfare || [];
@@ -426,12 +450,13 @@
     h += row('월정액', '<select class="sel" data-k="plan">' + plansF.map(function (p) { return '<option value="' + p.id + '"' + (s.plan === p.id ? ' selected' : '') + '>' + (pf.indexOf(p.id) >= 0 ? '★ ' : '') + esc(p.name) + ' · ' + num(p.fee) + '원</option>'; }).join('') + '</select>', '', r.plan ? '<small>' + esc(r.plan.data || '') + ' · <b class="num">' + won(r.fee) + '</b></small>' : '');
     if (!mv && r.subMode === 'select') h += row('선택약정', '<span class="num" data-o="selectOff">' + minus(r.selectOff) + '</span>', 'minus', '<small>' + (r.subMode === 'select' ? '25% 할인' : '미적용') + '</small>');
     if (!mv) h += row('결합 할인', '<button class="sel selbtn' + (s.bundle ? ' w-s' : '') + '" data-act="pickBundle">' + (s.bundle ? esc((D.bundles.find(function (b) { return b.id === s.bundle; }) || {}).name || '선택') : '미적용') + '</button>' + (s.bundle ? numIn('bundleAmt', s.bundleAmt, true, 'w-s') : ''));
-    if (!mv) h += row('복지 할인', '<select class="sel" data-k="welfare"><option value="">미적용</option>' + wel.map(function (w) { return opt(w.id, w.name, s.welfare); }).join('') + '</select>', '', s.welfare ? '<small class="num" data-o="welOff">' + minus(r.welOff) + '</small>' : '');
+    if (!mv) h += row('복지 할인', '<button class="sel selbtn' + (s.welfare ? ' w-s' : '') + '" data-act="pickWelfare">' + (s.welfare ? esc((wel.find(function (w) { return w.id === s.welfare; }) || {}).name || '선택') : '미적용') + '</button>', '', s.welfare ? '<small class="num" data-o="welOff">' + minus(r.welOff) + '</small>' : '');
     if (!mv) h += row('청구할인카드', '<button class="sel selbtn" data-act="pickCard">' + (r.card ? '[' + esc(r.card.issuer) + '] ' + esc(r.card.name) : '미적용') + '</button>');
     if (!mv && r.card) h += row('카드 전월 실적', '<select class="sel" data-k="cardTier">' + r.cardTiers.map(function (t, i) { return opt(i, num(t[0] / 10000) + '만원 이상 → 월 -' + num(t[1]), String(s.cardTier)); }).join('') + '</select>');
-    if (!mv) h += row('군인 할인', '<label class="chk"><input type="checkbox" data-k="military"' + (s.military ? ' checked' : '') + '>적용 (' + (D.militaryRate || 20) + '%)</label><span class="num" data-o="milOff" style="color:var(--blue)">' + minus(r.milOff) + '</span>', '', '', true, s.military);
+    if (!mv) h += row('군인 할인제도', '<button class="sel selbtn' + (s.military ? ' w-s' : '') + '" data-act="pickMilitary">' + (s.military ? '적용 (월정액 ' + r.milRate + '%)' : '미적용') + '</button>', '', s.military ? '<small class="num" data-o="milOff">' + minus(r.milOff) + '</small>' : '', true, s.military);
+    if (!mv && ((D.famDisc || {})[s.carrier] || []).length) h += row('가족 할인', '<button class="sel selbtn' + (s.fam ? ' w-s' : '') + '" data-act="pickFam">' + (r.famD ? esc(r.famD.name) : '미적용') + '</button>', '', s.fam ? '<small class="num" data-o="famOff">' + minus(r.famOff) + '</small>' : '', true, !!s.fam);
+    if (!mv) { var dI = (D.dualInfo || {})[s.carrier] || { name: '듀얼번호' }; h += row(esc(dI.name || '듀얼번호'), '<button class="sel selbtn' + (s.dual ? ' w-s' : '') + '" data-act="pickDual">' + (s.dual ? '적용 (월 ' + num(r.dual) + '원)' : '미적용') + '</button>', '', s.dual ? '<small class="num" data-o="dual">+' + num(r.dual) + '원</small>' : '<small>번호 하나 더</small>', true, s.dual); }
     h += row('프로모션', numIn('promo', s.promo, true), '', '<small>월 할인</small>', true, s.promo > 0);
-    h += row('듀얼번호', '<label class="chk"><input type="checkbox" data-k="dual"' + (s.dual ? ' checked' : '') + '>사용</label><span class="num" data-o="dual">' + (r.dual ? '+' + num(r.dual) + '원' : '0원') + '</span>', '', '', true, s.dual);
     h += '<div class="row big b"><div class="k">월 요금</div><div class="v"><span class="num" data-o="planNet">' + won(r.planMonthly - r.cardOff) + '</span></div></div>';
     h += '</div><button class="more-btn" data-act="more">' + (DB.prefs.more ? '간단히 보기 ▲' : '할인 항목 더 보기 ▼') + '</button></section>';
 
@@ -496,7 +521,7 @@
     var s = st(), r = G.calc(s);
     var out = {
       price: won(r.price), common: minus(r.common), cash: minus(r.cash), principal: won(r.principal), instFee: won(r.instFee), instMonthly: won(r.instMonthly),
-      selectOff: minus(r.selectOff), welOff: minus(r.welOff), milOff: minus(r.milOff), dual: r.dual ? '+' + num(r.dual) + '원' : '0원',
+      selectOff: minus(r.selectOff), welOff: minus(r.welOff), milOff: minus(r.milOff), famOff: minus(r.famOff || 0), dual: r.dual ? '+' + num(r.dual) + '원' : '0원',
       planNet: won(r.planMonthly - r.cardOff), monthly: num(r.monthly), monthly2: num(r.monthly) + '원',
       eqA: num(r.instMonthly), eqB: num(r.planMonthly - r.cardOff), eqC: num(r.addonFee)
     };
@@ -578,9 +603,9 @@
       $('[data-g]', m).innerHTML = gs.map(function (x) { var c = all.filter(function (p) { return inG(p, x[0]); }).length; return '<button data-grp="' + esc(x[0]) + '" class="' + (grp === x[0] ? 'on' : '') + '">' + esc(x[1]) + '<small>' + c + '</small></button>'; }).join('');
     }
     function drawL() {
-      var nq = q.toLowerCase().replace(/\s/g, '');
+      var nq = q.trim();
       var rows = all.filter(function (p) {
-        if (nq) { if ((p.name + p.data + GC[p.id]).toLowerCase().replace(/\s/g, '').indexOf(nq) < 0) return false; } else if (!inG(p, grp)) return false;
+        if (nq) { if (!planHit(p, nq, GC[p.id])) return false; } else if (!inG(p, grp)) return false;
         var g = gb(p);
         if (fData === 'unl' && g < 999) return false; if (fData === 'big' && g < 15) return false; if (fData === 'small' && g >= 15) return false;
         if (fSub && !DB.subsidy(s.device, s.carrier, p.id)) return false;
@@ -646,6 +671,122 @@
       '<div class="modal-f"><button class="btn" data-id="">미적용</button></div>';
     var m = modal(title, '<div style="overflow:auto">' + body + '</div>', { size: 'sm' });
     $$('[data-id]', m).forEach(function (b) { b.onclick = function () { onPick(b.getAttribute('data-id')); closeModal(); render(); }; });
+  }
+  /* ---------- 할인 선택 창 (카드 · 결합 · 복지 · 군인) ---------- */
+  var CARD_SORT = [['base', '기본정렬순'], ['fav', '즐겨찾기순'], ['hi', '할인액높은순'], ['promo', '프로모션순'], ['name', '이름순']];
+  function cardArt(c) {
+    var col = c.color || '#3D3F45', lt = /^#(F|E|D[0-9A-F])/i.test(col);
+    return '<span class="dc-art" style="background:linear-gradient(135deg,' + col + ' 0%,' + col + 'cc 60%,' + col + '99 100%);color:' + (lt ? '#333' : '#fff') + '"><i></i><em>' + esc(c.issuer || '') + '</em></span>';
+  }
+  function pickCardKind(kind) {
+    var s = st(), light = kind === 'light', list = (light ? DB.data.lightCards : DB.data.cards).filter(function (c) { return c.carrier === s.carrier; });
+    var favKey = light ? 'lightFav' : 'cardFav', fav = DB.prefs[favKey] = DB.prefs[favKey] || [], sort = 'base';
+    var md = DB.model((DB.device(s.device) || {}).model) || {};
+    var info = light ? '<div class="dc-info"><b>※ 라이트할부란?</b> 휴대폰 할부금 일부를 카드할부로 결제하고, 카드 사용 실적에 따라 카드사에서 휴대폰 할부를 할인받는 서비스예요.</div>' : '<div class="dc-info"><b>※ 청구할인카드</b> 통신요금을 제휴카드로 자동이체하면 전월 카드 실적에 따라 매달 요금을 할인받아요.</div>';
+    var body = info + '<div class="dc-sort">' + CARD_SORT.map(function (x) { return '<button data-cs="' + x[0] + '" class="' + (x[0] === sort ? 'on' : '') + '">' + x[1] + '</button>'; }).join('') + '</div><div class="dc-list" data-l></div>' +
+      '<div class="modal-f"><button class="btn lg" data-none>미적용</button></div>';
+    var m = modal(light ? '라이트할부 카드 선택' : '청구할인 카드 선택', body);
+    m.querySelector('.modal').classList.add('dc-modal');
+    function maxOff(c) { return Math.max.apply(null, G.tiers(c).map(function (t) { return t[1]; }).concat([0])); }
+    function draw() {
+      var rows = list.map(function (c, i) { return [c, i]; });
+      rows.sort(function (a, b) {
+        if (sort === 'fav') return (fav.indexOf(b[0].id) >= 0) - (fav.indexOf(a[0].id) >= 0) || a[1] - b[1];
+        if (sort === 'hi') return maxOff(b[0]) - maxOff(a[0]) || a[1] - b[1];
+        if (sort === 'promo') return (!!b[0].promo) - (!!a[0].promo) || a[1] - b[1];
+        if (sort === 'name') return a[0].name.localeCompare(b[0].name, 'ko');
+        return (fav.indexOf(b[0].id) >= 0) - (fav.indexOf(a[0].id) >= 0) || a[1] - b[1];
+      });
+      var cur = light ? s.light : s.card;
+      $('[data-l]', m).innerHTML = rows.map(function (x) {
+        var c = x[0], on = fav.indexOf(c.id) >= 0, bad = c.maker && md.maker && c.maker !== md.maker;
+        var tl = G.tiers(c).map(function (t) { return '<div><span>전월실적 ' + num(t[0]) + '원 이상</span> <b class="num">' + num(t[1]) + '원</b> 할인</div>'; }).join('');
+        var pr = String(c.promo || '').split(',').filter(Boolean).map(function (p) { return '<span>' + esc(p) + '</span>'; }).join('');
+        return '<div class="dc-row' + (cur === c.id ? ' on' : '') + (bad ? ' off' : '') + '" data-pick="' + c.id + '"><button class="ao-star' + (on ? ' on' : '') + '" data-cfav="' + c.id + '">' + (on ? '★' : '☆') + '</button>' +
+          '<span class="dc-iss">' + esc(c.issuer || '') + '</span>' + cardArt(c) +
+          '<div class="dc-nm">' + (c.note ? '<small>* ' + esc(c.note) + (bad ? ' · 이 폰은 안 돼요' : '') + '</small>' : '') + '<b>' + esc(c.name) + '</b>' + (cur === c.id ? '<span class="ao-b fit">지금 선택</span>' : '') + '</div>' +
+          '<div class="dc-tiers">' + tl + '</div><div class="dc-pr">' + pr + '</div></div>';
+      }).join('') || '<div class="empty-note">이 통신사 카드가 아직 없어요. [관리]에서 넣을 수 있어요.</div>';
+    }
+    m.addEventListener('click', function (e) {
+      var t = e.target, f = t.closest('[data-cfav]');
+      if (f) { e.stopPropagation(); var id = f.getAttribute('data-cfav'), k = fav.indexOf(id); if (k >= 0) fav.splice(k, 1); else fav.push(id); DB.savePrefs(); draw(); return; }
+      var so = t.closest('[data-cs]'); if (so) { sort = so.getAttribute('data-cs'); $$('[data-cs]', m).forEach(function (b) { b.classList.toggle('on', b === so); }); draw(); return; }
+      if (t.closest('[data-none]')) { if (light) { s.light = ''; s.lightAmt = 0; s.lightTier = 0; } else { s.card = ''; s.cardTier = 0; } closeModal(); render(); return; }
+      var r = t.closest('[data-pick]'); if (r) { var id2 = r.getAttribute('data-pick'); if (light) { s.light = id2; s.lightTier = 0; s.lightAmt = 0; } else { s.card = id2; s.cardTier = 0; } closeModal(); render(); }
+    });
+    draw();
+  }
+  function pickBundleBig() {
+    var s = st(), list = DB.data.bundles.filter(function (b) { return b.carrier === s.carrier; });
+    var body = '<div class="dg-list">' + list.map(function (b) {
+      var tg = String(b.tags || '').split(/[,+]/).map(function (x) { return x.trim(); }).filter(Boolean);
+      return '<div class="dg-row' + (s.bundle === b.id ? ' on' : '') + (b.note ? ' old' : '') + '" data-pick="' + b.id + '"><div class="dg-k">' + esc(b.name) + '</div><div class="dg-v">' + (b.note ? '<div class="dg-note">* ' + esc(b.note) + '</div>' : '') +
+        String(b.desc || '').split('\n').map(function (l) { return '<div' + (/^※/.test(l) ? ' class="sm"' : '') + '>' + (/^※/.test(l) ? '' : '▶ ') + esc(l) + '</div>'; }).join('') + (n0(b.value) ? '<div class="dg-amt">처음 넣는 월 할인 ' + num(b.value) + '원 (상담 화면에서 고칠 수 있어요)</div>' : '') + '</div>' +
+        '<div class="dg-tag">' + tg.map(function (x) { return '<span class="' + (x === '무무선' ? 'mm' : 'ym') + '">' + esc(x) + '</span>'; }).join('') + '</div></div>';
+    }).join('') + '</div><div class="modal-f"><button class="btn lg" data-none>미적용</button></div>';
+    var m = modal('결합 선택', body); m.querySelector('.modal').classList.add('dg-modal');
+    m.addEventListener('click', function (e) {
+      if (e.target.closest('[data-none]')) { s.bundle = ''; s.bundleAmt = 0; closeModal(); render(); return; }
+      var r = e.target.closest('[data-pick]'); if (r) { var b = DB.data.bundles.find(function (x) { return x.id === r.getAttribute('data-pick'); }); s.bundle = b.id; s.bundleAmt = n0(b.value); closeModal(); render(); }
+    });
+  }
+  function pickWelfare() {
+    var s = st(), list = DB.data.welfare || [];
+    var body = '<div class="dg-list">' + list.map(function (w) {
+      return '<div class="dg-row' + (s.welfare === w.id ? ' on' : '') + '" data-pick="' + w.id + '"><div class="dg-k">' + esc(w.name) + '</div><div class="dg-v"><div class="dg-head">' + esc(w.head || w.desc || '') + '</div>' +
+        String(w.head ? w.desc || '' : '').split('\n').filter(Boolean).map(function (l) { return '<div>' + esc(l) + '</div>'; }).join('') + '</div></div>';
+    }).join('') + '</div><div class="modal-f"><button class="btn lg" data-none>미적용</button></div>';
+    var m = modal('복지할인 선택', body); m.querySelector('.modal').classList.add('dg-modal');
+    m.addEventListener('click', function (e) {
+      if (e.target.closest('[data-none]')) { s.welfare = ''; closeModal(); render(); return; }
+      var r = e.target.closest('[data-pick]'); if (r) { s.welfare = r.getAttribute('data-pick'); closeModal(); render(); }
+    });
+  }
+  function pickDual() {
+    var s = st(), dI = (DB.data.dualInfo || {})[s.carrier] || {}, r = G.calc(s, { dual: true });
+    var lines = function (t) { return String(t || '').split('\n').filter(Boolean).map(function (l) { var m = /^([^:]{1,8}) : (.*)$/.exec(l); return '<div class="ml-t">- ' + (m ? '<b>' + esc(m[1]) + '</b> : ' + esc(m[2]) : esc(l)) + '</div>'; }).join(''); };
+    var body = '<div class="ml-box"><div class="ml-l"><b style="color:#E11D48">* ' + esc(dI.name || '듀얼번호') + '란?</b> <span>' + esc(dI.intro || '') + '</span></div>' + (dI.info ? '<div class="ml-l" style="margin-top:12px"><b>■ 서비스 정보 ■</b></div>' + lines(dI.info) : '') + '</div>' +
+      (dI.caution ? '<div class="ml-box"><div class="ml-c">※ 유의사항</div>' + lines(dI.caution) + '</div>' : '') +
+      '<div class="ml-amt"><span>월 청구 요금</span><b class="num">' + num(r.dual) + '원</b></div>' +
+      '<div class="modal-f two"><button class="btn lg" data-none>미적용</button><button class="btn pri lg" data-yes>적용</button></div>';
+    var m = modal(esc(dI.name || '듀얼번호'), body); m.querySelector('.modal').classList.add('ml-modal');
+    m.addEventListener('click', function (e) {
+      if (e.target.closest('[data-none]')) { s.dual = false; closeModal(); render(); return; }
+      if (e.target.closest('[data-yes]')) { s.dual = true; closeModal(); render(); }
+    });
+  }
+  function pickFam() {
+    var s = st(), list = (DB.data.famDisc || {})[s.carrier] || [], cur = s.fam || (list[0] || {}).id;
+    function draw() {
+      var f = list.find(function (x) { return x.id === cur; }) || list[0] || {}, r = G.calc(s, { fam: f.id });
+      var ln = function (k, v) { return v ? '<div class="ml-l"><b>* ' + k + ' :</b> <span>' + esc(v).replace(/\n/g, '<br>') + '</span></div>' : ''; };
+      return (list.length > 1 ? '<div class="seg" style="margin-bottom:10px">' + list.map(function (x) { return '<button data-fid="' + x.id + '" class="' + (x.id === f.id ? 'on' : '') + '">' + esc(x.name) + '</button>'; }).join('') + '</div>' : '') +
+        '<div class="ml-box">' + ln('가입 기간', f.period) + ln('가입 대상', f.target) + ln('가입 조건', f.cond) + ln('제공 혜택', f.benefit) + '</div>' +
+        (f.opt ? '<div class="ml-box"><label class="chk"><input type="radio" checked> ' + esc(f.opt) + '</label>' + (r.fee < n0(f.minFee) ? '<div class="ml-t" style="color:#E11D48">지금 요금제(' + num(r.fee) + '원)는 조건에 안 맞아요</div>' : '') + '</div>' : '') +
+        (f.caution ? '<div class="ml-c" style="text-align:right;font-size:12px;line-height:1.5">※ ' + esc(f.caution) + '</div>' : '') +
+        '<div class="ml-amt"><span>월 요금 할인</span><b class="num">' + num(r.famOff) + '원</b></div>' +
+        '<div class="modal-f two"><button class="btn lg" data-none>미적용</button><button class="btn pri lg" data-yes>적용</button></div>';
+    }
+    var m = modal(esc(list.length === 1 ? list[0].name : '가족 할인'), '<div data-fb>' + draw() + '</div>'); m.querySelector('.modal').classList.add('ml-modal');
+    m.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-fid]'); if (b) { cur = b.getAttribute('data-fid'); m.querySelector('[data-fb]').innerHTML = draw(); return; }
+      if (e.target.closest('[data-none]')) { s.fam = ''; closeModal(); render(); return; }
+      if (e.target.closest('[data-yes]')) { s.fam = cur; closeModal(); render(); }
+    });
+  }
+  function pickMilitary() {
+    var s = st(), mi = (DB.data.military || {})[s.carrier] || {}, r = G.calc(s, { military: true });
+    var ln = function (k, v) { return v ? '<div class="ml-l"><b>* ' + k + ' :</b> <span>' + esc(v).replace(/\n/g, '<br>') + '</span></div>' : ''; };
+    var body = '<div class="ml-box">' + ln('가입 대상', mi.target) + ln('대상 요금제', mi.plans) + ln('제공 혜택', mi.benefit) + '</div>' +
+      '<div class="ml-box">' + (mi.caution ? '<div class="ml-c">※ 주의사항</div>' + String(mi.caution).split('\n').map(function (l) { return '<div class="ml-t">- ' + esc(l) + '</div>'; }).join('') : '') + (mi.docs ? '<div class="ml-l" style="margin-top:12px"><b>* 제출 필요 서류</b></div>' + String(mi.docs).split('\n').map(function (l) { return '<div class="ml-t">- ' + esc(l) + '</div>'; }).join('') : '') + '</div>' +
+      '<div class="ml-amt"><span>월 요금 할인</span><b class="num">' + num(r.milOff) + '원</b></div>' +
+      '<div class="modal-f two"><button class="btn lg" data-none>미적용</button><button class="btn pri lg" data-yes>적용</button></div>';
+    var m = modal(esc(mi.title || '군인 할인제도'), body); m.querySelector('.modal').classList.add('ml-modal');
+    m.addEventListener('click', function (e) {
+      if (e.target.closest('[data-none]')) { s.military = false; closeModal(); render(); return; }
+      if (e.target.closest('[data-yes]')) { s.military = true; closeModal(); render(); }
+    });
   }
   function pickBundle() {
     var s = st();
@@ -807,10 +948,10 @@
       '[A 단말기] ' + (s.mode === 'used' ? '판매가 ' : '출고가 ') + won(r.price)];
     [['공통지원금', r.common], ['추가지원금', r.extra], ['프리미엄패스', r.passOff], ['중고폰 할인', r.usedOff], ['기타지원', r.etc], ['라이트할부카드', r.lightOff], ['수납금', r.cash]].forEach(function (x) { if (x[1]) L.push(' - ' + x[0] + ' ' + minus(x[1])); });
     L.push(' 할부원금 ' + won(r.principal) + (r.months ? ' / ' + r.months + '개월' : ' / 일시불'));
-    L.push(' 월 할부금 ' + won(r.instMonthly), '');
+    L.push(' 월 할부금 ' + won(r.instMonthly) + (r.lightMon ? ' (라이트할부 월 ' + minus(r.lightMon) + ' → ' + won(r.instMonthly - r.lightMon) + ')' : ''), '');
     L.push('[B 요금] 월정액 ' + won(r.fee));
-    [['선택약정', r.selectOff], ['결합 할인', r.bundleOff], ['복지 할인', r.welOff], ['청구할인카드', r.cardOff], ['군인 할인', r.milOff], ['프로모션', r.promo]].forEach(function (x) { if (x[1]) L.push(' - ' + x[0] + ' ' + minus(x[1])); });
-    if (r.dual) L.push(' + 듀얼번호 ' + won(r.dual));
+    [['선택약정', r.selectOff], ['결합 할인', r.bundleOff], ['복지 할인', r.welOff], ['청구할인카드', r.cardOff], ['군인 할인', r.milOff], [r.famD ? r.famD.name : '가족 할인', r.famOff], ['프로모션', r.promo]].forEach(function (x) { if (x[1]) L.push(' - ' + x[0] + ' ' + minus(x[1])); });
+    if (r.dual) L.push(' + ' + (((DB.data.dualInfo || {})[s.carrier] || {}).name || '듀얼번호') + ' ' + won(r.dual));
     L.push(' 월 요금 ' + won(r.planMonthly - r.cardOff));
     if (r.addonFee) { L.push('', '[C 보험 · 부가] 월 ' + won(r.addonFee)); r.addons.forEach(function (a) { L.push(' - ' + a.name + ' ' + won(a.fee) + (n0(a.months) ? ' (' + n0(a.months) + '개월 유지)' : '')); }); }
     L.push('', '▶ 매달 내는 돈(예상): ' + won(r.monthly));
@@ -852,10 +993,10 @@
     var tr = function (k, v) { return '<tr><th>' + k + '</th><td class="r">' + v + '</td></tr>'; };
     var a = tr(s.mode === 'used' ? '판매가' : '출고가', won(r.price));
     [['공통지원금', r.common], ['추가지원금', r.extra], ['프리미엄패스', r.passOff], ['중고폰 할인', r.usedOff], ['기타지원', r.etc], ['라이트할부카드', r.lightOff], ['수납금', r.cash]].forEach(function (x) { if (x[1]) a += tr(x[0], minus(x[1])); });
-    a += tr('할부원금', won(r.principal)) + tr('할부 개월', r.months ? r.months + '개월 (연 ' + r.rate + '%)' : '일시불') + tr('월 할부금', won(r.instMonthly));
+    a += tr('할부원금', won(r.principal)) + tr('할부 개월', r.months ? r.months + '개월 (연 ' + r.rate + '%)' : '일시불') + tr('월 할부금', won(r.instMonthly)) + (r.lightMon ? tr('라이트할부 월 할인', minus(r.lightMon)) : '');
     var b = tr('요금제', r.plan ? esc(r.plan.name) : '-') + tr('월정액', won(r.fee));
-    [['선택약정', r.selectOff], ['결합 할인', r.bundleOff], ['복지 할인', r.welOff], ['청구할인카드', r.cardOff], ['군인 할인', r.milOff], ['프로모션', r.promo]].forEach(function (x) { if (x[1]) b += tr(x[0], minus(x[1])); });
-    if (r.dual) b += tr('듀얼번호', '+' + won(r.dual));
+    [['선택약정', r.selectOff], ['결합 할인', r.bundleOff], ['복지 할인', r.welOff], ['청구할인카드', r.cardOff], ['군인 할인', r.milOff], [r.famD ? r.famD.name : '가족 할인', r.famOff], ['프로모션', r.promo]].forEach(function (x) { if (x[1]) b += tr(x[0], minus(x[1])); });
+    if (r.dual) b += tr(esc(((DB.data.dualInfo || {})[s.carrier] || {}).name || '듀얼번호'), '+' + won(r.dual));
     b += tr('월 요금', won(r.planMonthly - r.cardOff));
     $('#print').innerHTML = '<h1>' + today() + ' 고무신모바일 구매 안내서</h1><div class="meta">고무신모바일 ' + esc(st0.name) + ' · ' + esc(st0.phone) + ' · ' + G.nowStr() + (s.customer ? ' · 고객 ' + esc(s.customer) : '') + (DB.prefs.staff ? ' · 상담 ' + esc(DB.prefs.staff) : '') + '</div>' +
       '<table>' + tr('통신사 / 가입 유형', esc(r.car.name || '') + ' / ' + (JOIN.find(function (j) { return j[0] === s.join; }) || [0, ''])[1]) + tr(s.mode === 'used' ? '중고폰' : '단말기', r.dev ? esc(r.dev.name) + (s.color && s.mode !== 'used' ? ' · ' + esc(s.color) : '') : '-') + '</table>' +
@@ -972,9 +1113,9 @@
     devices: { title: '용량 · 출고가', help: '<b>출고가</b>를 바꾸면 상담 화면에 바로 반영돼요. 새 용량을 추가할 때는 <b>모델</b>을 꼭 골라요.', fields: [['model', '모델', 'model', 190], ['name', '표시 이름', 'text', 240], ['cap', '용량', 'text', 80], ['price', '출고가', 'num', 120]] },
     plans: { title: '요금제', help: '<b>구간</b>은 공통지원금 단계예요. 1구간 85,000원↑ · 2구간 68,000원↑ · 3구간 55,000원↑ · 4구간 47,000원↑ · 5구간 그 아래.', fields: [['carrier', '통신사', 'carrier', 120], ['name', '요금제 이름', 'text', 220], ['fee', '월정액', 'num', 100], ['data', '데이터', 'text', 150], ['tier', '구간', 'sel:1,2,3,4,5', 70], ['desc', '혜택 설명', 'text', 280]] },
     usedStock: { title: '중고폰 재고', help: '판매할 중고폰을 등록해요. <b>등급</b>은 S(새것 같음) · A · B · C 순서예요.', fields: [['name', '모델명', 'text', 220], ['grade', '등급', 'sel:S,A,B,C', 70], ['battery', '배터리 %', 'num', 90], ['color', '색상', 'text', 90], ['store', '보유 매장', 'store', 110], ['price', '판매가', 'num', 110], ['memo', '메모', 'text', 200]] },
-    bundles: { title: '결합 할인', help: '<b>월 할인</b>은 상담할 때 처음 들어가는 값이에요. 상담 화면에서 고칠 수 있어요.', fields: [['carrier', '통신사', 'carrierM', 110], ['name', '이름', 'text', 180], ['tags', '종류', 'text', 120], ['value', '월 할인', 'num', 100], ['desc', '설명', 'text', 360]] },
-    cards: { title: '청구할인 카드', help: '<b>실적 구간</b>은 "전월실적:월할인"을 쉼표로 이어 써요. 예) 300000:15000,700000:20000', fields: [['carrier', '통신사', 'carrierM', 110], ['issuer', '카드사', 'text', 80], ['name', '카드 이름', 'text', 220], ['tiers', '실적 구간', 'text', 320]] },
-    lightCards: { title: '라이트할부카드', help: '<b>할인 금액</b>은 할부원금에서 빠지는 금액이에요.', fields: [['carrier', '통신사', 'carrierM', 110], ['name', '카드 이름', 'text', 220], ['off', '할인 금액', 'num', 110], ['cond', '조건', 'text', 200]] },
+    bundles: { title: '결합 할인', help: '<b>월 할인</b>은 상담할 때 처음 들어가는 값이에요. 상담 화면에서 고칠 수 있어요.', fields: [['carrier', '통신사', 'carrierM', 110], ['name', '이름', 'text', 180], ['tags', '종류 (무무선,유무선)', 'text', 140], ['value', '월 할인', 'num', 100], ['note', '빨간 안내', 'text', 200], ['desc', '설명 (줄바꿈 가능)', 'text', 360]] },
+    cards: { title: '청구할인 카드', help: '<b>실적 구간</b>은 "전월실적:월할인"을 쉼표로 이어 써요. 예) 300000:15000,700000:20000', fields: [['carrier', '통신사', 'carrierM', 110], ['issuer', '카드사', 'text', 80], ['name', '카드 이름', 'text', 220], ['tiers', '실적 구간', 'text', 320], ['promo', '프로모션', 'text', 160], ['note', '파란 안내', 'text', 140], ['color', '카드 색', 'text', 90]] },
+    lightCards: { title: '라이트할부카드', help: '<b>실적 구간</b>은 "전월실적:매달 할부 할인"을 쉼표로 이어 써요. 실적 구간이 비어 있으면 <b>할인 금액</b>을 할부원금에서 한 번에 빼요.', fields: [['carrier', '통신사', 'carrierM', 110], ['issuer', '카드사', 'text', 80], ['name', '카드 이름', 'text', 220], ['tiers', '실적 구간', 'text', 300], ['promo', '프로모션', 'text', 160], ['note', '파란 안내', 'text', 140], ['off', '할인 금액', 'num', 100], ['color', '카드 색', 'text', 90]] },
     welfare: { title: '복지 할인', help: '<b>고정액</b>을 먼저 빼고 남은 요금에서 <b>%</b>를 더 빼요. 최대 0은 제한 없음.', fields: [['name', '이름', 'text', 220], ['fixed', '고정액', 'num', 90], ['percent', '%', 'num', 60], ['max', '최대', 'num', 90], ['desc', '설명', 'text', 300]] },
     addons: { title: '부가서비스 · 보험', help: '<b>통신사</b>별로 따로 보여요 (공통은 모든 통신사). <b>유치</b>를 고르면 (상담 화면에서 ★를 눌러도 같아요) 맨 위에 고정돼요. <b>묶음</b>은 보험 위쪽 탭 · 부가서비스 왼쪽 그룹 이름이에요. 보험의 <b>대상</b>은 A 안드로이드 · I 아이폰 · FO 폴드 · FL 플립을 쉼표로 써요. <b>출고가 이상/미만</b>을 넣으면 맞는 보험을 "이 폰에 맞음"으로 알려줘요. 종류가 <b>폰교체</b>면 폰교체 프로그램에, <b>듀얼</b>이면 듀얼번호에 쓰여요.', fields: [['carrier', '통신사', 'carrierAll', 90], ['push', '유치', 'sel:,유치', 70], ['kind', '종류', 'sel:보험,부가,폰교체,듀얼', 90], ['grp', '묶음', 'text', 130], ['name', '이름', 'text', 220], ['fee', '월 요금', 'num', 90], ['months', '유지 개월', 'num', 80], ['dev', '대상', 'text', 90], ['minP', '출고가 이상', 'num', 100], ['maxP', '출고가 미만', 'num', 100], ['cond', '조건 · 메모', 'text', 220]] },
     usims: { title: '유심 비용', help: '통신사별 유심 종류와 비용이에요. 상담 화면 C칸에서 골라요. 통신사를 <b>공통</b>으로 두면 알뜰폰에 쓰여요.', fields: [['carrier', '통신사', 'carrierAll', 100], ['name', '이름', 'text', 220], ['fee', '비용', 'num', 100], ['cond', '메모', 'text', 220]] },
@@ -1232,8 +1373,13 @@
       else if (act === 'pickModel') pickModel();
       else if (act === 'pickPlan') pickPlan();
       else if (act === 'pickTV') pickTV();
-      else if (act === 'pickBundle') pickBundle();
-      else if (act === 'pickCard') pickCard();
+      else if (act === 'pickBundle') pickBundleBig();
+      else if (act === 'pickCard') pickCardKind('card');
+      else if (act === 'pickLight') pickCardKind('light');
+      else if (act === 'pickWelfare') pickWelfare();
+      else if (act === 'pickMilitary') pickMilitary();
+      else if (act === 'pickDual') pickDual();
+      else if (act === 'pickFam') pickFam();
       else if (act === 'pickAddon') pickAddon();
       else if (act === 'pickIns') pickIns();
       else if (act === 'more') { DB.prefs.more = !DB.prefs.more; DB.savePrefs(); render(); }
@@ -1261,7 +1407,7 @@
         if (el.type === 'checkbox') s[k] = el.checked;
         else if (el.getAttribute('data-num')) { s[k] = n0(el.value); el.value = s[k] ? num(s[k]) : ''; refresh(); return; }
         else if (k === 'carrier') { setCarrier(s, el.value); }
-        else { s[k] = (k === 'months' || k === 'cardTier') ? Number(el.value) : el.value; if (k === 'plan') s.planAuto = false; }
+        else { s[k] = (k === 'months' || k === 'cardTier' || k === 'lightTier') ? Number(el.value) : el.value; if (k === 'plan') s.planAuto = false; }
         if (k === 'pass') { var p = DB.data.passes.find(function (x) { return x.id === el.value; }); s.passAmt = p ? n0(p.off) : 0; }
         if (k === 'light') { var l = DB.data.lightCards.find(function (x) { return x.id === el.value; }); s.lightAmt = l ? n0(l.off) : 0; }
         render(); return;
