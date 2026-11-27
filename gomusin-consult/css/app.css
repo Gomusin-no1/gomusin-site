@@ -986,10 +986,9 @@ body.no-admin .adm-link { display: none; }
 .mvi-f a:hover { border-color: #7C3AED; background: #FAF7FF; }
 .mvi-k { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 12px; font-size: 13px; color: #374151; } .mvi-k b { color: #6D28D9; margin-right: 4px; }
 .mvi-n { margin-top: 10px; font-size: 12.5px; color: var(--sub); line-height: 1.5; }
-/* 통신사 카드: 통신사 색 바탕 + 흰 글씨 (사장님 기준 SKT #EA002C · KT #000000 · LG U+ #E6007E) */
-.car-grid .car.c-skt, .car-grid .car.c-kt, .car-grid .car.c-lgu, .car-grid .car.c-mvno { border: 0 !important; color: #fff; box-shadow: 0 10px 24px rgba(17, 24, 39, .14); transition: transform .15s, box-shadow .15s, filter .15s; }
-.car-grid .car.c-skt { background: #EA002C !important; } .car-grid .car.c-kt { background: #000000 !important; } .car-grid .car.c-lgu { background: #E6007E !important; } .car-grid .car.c-mvno { background: #7C3AED !important; }
-.car-grid .car:hover { transform: translateY(-3px); filter: brightness(1.06); box-shadow: 0 16px 32px rgba(17, 24, 39, .2); }
-.car-grid .car .nm, .car-grid .car .go { background: none !important; -webkit-background-clip: border-box !important; background-clip: border-box !important; color: #fff !important; -webkit-text-fill-color: #fff !important; }
-.car-grid .car .ds { color: rgba(255, 255, 255, .85) !important; }
-.car-grid .car .go { display: inline-block; padding: 6px 16px; border-radius: 99px; background: rgba(255, 255, 255, .18) !important; }
+/* 통신사 카드: 흰 카드 + 통신사 색 글씨 (사장님 기준 SKT #EA002C · KT #000000 · LG U+ #E6007E · 알뜰폰 보라) */
+.car-grid .car .nm, .car-grid .car .go { background: none !important; -webkit-background-clip: border-box !important; background-clip: border-box !important; }
+.car-grid .car.c-skt .nm, .car-grid .car.c-skt .go { color: #EA002C !important; -webkit-text-fill-color: #EA002C !important; }
+.car-grid .car.c-kt .nm, .car-grid .car.c-kt .go { color: #000000 !important; -webkit-text-fill-color: #000000 !important; }
+.car-grid .car.c-lgu .nm, .car-grid .car.c-lgu .go { color: #E6007E !important; -webkit-text-fill-color: #E6007E !important; }
+.car-grid .car.c-mvno .nm, .car-grid .car.c-mvno .go { color: #7C3AED !important; -webkit-text-fill-color: #7C3AED !important; }
