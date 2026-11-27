@@ -101,7 +101,8 @@
     var nav = [['home', '처음'], ['phone', '휴대폰'], ['wired', '인터넷 · TV'], ['mvno', '알뜰폰'], ['used', '중고폰'], ['records', '상담기록'], ['admin', '관리']];
     $('#nav').innerHTML = nav.map(function (n) { return '<a href="#/' + n[0] + '" class="' + (r === n[0] ? 'on' : '') + '">' + n[1] + '</a>'; }).join('');
     var sel = $('#store');
-    sel.innerHTML = DB.data.stores.map(function (s) { return '<option value="' + s.id + '"' + (DB.prefs.store === s.id ? ' selected' : '') + '>' + esc(s.name) + '</option>'; }).join('');
+    var SO = { bupyeong: 1, sungui: 2, ganseok: 3 };
+    sel.innerHTML = DB.data.stores.slice().sort(function (a, b) { return (SO[a.id] || 9) - (SO[b.id] || 9); }).map(function (s) { return '<option value="' + s.id + '"' + (DB.prefs.store === s.id ? ' selected' : '') + '>' + esc(s.name) + '</option>'; }).join('');
     var b = DB.subsidyBase();
     $('#basetime').innerHTML = '공통지원금 기준 <b>' + b.slice(5, 7) + '/' + b.slice(8, 10) + ' ' + b.slice(11) + '</b>';
   }
@@ -122,15 +123,15 @@
   function renderHome() {
     var D = DB.data;
     var d0 = new Date(), iso = d0.getFullYear() + '-' + ('0' + (d0.getMonth() + 1)).slice(-2) + '-' + ('0' + d0.getDate()).slice(-2);
-    var todayN = (DB.records || []).filter(function (x) { return String(x.at || x.date || x.savedAt || '').indexOf(iso) === 0; }).length;
+    var todayN = (DB.records || []).filter(function (x) { return (x.store || 'bupyeong') === DB.prefs.store && String(x.at || x.date || x.savedAt || '').indexOf(iso) === 0; }).length;
     var stName = (DB.store(DB.prefs.store) || {}).name || '';
     var h = '<div class="home-hero"><div class="hh-l"><div class="date">' + today() + (stName ? ' · ' + esc(stName) : '') + '</div><h1>무엇을 상담할까요?</h1><div class="sub">큰 칸 하나를 누르면 다음 단계로 넘어가요.</div></div>' +
-      '<div class="hh-r"><div class="hh-s"><span>오늘 상담</span><b class="num">' + todayN + '<small>건</small></b></div><div class="hh-s"><span>중고폰 재고</span><b class="num">' + D.usedStock.length + '<small>대</small></b></div><div class="hh-s"><span>지원금 기준 (매일)</span><b class="num">12:00</b></div></div></div>';
+      '<div class="hh-r"><div class="hh-s"><span>오늘 상담</span><b class="num">' + todayN + '<small>건</small></b></div><div class="hh-s"><span>매장 전화</span><b class="num hh-ph">' + esc((DB.store(DB.prefs.store) || {}).phone || '') + '</b></div><div class="hh-s"><span>지원금 기준 (매일)</span><b class="num">12:00</b></div></div></div>';
     h += '<div class="home-tiles">';
     h += tile('#/phone', 'p', '휴대폰', 'SKT · KT · LG U+', '새 휴대폰 · 번호이동 · 기기변경');
     h += tile('#/wired', 'w', '인터넷 · TV', '인터넷 · IPTV · 결합', '휴대폰과 묶으면 얼마나 싸지는지');
     h += tile('#/mvno', 'm', '알뜰폰', DB.data.carriers.filter(function (c) { return c.mvno; }).length + '개 알뜰폰 회사', '유심 요금제 · 저렴한 요금');
-    h += tile('#/used', 'u', '중고폰', '매장 재고 ' + D.usedStock.length + '대', '등급 · 배터리 · 판매가');
+    h += tile('#/used', 'u', '중고폰', '매장 중고폰 재고', '등급 · 배터리 · 판매가');
     h += '</div>';
     h += '<div class="home-low">';
     h += '<section class="card"><div class="card-h"><h2>처음 쓰는 분은 이렇게</h2></div><ol class="howto"><li><b>휴대폰</b>을 눌러요.</li><li>고객님이 쓸 <b>통신사</b>를 눌러요.</li><li>원하는 <b>모델</b>을 눌러요.</li><li><b>색상 · 용량</b>을 고르고 아래 <b>요금제</b>를 고르면 매달 내는 돈이 바로 나와요.</li><li><b>상담 저장</b> 또는 <b>견적서 인쇄</b>로 마무리해요.</li></ol></section>';
@@ -349,6 +350,7 @@
     function drawUsed(qq) {
       $$('[data-dt]', md).forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-dt') === '중고폰'); });
       var rows = DB.data.usedStock.filter(function (u) { return !qq || u.name.toLowerCase().replace(/[\s\-_]/g, '').indexOf(qq) >= 0; });
+      rows.sort(function (a, b) { return (b.store === DB.prefs.store) - (a.store === DB.prefs.store); });
       if (sort === 'hi') rows.sort(function (a, b) { return b.price - a.price; });
       if (sort === 'lo') rows.sort(function (a, b) { return a.price - b.price; });
       list.innerHTML = rows.map(function (u) {
@@ -526,6 +528,7 @@
     var m = modal('중고폰 선택', body), tbody = $('tbody', m);
     function draw() {
       var list = DB.data.usedStock.filter(function (d) { return (maker === '전체' || d.grade === maker) && (!q || d.name.toLowerCase().indexOf(q) >= 0); });
+      list.sort(function (a, b) { return (b.store === DB.prefs.store) - (a.store === DB.prefs.store); });
       tbody.innerHTML = list.map(function (d) { return '<tr data-id="' + d.id + '" class="' + (s.device === d.id ? 'on' : '') + '"><td class="b">' + esc(d.name) + '</td><td><span class="tag ' + (d.grade === 'S' ? 'g' : d.grade === 'A' ? 'k' : 'y') + '">' + esc(d.grade) + '급</span></td><td class="r">' + n0(d.battery) + '%</td><td class="hide-m">' + esc(d.color) + '</td><td class="hide-m">' + esc(DB.store(d.store).name) + '</td><td class="r b">' + num(d.price) + '</td></tr>'; }).join('') || '<tr><td colspan="6" class="empty-note">맞는 중고폰이 없어요. [관리 → 중고폰 재고]에서 등록해요.</td></tr>';
     }
     draw();
@@ -947,13 +950,15 @@
      ========================================================= */
   function renderRecords() {
     var q = renderRecords.q || '';
-    var list = DB.records.filter(function (x) { return !q || [x.state.customer, x.state.phone, x.device, x.staff].join(' ').indexOf(q) >= 0; });
-    var h = '<div class="page-h"><h1>상담 기록</h1><div class="sub">이 컴퓨터에 저장된 상담 ' + DB.records.length + '건 · 줄을 누르면 불러와요</div></div>';
-    h += '<section class="card"><div class="bar"><input class="search" id="rq" placeholder="이름, 전화번호, 모델로 찾기" value="' + esc(q) + '" style="flex:1;min-width:200px"><button class="btn" data-act="csv">엑셀(CSV) 받기</button></div>';
+    var allSt = !!renderRecords.all, myN = DB.records.filter(function (x) { return (x.store || 'bupyeong') === DB.prefs.store; }).length;
+    var list = DB.records.filter(function (x) { return (allSt || (x.store || 'bupyeong') === DB.prefs.store) && (!q || [x.state.customer, x.state.phone, x.device, x.staff].join(' ').indexOf(q) >= 0); });
+    var h = '<div class="page-h"><h1>상담 기록</h1><div class="sub">' + esc(DB.store(DB.prefs.store).name) + ' ' + myN + '건 · 이 기기 전체 ' + DB.records.length + '건 · 줄을 누르면 불러와요</div></div>';
+    h += '<section class="card"><div class="bar"><div class="seg" style="width:auto"><button id="rs1" class="' + (allSt ? '' : 'on') + '" style="padding:0 14px">이 매장</button><button id="rs2" class="' + (allSt ? 'on' : '') + '" style="padding:0 14px">전 매장</button></div><input class="search" id="rq" placeholder="이름, 전화번호, 모델로 찾기" value="' + esc(q) + '" style="flex:1;min-width:200px"><button class="btn" data-act="csv">엑셀(CSV) 받기</button></div>';
     h += '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>날짜</th><th class="hide-m">매장</th><th>고객</th><th class="hide-m">전화번호</th><th class="hide-m">통신사</th><th>모델</th><th class="r">월 납부</th><th></th></tr></thead><tbody>';
     h += list.map(function (x) { return '<tr data-rid="' + x.id + '"><td>' + esc(x.at.slice(5)) + '</td><td class="hide-m">' + esc(DB.store(x.store).name) + '</td><td class="b">' + esc(x.state.customer || '-') + '</td><td class="hide-m">' + esc(x.state.phone || '') + '</td><td class="hide-m">' + esc(x.carrier) + '</td><td>' + esc(x.device || '-') + '</td><td class="r b">' + num(x.monthly) + '</td><td class="r"><button class="btn sm red" data-del="' + x.id + '">삭제</button></td></tr>'; }).join('') || '<tr><td colspan="8" class="empty-note">저장한 상담이 없어요. 상담 화면에서 [상담 저장]을 누르면 여기에 쌓여요.</td></tr>';
     h += '</tbody></table></div></section>';
     app.innerHTML = '<div class="wrap">' + h + '</div>';
+    if ($('#rs1')) { $('#rs1').onclick = function () { renderRecords.all = false; renderRecords(); }; $('#rs2').onclick = function () { renderRecords.all = true; renderRecords(); }; }
     $('#rq').oninput = function (e) { renderRecords.q = e.target.value.trim(); var p = e.target.selectionStart; renderRecords(); var i = $('#rq'); i.focus(); i.setSelectionRange(p, p); };
   }
 
@@ -1262,7 +1267,7 @@
       var wk = el.getAttribute('data-wk');
       if (wk) { W[wk] = el.type === 'checkbox' ? el.checked : (wk === 'gift' || wk === 'mobileOff') ? n0(el.value) : el.value; renderWired(); }
     });
-    $('#store').onchange = function (e) { DB.prefs.store = e.target.value; DB.savePrefs(); toast(DB.store(e.target.value).name + '(으)로 바꿨어요'); };
+    $('#store').onchange = function (e) { DB.prefs.store = e.target.value; DB.savePrefs(); render(); toast(DB.store(e.target.value).name + '(으)로 바꿨어요'); };
     window.addEventListener('hashchange', function () { closeModal(); render(); window.scrollTo(0, 0); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
     setInterval(function () { var n = DB.applySchedule(); var r = (location.hash.replace(/^#\/?/, '') || 'home').split('/')[0]; header(r); if (n) { toast('낮 12시 공통지원금 ' + n + '건이 바뀌었어요'); if ($('#cols') || $('.mgrid')) render(); } }, 60000);
@@ -1276,7 +1281,9 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     app = $('#app');
-    DB.init(); loadDraft(); bind(); render();
+    DB.init();
+    var qs = /[?&]store=([a-z]+)/.exec(location.search); if (qs && DB.data.stores.some(function (x) { return x.id === qs[1]; })) { DB.prefs.store = qs[1]; DB.savePrefs(); }
+    loadDraft(); bind(); render();
     if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(function () {});
     var lastChk = Date.now();
     function chkNew() {

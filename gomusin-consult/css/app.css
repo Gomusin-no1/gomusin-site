@@ -834,3 +834,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: var(--fs-2); }
 }
 
 @media (max-width: 760px) { .pp-f { gap: 8px; flex-wrap: nowrap; } .pp-f label { flex: 1; min-width: 0; } .pp-f .sel { width: 100%; min-width: 0; } }
+
+.hh-ph { font-size: 18px !important; letter-spacing: -0.01em; }
+.top-r select#store { font-weight: 800; min-width: 120px; }
+
+.hh-ph { white-space: nowrap; }
+@media (max-width: 760px) { .hh-ph { font-size: 13px !important; letter-spacing: -0.03em; } }
+@media (max-width: 760px) { .hh-r .hh-s:nth-child(2) { flex: 1.4; } .hh-r .hh-s:nth-child(1) { flex: .8; } }
