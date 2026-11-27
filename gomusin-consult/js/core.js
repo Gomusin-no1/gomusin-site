@@ -39,6 +39,9 @@
         def.plans.forEach(function (d) { var h = have[d.id]; if (!h) self.data.plans.push(clone(d)); else if (h.name === d.name) { h.data = d.data; h.desc = d.desc; if (d.call) h.call = d.call; if (d.sms) h.sms = d.sms; if (d.seg) h.seg = d.seg; } });
         this.data.planVer = def.planVer;
       }
+      (def.carriers || []).forEach(function (c) { if (!self.data.carriers.some(function (x) { return x.id === c.id; })) self.data.carriers.push(clone(c)); });
+      if ((this.data.mobingVer || 0) < (def.mobingVer || 0)) { this.data.plans = this.data.plans.filter(function (p) { return !/^mobing-/.test(p.carrier); }).concat(clone(def.plans.filter(function (p) { return /^mobing-/.test(p.carrier); }))); this.data.mvnoInfo = clone(def.mvnoInfo || {}); this.data.mobingVer = def.mobingVer; }
+      if (!this.data.mvnoInfo) this.data.mvnoInfo = clone(def.mvnoInfo || {});
       if ((this.data.discVer || 0) < (def.discVer || 0)) { ['welfare', 'bundles', 'cards', 'lightCards'].forEach(function (k) { self.data[k] = clone(def[k]); }); this.data.military = clone(def.military); this.data.dualInfo = clone(def.dualInfo); this.data.famDisc = clone(def.famDisc || {}); this.data.planChange = clone(def.planChange || {}); this.data.discVer = def.discVer; }
       if (!this.data.dualInfo) this.data.dualInfo = clone(def.dualInfo || {});
       if (!this.data.military) this.data.military = clone(def.military || {});

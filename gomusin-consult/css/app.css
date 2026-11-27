@@ -980,3 +980,13 @@ body.no-admin .adm-link { display: none; }
 .pcw-chk { margin-top: 12px; display: inline-block; padding: 3px 10px; border-radius: 8px; background: #FEF3C7; color: #92400E; font-size: 12px; font-weight: 700; }
 /* 적용된 할인 금액은 빨간색 (결합 · 복지 · 군인 · 가족 · 카드 등) */
 .row .k small.num[data-o], .row .k small[data-o] { color: #E11D48 !important; font-weight: 800; }
+/* 알뜰폰 회사 안내 카드 */
+.mvi { margin-bottom: 14px; } .mvi-b { padding: 4px 20px 18px; }
+.mvi-p { margin: 8px 0 12px; padding: 10px 12px; border-radius: 10px; background: #F5F3FF; color: #4C1D95; font-size: 14px; }
+.mvi-p b { margin-right: 6px; } .mvi-p em { font-style: normal; font-weight: 800; color: #6D28D9; } .mvi-p small { color: #7C6F9E; }
+.mvi-h { font-weight: 800; font-size: 14px; margin: 6px 0 8px; } .mvi-h small { font-weight: 500; color: var(--sub); }
+.mvi-f { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+.mvi-f a { display: block; padding: 10px 12px; border: 1px solid #E5E7EB; border-radius: 10px; color: #1F2937; text-decoration: none; font-size: 13.5px; font-weight: 600; background: #fff; }
+.mvi-f a:hover { border-color: #7C3AED; background: #FAF7FF; }
+.mvi-k { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 12px; font-size: 13px; color: #374151; } .mvi-k b { color: #6D28D9; margin-right: 4px; }
+.mvi-n { margin-top: 10px; font-size: 12.5px; color: var(--sub); line-height: 1.5; }

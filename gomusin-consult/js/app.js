@@ -415,6 +415,18 @@
   /* =========================================================
      상담 계산 화면 (A 단말기 · B 요금 · 합계)
      ========================================================= */
+  /* 알뜰폰 회사 안내 · 공식 신청서식 (모빙 등) */
+  function mvInfoHTML(r) {
+    var car = r.car || {}, mi = car.brand && (DB.data.mvnoInfo || {})[car.brand];
+    if (!mi) return '';
+    var p = r.plan, h = '<section class="card mvi"><div class="card-h"><h2>' + esc(mi.name) + ' 가입 안내</h2><div class="r"><a class="btn sm" href="' + esc(mi.site) + '" target="_blank" rel="noopener">공식 사이트</a></div></div><div class="mvi-b">';
+    if (p && p.promoMonths) h += '<div class="mvi-p"><b>이 요금제</b> 처음 ' + p.promoMonths + '개월 월 <em>' + num(p.fee) + '원</em> → ' + (p.promoMonths + 1) + '개월차부터 <em>' + num(p.feeAfter) + '원</em>' + (p.feeOrig > p.feeAfter ? ' <small>(정상가 ' + num(p.feeOrig) + '원)</small>' : '') + '</div>';
+    else if (p && p.feeOrig > p.fee) h += '<div class="mvi-p"><b>이 요금제</b> 평생 월 <em>' + num(p.fee) + '원</em> <small>(정상가 ' + num(p.feeOrig) + '원)</small></div>';
+    h += '<div class="mvi-h">공식 신청서식 <small>(' + esc(mi.company) + ' 공식 사이트 · ' + esc(mi.checked) + ' 확인)</small></div><div class="mvi-f">' + mi.forms.map(function (f) { return '<a href="' + esc(f[1]) + '" target="_blank" rel="noopener">📄 ' + esc(f[0]) + '</a>'; }).join('') + '</div>';
+    h += '<div class="mvi-k"><span><b>신청서 팩스</b> ' + mi.fax.map(function (x) { return esc(x[0]) + ' ' + esc(x[1]); }).join(' · ') + '</span><span><b>고객센터</b> ' + mi.cs.map(function (x) { return esc(x[0]) + ' ' + esc(x[1]); }).join(' · ') + '</span></div>';
+    h += '<div class="mvi-n">신분증 원본과 본인 명의 결제수단이 필요해요. 미성년자는 법정대리인 동의서와 가족관계 서류, 외국인은 외국인등록증이 필요해요. 정확한 서류는 신청서 안내를 따라요.</div>';
+    return h + '</div></section>';
+  }
   function consultCols(s, r) {
     var D = DB.data, mv = r.mvno, used = s.mode === 'used';
     var more = DB.prefs.more ? ' more-on' : '';
@@ -470,6 +482,7 @@
     h += '</div></div><div>';
     h += '<div id="cmpBox">' + cmpHTML(s, r) + '</div>';
     h += '<div id="acBox">' + acHTML(s, plans) + '</div>';
+    h += mvInfoHTML(r);
     h += '<div class="acts"><button class="btn pri lg full" data-act="save">상담 저장</button><button class="btn" data-act="print">견적서 인쇄</button><button class="btn" data-act="copy">문자로 복사</button><button class="btn full red" data-act="reset">새 상담 (지우기)</button></div>';
     h += '</div></div></div></section>';
     return h + '</div>';
