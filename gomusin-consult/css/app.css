@@ -948,10 +948,6 @@ body.no-admin .adm-link { display: none; }
 @media (max-width: 600px) { .car { min-height: 120px; border-radius: 16px; } .car .nm { font-size: 32px; } }
 .car.c-skt .go { color: #F0391A; } .car.c-kt .go { color: #E4002B; } .car.c-lgu .go { color: #E6007E; } .car.c-mvno .go, .car.c-mv .go { color: #7C3AED; }
 .car.c-skt, .car.c-kt, .car.c-lgu, .car.c-mvno, .car.c-mv { border-top-color: #E6E8EE; }
-/* 통신사 카드: 무지개 그라데이션 (사장님 요청 2026-11-27) */
-.car .nm, .car.c-skt .nm, .car.c-kt .nm, .car.c-lgu .nm, .car.c-mvno .nm, .car.c-mv .nm, .car .go, .car.c-skt .go, .car.c-kt .go, .car.c-lgu .go, .car.c-mvno .go, .car.c-mv .go { background: linear-gradient(90deg, #EF4444 0%, #F97316 18%, #EAB308 34%, #22C55E 52%, #0EA5E9 68%, #4F46E5 84%, #A21CAF 100%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
-.car .go { display: inline-block; }
-.car .go svg, .car .go i { color: #4F46E5; stroke: #4F46E5; }
 /* 결합 선택형 팝업 (한방에Yo · 온가족할인) */
 .bs-red { color: #E11D48; font-weight: 700; font-size: 14px; margin: 4px 0 12px; }
 .bs-radio { display: flex; flex-direction: column; gap: 8px; margin: 6px 0 12px; }
