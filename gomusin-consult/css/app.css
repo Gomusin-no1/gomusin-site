@@ -992,10 +992,19 @@ body.no-admin .adm-link { display: none; }
 .car-grid .car.c-kt .nm, .car-grid .car.c-kt .go { color: #000000 !important; -webkit-text-fill-color: #000000 !important; }
 .car-grid .car.c-lgu .nm, .car-grid .car.c-lgu .go { color: #E6007E !important; -webkit-text-fill-color: #E6007E !important; }
 .car-grid .car.c-mvno .nm, .car-grid .car.c-mvno .go { color: #7C3AED !important; -webkit-text-fill-color: #7C3AED !important; }
-/* 통신사 카드 테두리 그라데이션 (통신사 색) */
-.car-grid .car.c-kt, .car-grid .car.c-skt, .car-grid .car.c-lgu, .car-grid .car.c-mvno { border: 2.5px solid transparent !important; transition: transform .15s, box-shadow .15s; }
+/* 통신사 카드: 위쪽 반은 통신사 색 블록(흰 글씨) · 아래 반은 흰색 + 통신사 색 테두리 그라데이션 */
+.car-grid .car { padding: 0 !important; overflow: hidden; justify-content: flex-start !important; min-height: 240px; border: 2.5px solid transparent !important; transition: transform .15s, box-shadow .15s; }
+.car-grid .car .nm { align-self: stretch; flex: 0 0 52%; min-height: 120px; display: flex; align-items: center; justify-content: center; padding: 14px 10px; margin: 0; color: #fff !important; -webkit-text-fill-color: #fff !important; text-shadow: 0 2px 12px rgba(0, 0, 0, .18); }
+.car-grid .car .ds { margin-top: 16px; padding: 0 10px; }
+.car-grid .car .go { margin: 10px 0 16px; }
 .car-grid .car.c-kt { background: linear-gradient(#fff, #fff) padding-box, linear-gradient(135deg, #000000, #9CA3AF 55%, #000000) border-box !important; }
 .car-grid .car.c-skt { background: linear-gradient(#fff, #fff) padding-box, linear-gradient(135deg, #1B2A6B, #7C93D6 55%, #1B2A6B) border-box !important; }
 .car-grid .car.c-lgu { background: linear-gradient(#fff, #fff) padding-box, linear-gradient(135deg, #E6007E, #FF8CC6 55%, #E6007E) border-box !important; }
 .car-grid .car.c-mvno { background: linear-gradient(#fff, #fff) padding-box, linear-gradient(135deg, #7C3AED, #C4B5FD 55%, #7C3AED) border-box !important; }
-.car-grid .car:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(17, 24, 39, .12); }
+.car-grid .car.c-kt .nm { background: linear-gradient(160deg, #000000 0%, #3A3A3A 100%) !important; }
+.car-grid .car.c-skt .nm { background: linear-gradient(160deg, #1B2A6B 0%, #34499E 100%) !important; }
+.car-grid .car.c-lgu .nm { background: linear-gradient(160deg, #E6007E 0%, #F2479F 100%) !important; }
+.car-grid .car.c-mvno .nm { background: linear-gradient(160deg, #7C3AED 0%, #9B6BF3 100%) !important; }
+.car-grid .car:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(17, 24, 39, .14); }
+@media (max-width: 760px) { .car-grid .car .nm { font-size: 38px; min-height: 96px; } }
+.car-grid .car.c-kt .nm, .car-grid .car.c-skt .nm, .car-grid .car.c-lgu .nm, .car-grid .car.c-mvno .nm { color: #fff !important; -webkit-text-fill-color: #fff !important; }
