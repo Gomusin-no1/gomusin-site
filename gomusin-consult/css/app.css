@@ -992,3 +992,10 @@ body.no-admin .adm-link { display: none; }
 .car-grid .car.c-kt .nm, .car-grid .car.c-kt .go { color: #000000 !important; -webkit-text-fill-color: #000000 !important; }
 .car-grid .car.c-lgu .nm, .car-grid .car.c-lgu .go { color: #E6007E !important; -webkit-text-fill-color: #E6007E !important; }
 .car-grid .car.c-mvno .nm, .car-grid .car.c-mvno .go { color: #7C3AED !important; -webkit-text-fill-color: #7C3AED !important; }
+/* 통신사 카드 테두리 그라데이션 (통신사 색) */
+.car-grid .car.c-kt, .car-grid .car.c-skt, .car-grid .car.c-lgu, .car-grid .car.c-mvno { border: 2.5px solid transparent !important; transition: transform .15s, box-shadow .15s; }
+.car-grid .car.c-kt { background: linear-gradient(#fff, #fff) padding-box, linear-gradient(135deg, #000000, #9CA3AF 55%, #000000) border-box !important; }
+.car-grid .car.c-skt { background: linear-gradient(#fff, #fff) padding-box, linear-gradient(135deg, #1B2A6B, #7C93D6 55%, #1B2A6B) border-box !important; }
+.car-grid .car.c-lgu { background: linear-gradient(#fff, #fff) padding-box, linear-gradient(135deg, #E6007E, #FF8CC6 55%, #E6007E) border-box !important; }
+.car-grid .car.c-mvno { background: linear-gradient(#fff, #fff) padding-box, linear-gradient(135deg, #7C3AED, #C4B5FD 55%, #7C3AED) border-box !important; }
+.car-grid .car:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(17, 24, 39, .12); }
