@@ -899,3 +899,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: var(--fs-2); }
 body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 input, textarea, select, [contenteditable="true"] { -webkit-user-select: text; user-select: text; }
 img { -webkit-user-drag: none; }
+
+/* 직원 이름 워터마크 (화면 · 인쇄에 흐리게) */
+.wm { position: fixed; inset: -20vh -20vw; z-index: 9999; pointer-events: none; display: flex; flex-wrap: wrap; gap: 70px 90px; align-content: flex-start; transform: rotate(-24deg); opacity: .06; overflow: hidden; }
+.wm span { font: 700 15px/1 -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; color: #111; white-space: nowrap; }
+@media print { .wm { display: none; } }
+body.st-lock #store { pointer-events: none; opacity: .9; }
+body.st-lock #store + * {}
+body.no-admin .adm-link { display: none; }

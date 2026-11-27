@@ -135,7 +135,7 @@
     h += '</div>';
     h += '<div class="home-low">';
     h += '<section class="card"><div class="card-h"><h2>처음 쓰는 분은 이렇게</h2></div><ol class="howto"><li><b>휴대폰</b>을 눌러요.</li><li>고객님이 쓸 <b>통신사</b>를 눌러요.</li><li>원하는 <b>모델</b>을 눌러요.</li><li><b>색상 · 용량</b>을 고르고 아래 <b>요금제</b>를 고르면 매달 내는 돈이 바로 나와요.</li><li><b>상담 저장</b> 또는 <b>견적서 인쇄</b>로 마무리해요.</li></ol></section>';
-    h += '<section class="card"><div class="card-h"><h2>바로 가기</h2></div><div class="quick"><a class="btn" href="#/records">상담 기록</a><a class="btn" href="#/used">중고폰</a></div><div style="margin-top:14px;text-align:right"><a href="#/admin" style="font-size:12px;color:#9AA3B5;text-decoration:none">사장님 메뉴</a></div></section>';
+    h += '<section class="card"><div class="card-h"><h2>바로 가기</h2></div><div class="quick"><a class="btn" href="#/records">상담 기록</a><a class="btn" href="#/used">중고폰</a></div><div style="margin-top:14px;text-align:right"><a href="#/admin" class="adm-link" style="font-size:12px;color:#9AA3B5;text-decoration:none">사장님 메뉴</a>' + (window.GMS_ME ? ' <span style="font-size:12px;color:#9AA3B5">· ' + esc(window.GMS_ME.n) + ' · <a href="/__logout" style="color:#9AA3B5">로그아웃</a></span>' : '') + '</div></section>';
     h += '</div>';
     app.innerHTML = '<div class="wrap">' + h + '</div>';
     function tile(href, k, t, s1, s2) { return '<a class="tile t-' + k + '" href="' + href + '"><div class="ic">' + icon(k) + '</div><div class="tt">' + t + '</div><div class="s1">' + s1 + '</div><div class="s2">' + s2 + '</div><div class="go">시작하기 →</div></a>'; }
@@ -1123,6 +1123,7 @@
   var ADMIN_TABS = [['subsidy', '공통지원금 (12시 변경)'], ['devices', '용량 · 출고가'], ['models', '모델 · 색상 · 사진'], ['plans', '요금제'], ['wired', '인터넷 · TV 요금'], ['usedStock', '중고폰 재고'], ['bundles', '결합 할인'], ['cards', '청구할인 카드'], ['lightCards', '라이트할부카드'], ['welfare', '복지 할인'], ['addons', '부가서비스 · 보험'], ['usims', '유심 비용'], ['notices', '알림'], ['basic', '매장 · 기본값'], ['sources', '자료 출처 · 기준일'], ['backup', '백업 · 옮기기']];
 
   function renderAdmin() {
+    if (window.GMS_ME && window.GMS_ME.r !== 'admin') { location.hash = '#/home'; return; }
     var h = '<div class="page-h"><h1>관리</h1><div class="sub">여기서 바꾼 값은 이 컴퓨터에 저장돼요. 다른 기기로는 [백업 · 옮기기]로 옮겨요.</div></div>';
     h += '<div class="grid2"><div class="card side-nav">' + ADMIN_TABS.map(function (t) { return '<button data-tab="' + t[0] + '" class="' + (adminTab === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div><div id="adm"></div></div>';
     app.innerHTML = '<div class="wrap">' + h + '</div>';
@@ -1430,6 +1431,16 @@
     app = $('#app');
     DB.init();
     var qs = /[?&]store=([a-z]+)/.exec(location.search); if (qs && DB.data.stores.some(function (x) { return x.id === qs[1]; })) { DB.prefs.store = qs[1]; DB.savePrefs(); }
+    var ME = null; try { var mc = /(?:^|;\s*)gms_n=([^;]+)/.exec(document.cookie); if (mc) ME = JSON.parse(decodeURIComponent(mc[1])); } catch (e) {}
+    window.GMS_ME = ME;
+    if (ME && ME.s && ME.s !== 'all' && DB.data.stores.some(function (x) { return x.id === ME.s; })) { DB.prefs.store = ME.s; DB.savePrefs(); document.body.classList.add('st-lock'); var se = document.getElementById('store'); if (se) se.disabled = true; }
+    if (ME && ME.r !== 'admin') document.body.classList.add('no-admin');
+    if (ME) {
+      var wm = document.createElement('div'); wm.className = 'wm'; wm.setAttribute('aria-hidden', 'true');
+      var d0 = new Date(), lb = ME.n + ' · ' + d0.getFullYear() + '.' + (d0.getMonth() + 1) + '.' + d0.getDate();
+      wm.innerHTML = new Array(60).join('<span>' + lb.replace(/</g, '') + '</span>');
+      document.body.appendChild(wm);
+    }
     loadDraft(); bind(); render();
     if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(function () {});
     var lastChk = Date.now();
