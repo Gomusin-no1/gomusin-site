@@ -948,3 +948,20 @@ body.no-admin .adm-link { display: none; }
 @media (max-width: 600px) { .car { min-height: 120px; border-radius: 16px; } .car .nm { font-size: 32px; } }
 .car.c-skt .go { color: #F0391A; } .car.c-kt .go { color: #E4002B; } .car.c-lgu .go { color: #E6007E; } .car.c-mvno .go, .car.c-mv .go { color: #7C3AED; }
 .car.c-skt, .car.c-kt, .car.c-lgu, .car.c-mvno, .car.c-mv { border-top-color: #E6E8EE; }
+/* 통신사 카드: 무지개 그라데이션 (사장님 요청 2026-11-27) */
+.car .nm, .car.c-skt .nm, .car.c-kt .nm, .car.c-lgu .nm, .car.c-mvno .nm, .car.c-mv .nm, .car .go, .car.c-skt .go, .car.c-kt .go, .car.c-lgu .go, .car.c-mvno .go, .car.c-mv .go { background: linear-gradient(90deg, #EF4444 0%, #F97316 18%, #EAB308 34%, #22C55E 52%, #0EA5E9 68%, #4F46E5 84%, #A21CAF 100%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+.car .go { display: inline-block; }
+.car .go svg, .car .go i { color: #4F46E5; stroke: #4F46E5; }
+/* 결합 선택형 팝업 (한방에Yo · 온가족할인) */
+.bs-red { color: #E11D48; font-weight: 700; font-size: 14px; margin: 4px 0 12px; }
+.bs-radio { display: flex; flex-direction: column; gap: 8px; margin: 6px 0 12px; }
+.bs-ro { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1.5px solid #E5E7EB; border-radius: 12px; cursor: pointer; font-weight: 700; }
+.bs-ro.on { border-color: #E6007E; background: #FFF1F8; }
+.bs-ro input { width: 18px; height: 18px; accent-color: #E6007E; }
+.bs-ro span { flex: 1; } .bs-ro em { font-style: normal; color: #E6007E; }
+.bs-add { align-items: flex-start; margin: 6px 0; line-height: 1.45; } .bs-add small { color: #6B7280; font-weight: 500; } .bs-add.dis { opacity: .5; }
+.bs-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0 14px; }
+.bs-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 26px 10px; border-radius: 18px; border: 2px solid #E5E7EB; background: #fff; cursor: pointer; font: inherit; }
+.bs-card b { font-size: 54px; font-weight: 900; line-height: 1; color: #E5337A; letter-spacing: -.02em; }
+.bs-card .bc-s { font-size: 12.5px; color: #6B7280; } .bs-card .bc-v { font-size: 14px; font-weight: 700; color: #2563EB; }
+.bs-card.on { border-color: #E5337A; background: #FFF4F8; box-shadow: 0 0 0 4px rgba(229, 51, 122, .12); }

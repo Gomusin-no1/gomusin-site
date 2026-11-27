@@ -181,6 +181,15 @@
     } else if (b.calc === 'pct') {
       if (s.bundleBase) { amt = 0; note += ' · 베이스 회선'; }
       else { amt = ok && fee >= n0(b.minFee) ? f10((fee * n0(b.rate)) / 100) : 0; if (amt && b.teen && s.bundleTeen && fee >= n0(b.teenMinFee)) { amt += n0(b.teen); note += ' · 청소년'; } }
+    } else if (b.calc === 'opt') {
+      var op = (b.opts || []).find(function (x) { return x.k === s.bundleOpt; }) || (b.opts || [])[0];
+      if (op) {
+        if (op.pct) amt = f10((fee * op.pct) / 100);
+        else amt = n0((op.amt || [])[colOf(b.cuts, fee)]);
+        note = op.l;
+      }
+      (b.adds || []).forEach(function (a) { var on = (s.bundleAdds || []).indexOf(a.k) >= 0, nd = !a.need || (s.bundleAdds || []).indexOf(a.need) >= 0; if (on && nd) { amt += n0(a.amt); note += ' · ' + a.l; } });
+      ok = true;
     }
     if (!ok) note += ' (최소 ' + b.minN + '회선)';
     return { amt: amt, note: note, n: n };

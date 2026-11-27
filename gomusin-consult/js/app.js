@@ -33,7 +33,7 @@
       mode: m, carrier: car ? car.id : '', join: m === 'mvno' ? 'new' : 'mnp', subMode: m === 'wireless' ? 'common' : 'select', view: 'consult',
       device: '', color: '', plan: plans[0] ? plans[0].id : '', extra: 0, pass: '', passAmt: 0, usedOff: 0, etc: 0,
       light: '', lightAmt: 0, lightTier: 0, swap: '', cashMode: 'none', cash: 0, months: 24,
-      bundle: '', bundleAmt: 0, bundleN: 0, bundleNet: '', bundleTotal: 0, bundleOne: false, bundleTeen: false, bundleBase: false, bundleLong: 0, welfare: '', military: false, promo: 0, dual: false, card: '', cardTier: 0,
+      bundle: '', bundleAmt: 0, bundleN: 0, bundleNet: '', bundleTotal: 0, bundleOne: false, bundleTeen: false, bundleBase: false, bundleLong: 0, bundleOpt: '', bundleAdds: [], welfare: '', military: false, promo: 0, dual: false, card: '', cardTier: 0,
       addons: [], usim: true, changePlan: '', customer: '', phone: '', memo: ''
     };
   }
@@ -736,7 +736,8 @@
   /* 결합 인원 · 인터넷 · 가족 요금 합계를 고르면 이 회선 할인을 바로 계산 */
   function bundleSetup(b) {
     var s = st(), car = s.carrier;
-    var t = { bundleN: s.bundle === b.id && s.bundleN ? s.bundleN : Math.max(n0(b.minN) || 1, 2), bundleNet: s.bundle === b.id ? s.bundleNet : '', bundleTotal: s.bundle === b.id ? s.bundleTotal : 0, bundleOne: s.bundle === b.id && s.bundleOne, bundleTeen: s.bundle === b.id && s.bundleTeen, bundleBase: s.bundle === b.id && s.bundleBase, bundleLong: s.bundle === b.id ? s.bundleLong : 0 };
+    var t = { bundleN: s.bundle === b.id && s.bundleN ? s.bundleN : Math.max(n0(b.minN) || 1, 2), bundleNet: s.bundle === b.id ? s.bundleNet : '', bundleTotal: s.bundle === b.id ? s.bundleTotal : 0, bundleOne: s.bundle === b.id && s.bundleOne, bundleTeen: s.bundle === b.id && s.bundleTeen, bundleBase: s.bundle === b.id && s.bundleBase, bundleLong: s.bundle === b.id ? s.bundleLong : 0, bundleOpt: s.bundle === b.id ? s.bundleOpt : '', bundleAdds: s.bundle === b.id && s.bundleAdds ? s.bundleAdds.slice() : [] };
+    if (!t.bundleOpt && b.opts) t.bundleOpt = b.opts[0].k;
     if (!t.bundleNet && b.nets) t.bundleNet = b.nets[0].k;
     function tbl() {
       var h = '';
@@ -755,6 +756,10 @@
         h = '<tr><th>내 요금제 월정액</th><th>회선마다 할인</th></tr>' + b.tiers.map(function (x, i) { var nx = b.tiers[i + 1]; return '<tr><td>' + (nx ? (x[0] ? num(x[0]) + '원 이상 ~ ' : '') + num(nx[0]) + '원 미만' : num(x[0]) + '원 이상') + '</td><td>' + (x[1] ? num(x[1]) + '원' : '-') + '</td></tr>'; }).join('');
       } else if (b.calc === 'pct') {
         h = '<tr><th>대상</th><th>할인</th></tr><tr><td>월정액 ' + num(b.minFee) + '원 이상 · 2~' + b.maxN + '번째 회선</td><td>월정액 ' + b.rate + '%</td></tr><tr><td>베이스(첫 번째) 회선</td><td>총액 · 정액 결합으로 따로</td></tr>' + (b.teen ? '<tr><td>청소년 자녀 (' + num(b.teenMinFee) + '원 이상 5G)</td><td>+' + num(b.teen) + '원</td></tr>' : '');
+      } else if (b.calc === 'opt') {
+        if (b.cuts) h = '<tr><th>선택</th><th>' + num(b.cuts[1]) + '원 미만</th><th>' + num(b.cuts[1]) + '원 이상</th></tr>' + b.opts.map(function (o) { return '<tr><td>' + esc(o.l) + '</td>' + o.amt.map(function (v) { return '<td>' + num(v) + '원</td>'; }).join('') + '</tr>'; }).join('');
+        else h = '<tr><th>선택</th><th>할인</th></tr>' + b.opts.map(function (o) { return '<tr><td>' + esc(o.l) + '</td><td>월정액 × ' + o.pct + '%</td></tr>'; }).join('');
+        (b.adds || []).forEach(function (a) { h += '<tr><td>' + esc(a.l) + '</td><td colspan="2">+' + num(a.amt) + '원 (대표자 1인)</td></tr>'; });
       }
       return '<table class="bs-t">' + h + '</table>';
     }
@@ -762,9 +767,15 @@
       var tmp = {}; Object.keys(s).forEach(function (k) { tmp[k] = s[k]; }); Object.keys(t).forEach(function (k) { tmp[k] = t[k]; }); tmp.bundle = b.id;
       var r = G.calc(tmp, {}), au = r.bAuto || { amt: 0, note: '' };
       var h = '<div class="bs-desc">' + String(b.desc || '').split('\n').map(function (l) { return '<div' + (/^※/.test(l) ? ' class="sm"' : '') + '>' + esc(l) + '</div>'; }).join('') + '</div>';
+      if (b.red) h += '<div class="bs-red">' + esc(b.red) + '</div>';
+      if (b.calc !== 'opt') {
       h += '<div class="bs-f"><label>결합 회선 수 (이 손님 포함)</label><div class="bs-n">';
       for (var k = 1; k <= (b.maxN || 5); k++) h += '<button data-n="' + k + '" class="' + (t.bundleN === k ? 'on' : '') + (k < (b.minN || 1) ? ' off' : '') + '">' + k + (k === (b.maxN || 5) && b.maxN > 5 ? '+' : '') + '</button>';
       h += '</div></div>';
+      }
+      if (b.calc === 'opt' && b.cards) h += '<div class="bs-cards">' + b.opts.map(function (o) { return '<button data-opt="' + o.k + '" class="bs-card' + (t.bundleOpt === o.k ? ' on' : '') + '"><span class="bc-s">' + esc(o.sub || '') + '</span><b>' + esc(o.l) + '</b><span class="bc-v">' + num(Math.floor((r.fee * (o.pct || 0)) / 1000) * 10) + '원 할인</span></button>'; }).join('') + '</div>';
+      else if (b.calc === 'opt') h += '<div class="bs-radio">' + b.opts.map(function (o) { return '<label class="bs-ro' + (t.bundleOpt === o.k ? ' on' : '') + '"><input type="radio" name="bsopt" data-opt="' + o.k + '"' + (t.bundleOpt === o.k ? ' checked' : '') + '><span>' + esc(o.l) + '</span><em>' + num((o.amt || [])[r.fee >= (b.cuts || [0, 0])[1] ? 1 : 0] || 0) + '원</em></label>'; }).join('') + '</div>';
+      (b.adds || []).forEach(function (a) { var on = t.bundleAdds.indexOf(a.k) >= 0, dis = a.need && t.bundleAdds.indexOf(a.need) < 0; h += '<label class="chk bs-chk bs-add' + (dis ? ' dis' : '') + '"><input type="checkbox" data-add="' + a.k + '"' + (on && !dis ? ' checked' : '') + (dis ? ' disabled' : '') + '> <span><b>' + esc(a.l) + '</b> <small>[' + esc(a.cond) + ']</small></span></label>'; });
       if (b.nets) h += '<div class="bs-f"><label>인터넷</label><div class="bs-n wide">' + b.nets.map(function (nt) { return '<button data-net="' + nt.k + '" class="' + (t.bundleNet === nt.k ? 'on' : '') + '">' + esc(nt.l) + '</button>'; }).join('') + '</div></div>';
       if (b.calc === 'total') h += '<div class="bs-f"><label>가족 휴대폰 월정액 합계</label><div class="bs-in"><input class="num" data-total inputmode="numeric" value="' + (t.bundleTotal ? num(t.bundleTotal) : '') + '" placeholder="' + num(r.fee * t.bundleN) + ' (모두 같은 요금제일 때)"><span>원</span></div></div>';
       if (b.calc === 'group' || b.calc === 'total') h += '<div class="bs-f"><label>받는 방법</label><div class="bs-n wide"><button data-one="0" class="' + (!t.bundleOne ? 'on' : '') + '">회선마다 똑같이 나눠받기</button><button data-one="1" class="' + (t.bundleOne ? 'on' : '') + '">이 회선에 몰아받기</button></div></div>';
@@ -772,7 +783,7 @@
       if (b.teen) h += '<label class="chk bs-chk"><input type="checkbox" data-teen' + (t.bundleTeen ? ' checked' : '') + '> 만 18세 이하 청소년 (+' + num(b.teen) + '원)</label>';
       if (b.longOpts) h += '<div class="bs-f"><label>장기고객 할인</label><select class="sel" data-long>' + b.longOpts.map(function (o) { return '<option value="' + o[0] + '"' + (Number(t.bundleLong) === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></div>';
       h += '<details class="bs-d"' + (b.calc === 'tier' || b.calc === 'pct' ? ' open' : '') + '><summary>금액표 보기</summary>' + tbl() + '<div class="bs-src">출처: ' + esc(b.src || '') + '</div></details>';
-      h += '<div class="ml-amt"><span>이 회선 월 할인</span><b class="num">' + num(r.bundleOff) + '원</b></div><div class="bs-note">' + esc(au.note) + (r.bundleOff < au.amt ? ' · 월정액 한도까지만 할인돼요' : '') + '</div>';
+      h += '<div class="ml-amt"><span>' + (b.calc === 'opt' ? '결합/요금 할인 합계' : '이 회선 월 할인') + '</span><b class="num">' + num(r.bundleOff) + '원</b></div><div class="bs-note">' + esc(au.note) + (r.bundleOff < au.amt ? ' · 월정액 한도까지만 할인돼요' : '') + '</div>';
       h += '<div class="modal-f two"><button class="btn lg" data-back>다른 결합</button><button class="btn pri lg" data-yes>적용</button></div>';
       return h;
     }
@@ -783,12 +794,15 @@
       if ((x = e.target.closest('[data-n]'))) { t.bundleN = Number(x.getAttribute('data-n')); re(); return; }
       if ((x = e.target.closest('[data-net]'))) { t.bundleNet = x.getAttribute('data-net'); re(); return; }
       if ((x = e.target.closest('[data-one]'))) { t.bundleOne = x.getAttribute('data-one') === '1'; re(); return; }
+      if ((x = e.target.closest('button[data-opt]'))) { t.bundleOpt = x.getAttribute('data-opt'); re(); return; }
       if ((x = e.target.closest('[data-base]'))) { t.bundleBase = x.getAttribute('data-base') === '1'; re(); return; }
       if (e.target.closest('[data-back]')) { closeModal(); pickBundleBig(); return; }
       if (e.target.closest('[data-yes]')) { s.bundle = b.id; s.bundleAmt = 0; Object.keys(t).forEach(function (k) { s[k] = t[k]; }); closeModal(); render(); }
     });
     m.addEventListener('change', function (e) {
       if (e.target.matches('[data-teen]')) { t.bundleTeen = e.target.checked; re(); }
+      if (e.target.matches('input[data-opt]')) { t.bundleOpt = e.target.getAttribute('data-opt'); re(); }
+      if (e.target.matches('[data-add]')) { var ak = e.target.getAttribute('data-add'); t.bundleAdds = t.bundleAdds.filter(function (z) { return z !== ak; }); if (e.target.checked) t.bundleAdds.push(ak); else (b.adds || []).forEach(function (a) { if (a.need === ak) t.bundleAdds = t.bundleAdds.filter(function (z) { return z !== a.k; }); }); re(); }
       if (e.target.matches('[data-long]')) { t.bundleLong = Number(e.target.value); re(); }
       if (e.target.matches('[data-total]')) { t.bundleTotal = n0(String(e.target.value).replace(/[^\d]/g, '')); re(); }
     });
