@@ -6,9 +6,9 @@ export const config = { matcher: '/((?!robots\\.txt|favicon\\.ico).*)' };
 const SALT = 'f62f54b81b92b6076783c69a7c5ac294';
 const STAFF = [
   { id: 'owner', name: '사장님', store: 'all', role: 'admin', pin: '067b824a17eb31f0468e84e0269dc25e3209deecf9df1f6aa77d8f3bc55653c7', on: true },
-  { id: 'bp1', name: '부평본점 직원', store: 'bupyeong', role: 'staff', pin: '6992c0cfb00d3a6f5e55ca6c6c74f192c4144446fbb2a72859a2a988d6963b17', on: true },
-  { id: 'sg1', name: '숭의점 직원', store: 'sungui', role: 'staff', pin: '6f797a5f65f3d7ec358876bb7996241b0d21729edc5dc587aadb33372d1b85fd', on: true },
-  { id: 'gs1', name: '간석점 직원', store: 'ganseok', role: 'staff', pin: 'b50ba050016eeb8e2f28c46b6b8e2f4f7cd527a05e26ce56927ce11f26d408b3', on: true }
+  { id: 'bp1', name: '부평본점 직원', store: 'bupyeong', role: 'staff', pin: 'e5cf92fa21b7011dbf21db4e67c785dc0aa808a3bd511312cab8b7bf7b09fdf8', on: true },
+  { id: 'sg1', name: '숭의점 직원', store: 'sungui', role: 'staff', pin: '63ef1f5a54308e3f7fbce3e1e29d0b54695d5a8f175ffcdfa2cbcb1397381675', on: true },
+  { id: 'gs1', name: '간석점 직원', store: 'ganseok', role: 'staff', pin: '06c1a8579ebbed55ed2a132fadbe00dccec1368cd07dea45d9c6fc40941b20c7', on: true }
 ];
 const COOKIE = 'gms_k', NAMEC = 'gms_n', AGE = 34560000; /* 400일 */
 const OPEN = ['/manifest.webmanifest', '/robots.txt'];
