@@ -157,7 +157,8 @@
     h += '<div class="page-h"><h1>' + (m === 'mvno' ? '알뜰폰 회사를 골라 주세요' : '통신사를 골라 주세요') + '</h1></div>';
     if (m === 'wireless') {
       h += '<div class="car-grid">';
-      carriersFor('wireless').forEach(function (c) {
+      var ORD = { kt: 0, skt: 1, lgu: 2 };
+      carriersFor('wireless').slice().sort(function (x, y) { return (ORD[x.id] == null ? 9 : ORD[x.id]) - (ORD[y.id] == null ? 9 : ORD[y.id]); }).forEach(function (c) {
         var nMod = DB.data.models.filter(function (x) { return !x.special && (!x.only || x.only === c.id); }).length;
         h += '<a class="car c-' + c.id + '" href="#/phone/' + c.id + '"><div class="nm">' + esc(c.name) + '</div><div class="ds">모델 ' + nMod + '종 · 요금제 ' + DB.plansOf(c.id).length + '개</div><div class="go">누르기 →</div></a>';
       });
