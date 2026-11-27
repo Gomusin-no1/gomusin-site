@@ -427,7 +427,6 @@
     h += row('가입 유형', '<div class="seg sm">' + JOIN.map(function (j) { return '<button data-set="join" data-v="' + j[0] + '" class="' + (s.join === j[0] ? 'on' : '') + '">' + j[1] + '</button>'; }).join('') + '</div>');
     h += row(used ? '판매가' : '출고가', '<span class="num" data-o="price">' + won(r.price) + '</span>', '', used ? '' : '<small>자동</small>');
     if (!used && !mv && r.subMode !== 'select') h += row('공통지원금', '<span class="num" data-o="common">' + minus(r.common) + '</span>', 'minus', '<small>' + (r.subMode === 'select' ? '선택약정 중' : '자동') + '</small>');
-    if (!used && !mv && r.subMode === 'common' && r.common && pcRule(s.carrier)) { var pc = pcRule(s.carrier); h += '<div class="pc-note"><b>요금제 변경 기준</b> 개통 <em>' + pc.days + '일</em> 뒤 <em>월 ' + num(pc.min) + '원 이상</em> 요금제로 바꾸면 차액정산금 없어요' + (pc.ok ? '' : ' <span class="pc-chk">확인 필요</span>') + '<div class="pc-s">그 전에 바꾸거나 더 낮은 요금제로 바꾸면 받은 공통지원금 일부를 돌려내야 해요.</div></div>'; }
     if (!used && !mv) h += row('추가지원금', numIn('extra', s.extra, true), '', '<small>직접 입력</small>');
     if (!used && !mv) h += row('프리미엄패스', '<select class="sel' + (s.pass ? ' w-s' : '') + '" data-k="pass"><option value="">미적용</option>' + passes.map(function (p) { return opt(p.id, p.name, s.pass); }).join('') + '</select>' + (s.pass ? numIn('passAmt', s.passAmt, true, 'w-s') : ''), '', '<small>24개월 약정</small>', true, !!s.pass);
     h += row('중고폰 할인', numIn('usedOff', s.usedOff, true), '', '<small>쓰던 폰 반납</small>', true, s.usedOff > 0);
@@ -1001,6 +1000,17 @@
   /* 공통지원금: 개통 후 며칠 지나면 얼마 이상 요금제로 바꿔도 차액정산금이 없는지 */
   function pcRule(car) { var x = ((DB.data.planChange || {})[car]) || null; return x && x.min ? x : null; }
   function pcText(car) { var x = pcRule(car); return x ? '개통 ' + x.days + '일 뒤 월 ' + num(x.min) + '원 이상 요금제로 바꾸면 차액정산금 없음' + (x.ok ? '' : ' (확인 필요)') : ''; }
+  /* 공통지원금으로 상담 저장하면 가운데 경고 팝업 */
+  function pcWarn(car) {
+    var x = pcRule(car), c = DB.carrier(car) || {};
+    var body = '<div class="pcw"><svg class="pcw-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6 1.4 21h21.2L12 2.6z" fill="#EF233C"/><path d="M12 9v5.2" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="17.4" r="1.4" fill="#fff"/></svg>' +
+      '<div class="pcw-t">고객님!</div><div class="pcw-c">' + esc(c.name || '') + ' 공통지원금으로 개통하셨어요</div>' +
+      '<div class="pcw-m"><b>6개월(' + x.days + '일) 뒤</b>에는 요금제를 자유롭게 바꾸셔도 되지만,</div>' +
+      '<div class="pcw-amt num">월 ' + num(x.min) + '원</div>' +
+      '<div class="pcw-m"><b class="red">이 요금제 밑으로</b> 쓰시면 받으신 공통지원금이 <b class="red">청구돼요</b> (차액 정산)</div>' +
+      '</div><div class="modal-f"><button class="btn pri lg" data-close style="width:100%">확인했어요</button></div>';
+    var m = modal('요금제 변경 안내', body, { size: 'sm' }); m.querySelector('.modal').classList.add('pcw-modal');
+  }
   function toolFee() {
     var s = st(), r = G.calc(s);
     var h = '<div class="modal-p"><div class="subhead">할부원금 ' + won(r.principal) + ' · 연 ' + r.rate + '%</div><table class="tbl"><thead><tr><th>개월</th><th class="r">월 할부금</th><th class="r">수수료 합계</th></tr></thead><tbody>';
@@ -1027,7 +1037,6 @@
       '지원 방식: ' + (r.subMode === 'common' ? '공통지원금' : r.subMode === 'select' ? '선택약정 25%' : '-'), '',
       '[A 단말기] ' + (s.mode === 'used' ? '판매가 ' : '출고가 ') + won(r.price)];
     [['공통지원금', r.common], ['추가지원금', r.extra], ['프리미엄패스', r.passOff], ['중고폰 할인', r.usedOff], ['기타지원', r.etc], ['라이트할부카드', r.lightOff], ['수납금', r.cash]].forEach(function (x) { if (x[1]) L.push(' - ' + x[0] + ' ' + minus(x[1])); });
-    if (r.subMode === 'common' && r.common && pcRule(s.carrier)) L.push(' ※ ' + pcText(s.carrier));
     L.push(' 할부원금 ' + won(r.principal) + (r.months ? ' / ' + r.months + '개월' : ' / 일시불'));
     L.push(' 월 할부금 ' + won(r.instMonthly) + (r.lightMon ? ' (라이트할부 월 ' + minus(r.lightMon) + ' → ' + won(r.instMonthly - r.lightMon) + ')' : ''), '');
     L.push('[B 요금] 월정액 ' + won(r.fee));
@@ -1057,6 +1066,7 @@
       DB.records.unshift({ id: G.uid(), at: G.nowStr(), store: DB.prefs.store, staff: DB.prefs.staff, state: G.clone(s), monthly: r.monthly, carrier: r.car.name, device: r.dev ? r.dev.name + (s.color && s.mode !== 'used' ? ' ' + s.color : '') : '', plan: r.plan ? r.plan.name : '' });
       if (DB.records.length > 2000) DB.records.length = 2000;
       DB.saveRecords(); closeModal(); toast('상담을 저장했어요'); saveDraft();
+      if (r.subMode === 'common' && r.common && pcRule(s.carrier)) pcWarn(s.carrier);
     };
   }
   function loadRecord(id) {
@@ -1074,7 +1084,6 @@
     var tr = function (k, v) { return '<tr><th>' + k + '</th><td class="r">' + v + '</td></tr>'; };
     var a = tr(s.mode === 'used' ? '판매가' : '출고가', won(r.price));
     [['공통지원금', r.common], ['추가지원금', r.extra], ['프리미엄패스', r.passOff], ['중고폰 할인', r.usedOff], ['기타지원', r.etc], ['라이트할부카드', r.lightOff], ['수납금', r.cash]].forEach(function (x) { if (x[1]) a += tr(x[0], minus(x[1])); });
-    if (r.subMode === 'common' && r.common && pcRule(s.carrier)) a += '<tr><th>요금제 변경 기준</th><td class="r" style="font-weight:700">' + esc(pcText(s.carrier)) + '</td></tr>';
     a += tr('할부원금', won(r.principal)) + tr('할부 개월', r.months ? r.months + '개월 (연 ' + r.rate + '%)' : '일시불') + tr('월 할부금', won(r.instMonthly)) + (r.lightMon ? tr('라이트할부 월 할인', minus(r.lightMon)) : '');
     var b = tr('요금제', r.plan ? esc(r.plan.name) : '-') + tr('월정액', won(r.fee));
     [['선택약정', r.selectOff], ['결합 할인', r.bundleOff], ['복지 할인', r.welOff], ['청구할인카드', r.cardOff], ['군인 할인', r.milOff], [r.famD ? r.famD.name : '가족 할인', r.famOff], ['프로모션', r.promo]].forEach(function (x) { if (x[1]) b += tr(x[0], minus(x[1])); });
