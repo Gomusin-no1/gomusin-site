@@ -155,6 +155,36 @@
      상담 계산
      s: 상담 상태 (app.js의 newState 참고)
      ========================================================= */
+  /* 결합 할인 자동 계산 (금액표가 있는 결합만) · 이 회선 한 대의 월 할인 */
+  function bundleAuto(b, s, fee, afterSelect) {
+    if (!b || !b.calc) return null;
+    var n = Math.max(1, Math.min(n0(b.maxN) || 10, n0(s.bundleN) || n0(b.minN) || 2));
+    var f10 = function (x) { return Math.floor(x / 10) * 10; };
+    var keyLE = function (obj, k) { var best = null; Object.keys(obj || {}).forEach(function (x) { x = Number(x); if (x <= k && (best === null || x > best)) best = x; }); return best; };
+    var colOf = function (cuts, v) { var c = 0; (cuts || [0]).forEach(function (m, i) { if (v >= m) c = i; }); return c; };
+    var amt = 0, note = n + '회선', ok = n >= (n0(b.minN) || 1);
+    var net = (b.nets || []).find(function (x) { return x.k === s.bundleNet; }) || (b.nets || [])[0];
+    if (b.calc === 'perLine') {
+      var base = b.basis === 'after' ? afterSelect : fee, k = keyLE(b.rows, n);
+      amt = ok && k !== null ? n0((b.rows[k] || [])[colOf(b.cuts, base)]) : 0;
+      if (ok && b.teen && s.bundleTeen) { amt += n0(b.teen); note += ' · 청소년'; }
+      if (ok && b.longOpts && n0(s.bundleLong)) { amt += f10(n0(s.bundleLong) / n); note += ' · 장기'; }
+    } else if (b.calc === 'group') {
+      var t = net ? net.t : {}, k2 = keyLE(t, n), tot = k2 !== null ? n0(t[k2]) : 0;
+      if (net && net.k === 'none' && n < 2) tot = 0;
+      amt = s.bundleOne ? tot : f10(tot / n); note += ' · ' + (net ? net.l : '') + (s.bundleOne ? ' · 1회선 몰아받기' : ' · 나눠받기');
+    } else if (b.calc === 'total') {
+      var sum = n0(s.bundleTotal) || fee * n, mob = net ? n0(net.m[colOf(b.cuts, sum)]) : 0;
+      amt = s.bundleOne ? mob : f10(mob / n); note += ' · 가족 합계 ' + won(sum) + (s.bundleOne ? ' · 1대 몰아받기' : ' · 나눠받기');
+    } else if (b.calc === 'tier') {
+      amt = ok ? n0(((b.tiers || []).filter(function (x) { return fee >= x[0]; }).pop() || [0, 0])[1]) : 0;
+    } else if (b.calc === 'pct') {
+      if (s.bundleBase) { amt = 0; note += ' · 베이스 회선'; }
+      else { amt = ok && fee >= n0(b.minFee) ? f10((fee * n0(b.rate)) / 100) : 0; if (amt && b.teen && s.bundleTeen && fee >= n0(b.teenMinFee)) { amt += n0(b.teen); note += ' · 청소년'; } }
+    }
+    if (!ok) note += ' (최소 ' + b.minN + '회선)';
+    return { amt: amt, note: note, n: n };
+  }
   function calc(s, override) {
     s = Object.assign({}, s, override || {});
     var D = DB.data;
@@ -192,7 +222,8 @@
     var selectOff = subMode === 'select' && plan ? Math.round((fee * 0.25) / 10) * 10 : 0;
     var afterSelect = fee - selectOff;
     var bundle = (D.bundles || []).find(function (x) { return x.id === s.bundle; });
-    var bundleOff = bundle ? Math.min(afterSelect, pos(s.bundleAmt)) : 0;
+    var bAuto = bundle ? bundleAuto(bundle, s, fee, afterSelect) : null;
+    var bundleOff = bundle ? Math.min(afterSelect, bAuto ? bAuto.amt : pos(s.bundleAmt)) : 0;
     var welfare = (D.welfare || []).find(function (x) { return x.id === s.welfare; });
     var welOff = welfareOff(welfare, Math.max(0, afterSelect - bundleOff));
     var mil = (D.military || {})[s.carrier] || {}, milRate = n0(mil.rate || D.militaryRate || 20);
@@ -224,7 +255,7 @@
       price: price, common: common, extra: extra, passOff: passOff, usedOff: usedOff, etc: etc, lightOff: lightOff, light: light, lightTiers: lightT, lightMon: lightMon, milRate: milRate,
       beforeCash: beforeCash, cash: cash, principal: principal, months: months, rate: rate,
       instMonthly: inst.monthly, instFee: inst.fee,
-      fee: fee, selectOff: selectOff, bundleOff: bundleOff, welOff: welOff, milOff: milOff, famOff: famOff, famD: famD, promo: promo, dual: dual,
+      fee: fee, selectOff: selectOff, bundleOff: bundleOff, bAuto: bAuto, welOff: welOff, milOff: milOff, famOff: famOff, famD: famD, promo: promo, dual: dual,
       planMonthly: planMonthly, cardOff: cardOff, card: card, cardTiers: cardT,
       addons: addons, swap: swap, addonFee: addonFee, usim: usim, usimItem: usimItem, usims: usims,
       monthly: monthly, total24: total24
@@ -256,5 +287,5 @@
     function fallback() { var ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); var ok = false; try { ok = document.execCommand('copy'); } catch (e) {} ta.remove(); return ok; }
   }
 
-  window.GC = { DB: DB, calc: calc, afterChange: afterChange, tiers: tiers, installment: installment, won: won, num: num, n0: n0, esc: esc, uid: uid, kst: kst, nowStr: nowStr, download: download, copyText: copyText, clone: clone };
+  window.GC = { DB: DB, calc: calc, bundleAuto: bundleAuto, afterChange: afterChange, tiers: tiers, installment: installment, won: won, num: num, n0: n0, esc: esc, uid: uid, kst: kst, nowStr: nowStr, download: download, copyText: copyText, clone: clone };
 })();
