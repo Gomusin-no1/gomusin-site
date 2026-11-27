@@ -1,59 +1,127 @@
-/* 직원별 로그인 (Vercel 서버에서 확인 · 로그인 전에는 화면 · 자료 · 코드가 하나도 안 나가요)
-   - 직원마다 비밀번호가 따로 있어요. 하루에 처음 열 때 한 번만 넣으면 그날(한국 시간 밤 12시까지)은 자동으로 들어가요.
-   - 직원을 빼면(on: false 또는 줄 삭제) 그 직원 기기는 바로 다음 화면부터 로그인 화면으로 돌아가요.
-   - 비밀번호는 sha256(SALT + 비밀번호) 로만 들어 있어요. */
+/* 직원별 아이디 로그인 (Vercel 서버에서 확인 · 로그인 전에는 화면 · 자료 · 코드가 하나도 안 나가요)
+   - 직원마다 아이디 · 비밀번호가 따로 있어요. 하루에 처음 열 때 한 번만 넣으면 그날(한국 시간 밤 12시까지)은 자동으로 들어가요.
+   - 사장님 메뉴 > 직원 계정 에서 직원을 만들고 · 멈추고 · 지워요. 지우거나 멈추면 그 직원은 바로 다음 화면부터 못 들어와요.
+   - 직원 목록은 Vercel 저장소(Upstash Redis)에 들어가요. 저장소가 없으면 아래 기본 계정만 쓸 수 있어요.
+   - 비밀번호는 sha256 으로만 들어 있어요. */
 export const config = { matcher: '/((?!robots\\.txt|favicon\\.ico).*)' };
 const SALT = 'f62f54b81b92b6076783c69a7c5ac294';
-const STAFF = [
-  { id: 'owner', name: '사장님', store: 'all', role: 'admin', pin: '067b824a17eb31f0468e84e0269dc25e3209deecf9df1f6aa77d8f3bc55653c7', on: true },
-  { id: 'bp1', name: '부평본점 직원', store: 'bupyeong', role: 'staff', pin: 'e5cf92fa21b7011dbf21db4e67c785dc0aa808a3bd511312cab8b7bf7b09fdf8', on: true },
-  { id: 'sg1', name: '숭의점 직원', store: 'sungui', role: 'staff', pin: '63ef1f5a54308e3f7fbce3e1e29d0b54695d5a8f175ffcdfa2cbcb1397381675', on: true },
-  { id: 'gs1', name: '간석점 직원', store: 'ganseok', role: 'staff', pin: '06c1a8579ebbed55ed2a132fadbe00dccec1368cd07dea45d9c6fc40941b20c7', on: true }
+/* 기본 계정 (저장소 없이도 동작) */
+const BASE = [
+  { id: 'admin', name: '사장님', store: 'all', role: 'admin', pin: '067b824a17eb31f0468e84e0269dc25e3209deecf9df1f6aa77d8f3bc55653c7', on: true },
+  { id: 'bupyeong', name: '부평본점 직원', store: 'bupyeong', role: 'staff', pin: 'e5cf92fa21b7011dbf21db4e67c785dc0aa808a3bd511312cab8b7bf7b09fdf8', on: true },
+  { id: 'sungui', name: '숭의점 직원', store: 'sungui', role: 'staff', pin: '63ef1f5a54308e3f7fbce3e1e29d0b54695d5a8f175ffcdfa2cbcb1397381675', on: true },
+  { id: 'ganseok', name: '간석점 직원', store: 'ganseok', role: 'staff', pin: '06c1a8579ebbed55ed2a132fadbe00dccec1368cd07dea45d9c6fc40941b20c7', on: true }
 ];
-const COOKIE = 'gms_k', NAMEC = 'gms_n';
-/* 한국 시간 기준 오늘 날짜(YYYY-MM-DD)와 오늘 밤 12시까지 남은 초 */
-function kstDay() { return new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10); }
-function toMidnight() { const k = Date.now() + 9 * 3600000; return Math.max(60, Math.floor((86400000 - (k % 86400000)) / 1000)); }
-function tokOf(u) { return sha(u.pin + ':' + u.id + ':' + kstDay()); }
+const COOKIE = 'gms_k', NAMEC = 'gms_n', KEY = 'gms:staff';
 const OPEN = ['/manifest.webmanifest', '/robots.txt'];
+const SEC = { 'X-Robots-Tag': 'noindex, nofollow, noarchive, nosnippet, noimageindex, noai, noimageai', 'Cache-Control': 'no-store', 'X-Frame-Options': 'DENY', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer' };
+const LOGIN = "<!doctype html>\n<html lang=\"ko\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,viewport-fit=cover\">\n<meta name=\"robots\" content=\"noindex,nofollow,noai,noimageai\">\n<title>고무신 상담 · 직원 로그인</title>\n<meta name=\"theme-color\" content=\"#070B16\">\n<link rel=\"manifest\" href=\"/manifest.webmanifest\">\n<meta name=\"apple-mobile-web-app-capable\" content=\"yes\">\n<meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black-translucent\">\n<link rel=\"apple-touch-icon\" href=\"/assets/icons/apple-180.png\">\n<style>\n@font-face{font-family:'PV';font-weight:45 920;font-display:swap;src:url('/assets/fonts/PretendardVariable.subset.woff2') format('woff2-variations'),url('/assets/fonts/PretendardVariable.subset.woff2') format('woff2')}\n*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}\nhtml,body{height:100%}\nbody{margin:0;font-family:'PV',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:#F4F1EA;background:#070B16;overflow:hidden;-webkit-user-select:none;user-select:none}\n.bg{position:fixed;inset:0;background:radial-gradient(1200px 700px at 50% -10%,#1C2A4E 0%,rgba(28,42,78,0) 60%),radial-gradient(900px 600px at 50% 120%,#2A1F0C 0%,rgba(42,31,12,0) 60%),linear-gradient(180deg,#0A1022,#070B16)}\n.st{position:fixed;inset:0;pointer-events:none}\n.st i{position:absolute;width:2px;height:2px;border-radius:50%;background:#F7E7B8;box-shadow:0 0 6px 1px rgba(247,231,184,.7);opacity:0;animation:tw 4s ease-in-out infinite}\n.st i.f{width:1px;height:60px;border-radius:0;background:linear-gradient(180deg,rgba(247,231,184,0),rgba(247,231,184,.9));box-shadow:none;animation:fall 7s linear infinite}\n@keyframes tw{0%,100%{opacity:0;transform:scale(.6)}50%{opacity:.9;transform:scale(1)}}\n@keyframes fall{0%{opacity:0;transform:translate(0,-20vh) rotate(20deg)}10%{opacity:.8}70%{opacity:0}100%{opacity:0;transform:translate(-30vh,80vh) rotate(20deg)}}\n.wrap{position:relative;z-index:2;min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:max(24px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}\n.logo{width:168px;height:auto;filter:drop-shadow(0 6px 24px rgba(212,162,76,.35));margin-bottom:18px}\n.card{width:100%;max-width:400px;padding:34px 28px 28px;border-radius:26px;background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.10);box-shadow:0 30px 80px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.08);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);text-align:center;position:relative}\n.card:before{content:'';position:absolute;inset:-1px;border-radius:26px;padding:1px;background:linear-gradient(140deg,rgba(232,196,120,.65),rgba(232,196,120,0) 35%,rgba(232,196,120,0) 65%,rgba(232,196,120,.35));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}\n.badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:99px;background:rgba(212,162,76,.12);color:#E8C478;font-size:12.5px;font-weight:700;letter-spacing:.04em}\n.badge svg{width:13px;height:13px}\nh1{margin:14px 0 6px;font-size:26px;font-weight:800;letter-spacing:-.02em}\np.s{margin:0 0 26px;color:#A9B2C7;font-size:14.5px;line-height:1.55}\n.pin{position:relative;display:flex;justify-content:center;gap:12px;margin:0 auto 8px;cursor:text}\n.pin b{width:46px;height:56px;border-radius:14px;background:rgba(7,11,22,.65);border:1.5px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;transition:border-color .15s,box-shadow .15s,transform .15s}\n.pin b.on{border-color:#E8C478;box-shadow:0 0 0 4px rgba(232,196,120,.14)}\n.pin b.fill:after{content:'';width:12px;height:12px;border-radius:50%;background:linear-gradient(180deg,#F6DE9C,#C9933A);box-shadow:0 0 10px rgba(232,196,120,.6);animation:pop .18s ease-out}\n@keyframes pop{0%{transform:scale(.3)}100%{transform:scale(1)}}\n.pin input{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;font-size:16px;color:transparent;background:transparent;caret-color:transparent;-webkit-user-select:text;user-select:text}\n.card.err .pin{animation:sh .4s}\n.card.err .pin b{border-color:#FF6B7D}\n@keyframes sh{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}\n.fl{display:block;text-align:left;margin:0 0 12px}\n.fl span{display:block;font-size:12.5px;font-weight:700;color:#C9B27E;margin:0 0 6px 4px;letter-spacing:.02em}\n.fl input{width:100%;height:54px;padding:0 16px;border-radius:14px;background:rgba(7,11,22,.65);border:1.5px solid rgba(255,255,255,.12);color:#F4F1EA;font:600 17px 'PV',-apple-system,sans-serif;outline:none;transition:border-color .15s,box-shadow .15s;-webkit-user-select:text;user-select:text}\n.fl input:focus{border-color:#E8C478;box-shadow:0 0 0 4px rgba(232,196,120,.14)}\n.fl input::placeholder{color:#5C6680;font-weight:500}\n.card.err .fl input{border-color:#FF6B7D}\n.card.err .fls{animation:sh .4s}\n.e{min-height:20px;margin:6px 0 10px;font-size:13.5px;color:#FF8A98;font-weight:600}\nbutton{width:100%;height:56px;border:0;border-radius:16px;cursor:pointer;font:800 17px 'PV',-apple-system,sans-serif;color:#1A1205;letter-spacing:.02em;background:linear-gradient(180deg,#F3D38A 0%,#D9A54B 55%,#B98330 100%);box-shadow:0 10px 26px rgba(212,162,76,.32),inset 0 1px 0 rgba(255,255,255,.55);transition:transform .12s,box-shadow .2s,filter .2s}\nbutton:hover{filter:brightness(1.06);box-shadow:0 14px 34px rgba(212,162,76,.42),inset 0 1px 0 rgba(255,255,255,.6)}\nbutton:active{transform:translateY(1px) scale(.99)}\nbutton[disabled]{filter:grayscale(.3) brightness(.8);cursor:default}\n.f{margin-top:18px;display:flex;align-items:center;justify-content:center;gap:7px;color:#7F8AA3;font-size:12.5px}\n.f svg{width:14px;height:14px;flex:none}\n.foot{margin-top:22px;color:#5C6680;font-size:12px;letter-spacing:.02em}\n@media (max-width:380px){.pin{gap:8px}.pin b{width:42px;height:52px}.card{padding:30px 20px 24px}}\n@media (prefers-reduced-motion:reduce){.st i{animation:none;opacity:.5}}\n</style>\n</head>\n<body oncontextmenu=\"return false\">\n<div class=\"bg\"></div>\n<div class=\"st\" id=\"st\"></div>\n<main class=\"wrap\">\n  <img class=\"logo\" src=\"/assets/logo-gold.png\" alt=\"고무신모바일\" draggable=\"false\">\n  <form class=\"card\" id=\"f\" method=\"post\" action=\"/__login\" autocomplete=\"off\">\n    <span class=\"badge\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"4\" y=\"10\" width=\"16\" height=\"11\" rx=\"2.5\"/><path d=\"M8 10V7a4 4 0 0 1 8 0v3\"/></svg>직원 전용</span>\n    <h1>고무신 상담</h1>\n    <p class=\"s\">아이디와 비밀번호를 넣어주세요</p>\n    <div class=\"fls\"><label class=\"fl\"><span>아이디</span><input id=\"id\" name=\"id\" type=\"text\" value=\"__ID__\" autocapitalize=\"none\" autocorrect=\"off\" spellcheck=\"false\" autocomplete=\"username\" placeholder=\"예: hong\" required></label><label class=\"fl\"><span>비밀번호</span><input id=\"pw\" name=\"pw\" type=\"password\" autocomplete=\"current-password\" placeholder=\"비밀번호\" required></label></div>\n    <div class=\"e\" id=\"e\">__MSG__</div>\n    <button id=\"go\" type=\"submit\">들어가기</button>\n    <div class=\"f\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 6 9 17l-5-5\"/></svg>하루에 한 번만 넣으면 오늘은 자동으로 들어가요</div>\n  </form>\n  <div class=\"foot\">고무신모바일 · 부평본점 · 숭의점 · 간석점</div>\n</main>\n<script>\n(function(){\n  var st=document.getElementById('st'),h='';\n  for(var i=0;i<46;i++){h+='<i style=\"left:'+(Math.random()*100).toFixed(1)+'%;top:'+(Math.random()*100).toFixed(1)+'%;animation-delay:'+(Math.random()*4).toFixed(2)+'s;animation-duration:'+(3+Math.random()*3).toFixed(2)+'s\"></i>';}\n  for(var j=0;j<4;j++){h+='<i class=\"f\" style=\"left:'+(40+Math.random()*60).toFixed(1)+'%;top:'+(Math.random()*30).toFixed(1)+'%;animation-delay:'+(j*1.9+Math.random()).toFixed(2)+'s\"></i>';}\n  st.innerHTML=h;\n  var f=document.getElementById('f'),id=document.getElementById('id'),pw=document.getElementById('pw'),go=document.getElementById('go');\n  try{if(!id.value){id.value=localStorage.getItem('gms_id')||'';}}catch(e){}\n  if(document.getElementById('e').textContent.trim()){f.classList.add('err');}\n  [id,pw].forEach(function(x){x.addEventListener('input',function(){f.classList.remove('err');document.getElementById('e').textContent='';});});\n  f.addEventListener('submit',function(){try{localStorage.setItem('gms_id',id.value.trim().toLowerCase());}catch(e){}go.disabled=true;go.textContent='확인 중…';});\n  setTimeout(function(){(id.value?pw:id).focus();},50);\n})();\n</script>\n</body>\n</html>\n";
 async function sha(t) { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)); return [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, '0')).join(''); }
 function getCookie(req, k) { const c = req.headers.get('cookie') || ''; const m = c.match(new RegExp('(?:^|;\\s*)' + k + '=([^;]+)')); return m ? m[1] : ''; }
-const SEC = { 'X-Robots-Tag': 'noindex, nofollow, noarchive, nosnippet, noimageindex, noai, noimageai', 'Cache-Control': 'no-store', 'X-Frame-Options': 'DENY', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer' };
-const LOGIN = "<!doctype html>\n<html lang=\"ko\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,viewport-fit=cover\">\n<meta name=\"robots\" content=\"noindex,nofollow,noai,noimageai\">\n<title>고무신 상담 · 직원 로그인</title>\n<meta name=\"theme-color\" content=\"#070B16\">\n<link rel=\"manifest\" href=\"/manifest.webmanifest\">\n<meta name=\"apple-mobile-web-app-capable\" content=\"yes\">\n<meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black-translucent\">\n<link rel=\"apple-touch-icon\" href=\"/assets/icons/apple-180.png\">\n<style>\n@font-face{font-family:'PV';font-weight:45 920;font-display:swap;src:url('/assets/fonts/PretendardVariable.subset.woff2') format('woff2-variations'),url('/assets/fonts/PretendardVariable.subset.woff2') format('woff2')}\n*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}\nhtml,body{height:100%}\nbody{margin:0;font-family:'PV',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:#F4F1EA;background:#070B16;overflow:hidden;-webkit-user-select:none;user-select:none}\n.bg{position:fixed;inset:0;background:radial-gradient(1200px 700px at 50% -10%,#1C2A4E 0%,rgba(28,42,78,0) 60%),radial-gradient(900px 600px at 50% 120%,#2A1F0C 0%,rgba(42,31,12,0) 60%),linear-gradient(180deg,#0A1022,#070B16)}\n.st{position:fixed;inset:0;pointer-events:none}\n.st i{position:absolute;width:2px;height:2px;border-radius:50%;background:#F7E7B8;box-shadow:0 0 6px 1px rgba(247,231,184,.7);opacity:0;animation:tw 4s ease-in-out infinite}\n.st i.f{width:1px;height:60px;border-radius:0;background:linear-gradient(180deg,rgba(247,231,184,0),rgba(247,231,184,.9));box-shadow:none;animation:fall 7s linear infinite}\n@keyframes tw{0%,100%{opacity:0;transform:scale(.6)}50%{opacity:.9;transform:scale(1)}}\n@keyframes fall{0%{opacity:0;transform:translate(0,-20vh) rotate(20deg)}10%{opacity:.8}70%{opacity:0}100%{opacity:0;transform:translate(-30vh,80vh) rotate(20deg)}}\n.wrap{position:relative;z-index:2;min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:max(24px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}\n.logo{width:168px;height:auto;filter:drop-shadow(0 6px 24px rgba(212,162,76,.35));margin-bottom:18px}\n.card{width:100%;max-width:400px;padding:34px 28px 28px;border-radius:26px;background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.10);box-shadow:0 30px 80px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.08);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);text-align:center;position:relative}\n.card:before{content:'';position:absolute;inset:-1px;border-radius:26px;padding:1px;background:linear-gradient(140deg,rgba(232,196,120,.65),rgba(232,196,120,0) 35%,rgba(232,196,120,0) 65%,rgba(232,196,120,.35));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}\n.badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:99px;background:rgba(212,162,76,.12);color:#E8C478;font-size:12.5px;font-weight:700;letter-spacing:.04em}\n.badge svg{width:13px;height:13px}\nh1{margin:14px 0 6px;font-size:26px;font-weight:800;letter-spacing:-.02em}\np.s{margin:0 0 26px;color:#A9B2C7;font-size:14.5px;line-height:1.55}\n.pin{position:relative;display:flex;justify-content:center;gap:12px;margin:0 auto 8px;cursor:text}\n.pin b{width:46px;height:56px;border-radius:14px;background:rgba(7,11,22,.65);border:1.5px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;transition:border-color .15s,box-shadow .15s,transform .15s}\n.pin b.on{border-color:#E8C478;box-shadow:0 0 0 4px rgba(232,196,120,.14)}\n.pin b.fill:after{content:'';width:12px;height:12px;border-radius:50%;background:linear-gradient(180deg,#F6DE9C,#C9933A);box-shadow:0 0 10px rgba(232,196,120,.6);animation:pop .18s ease-out}\n@keyframes pop{0%{transform:scale(.3)}100%{transform:scale(1)}}\n.pin input{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;font-size:16px;color:transparent;background:transparent;caret-color:transparent;-webkit-user-select:text;user-select:text}\n.card.err .pin{animation:sh .4s}\n.card.err .pin b{border-color:#FF6B7D}\n@keyframes sh{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}\n.e{min-height:20px;margin:6px 0 10px;font-size:13.5px;color:#FF8A98;font-weight:600}\nbutton{width:100%;height:56px;border:0;border-radius:16px;cursor:pointer;font:800 17px 'PV',-apple-system,sans-serif;color:#1A1205;letter-spacing:.02em;background:linear-gradient(180deg,#F3D38A 0%,#D9A54B 55%,#B98330 100%);box-shadow:0 10px 26px rgba(212,162,76,.32),inset 0 1px 0 rgba(255,255,255,.55);transition:transform .12s,box-shadow .2s,filter .2s}\nbutton:hover{filter:brightness(1.06);box-shadow:0 14px 34px rgba(212,162,76,.42),inset 0 1px 0 rgba(255,255,255,.6)}\nbutton:active{transform:translateY(1px) scale(.99)}\nbutton[disabled]{filter:grayscale(.3) brightness(.8);cursor:default}\n.f{margin-top:18px;display:flex;align-items:center;justify-content:center;gap:7px;color:#7F8AA3;font-size:12.5px}\n.f svg{width:14px;height:14px;flex:none}\n.foot{margin-top:22px;color:#5C6680;font-size:12px;letter-spacing:.02em}\n@media (max-width:380px){.pin{gap:8px}.pin b{width:42px;height:52px}.card{padding:30px 20px 24px}}\n@media (prefers-reduced-motion:reduce){.st i{animation:none;opacity:.5}}\n</style>\n</head>\n<body oncontextmenu=\"return false\">\n<div class=\"bg\"></div>\n<div class=\"st\" id=\"st\"></div>\n<main class=\"wrap\">\n  <img class=\"logo\" src=\"/assets/logo-gold.png\" alt=\"고무신모바일\" draggable=\"false\">\n  <form class=\"card\" id=\"f\" method=\"post\" action=\"/__login\" autocomplete=\"off\">\n    <span class=\"badge\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"4\" y=\"10\" width=\"16\" height=\"11\" rx=\"2.5\"/><path d=\"M8 10V7a4 4 0 0 1 8 0v3\"/></svg>직원 전용</span>\n    <h1>고무신 상담</h1>\n    <p class=\"s\">직원 비밀번호 6자리를 눌러주세요</p>\n    <label class=\"pin\" id=\"pin\"><b></b><b></b><b></b><b></b><b></b><b></b><input id=\"pi\" name=\"pin\" type=\"password\" inputmode=\"numeric\" pattern=\"[0-9]*\" maxlength=\"12\" autocomplete=\"current-password\" aria-label=\"비밀번호\" autofocus required></label>\n    <div class=\"e\" id=\"e\">__MSG__</div>\n    <button id=\"go\" type=\"submit\">들어가기</button>\n    <div class=\"f\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 6 9 17l-5-5\"/></svg>하루에 한 번만 넣으면 오늘은 자동으로 들어가요</div>\n  </form>\n  <div class=\"foot\">고무신모바일 · 부평본점 · 숭의점 · 간석점</div>\n</main>\n<script>\n(function(){\n  var st=document.getElementById('st'),h='';\n  for(var i=0;i<46;i++){h+='<i style=\"left:'+(Math.random()*100).toFixed(1)+'%;top:'+(Math.random()*100).toFixed(1)+'%;animation-delay:'+(Math.random()*4).toFixed(2)+'s;animation-duration:'+(3+Math.random()*3).toFixed(2)+'s\"></i>';}\n  for(var j=0;j<4;j++){h+='<i class=\"f\" style=\"left:'+(40+Math.random()*60).toFixed(1)+'%;top:'+(Math.random()*30).toFixed(1)+'%;animation-delay:'+(j*1.9+Math.random()).toFixed(2)+'s\"></i>';}\n  st.innerHTML=h;\n  var f=document.getElementById('f'),pi=document.getElementById('pi'),bs=document.querySelectorAll('.pin b'),go=document.getElementById('go'),sent=false;\n  if(document.getElementById('e').textContent.trim()){f.classList.add('err');}\n  function draw(){var v=pi.value.replace(/\\D/g,'');if(v!==pi.value)pi.value=v;for(var k=0;k<bs.length;k++){bs[k].className=(k<v.length?'fill':'')+(k===Math.min(v.length,bs.length-1)&&document.activeElement===pi?' on':'');}}\n  pi.addEventListener('input',function(){f.classList.remove('err');document.getElementById('e').textContent='';draw();if(pi.value.length===6&&!sent){sent=true;go.disabled=true;go.textContent='확인 중…';setTimeout(function(){f.submit();},120);}});\n  pi.addEventListener('focus',draw);pi.addEventListener('blur',draw);\n  f.addEventListener('submit',function(){sent=true;go.disabled=true;go.textContent='확인 중…';});\n  document.getElementById('pin').addEventListener('click',function(){pi.focus();});\n  setTimeout(function(){pi.focus();draw();},50);\n})();\n</script>\n</body>\n</html>\n";
-function page(msg) {
-  return new Response(LOGIN.replace('__MSG__', msg || ''), { status: 401, headers: { ...SEC, 'Content-Type': 'text/html; charset=utf-8' } });
-}
-function cookies(u, tok) {
-  const AGE = toMidnight();
-  const nm = encodeURIComponent(JSON.stringify({ n: u.name, s: u.store, r: u.role }));
-  return [COOKIE + '=' + u.id + '.' + tok + '; Path=/; Max-Age=' + AGE + '; HttpOnly; Secure; SameSite=Lax', NAMEC + '=' + nm + '; Path=/; Max-Age=' + AGE + '; Secure; SameSite=Lax'];
-}
+function kstDay() { return new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10); }
+function toMidnight() { const k = Date.now() + 9 * 3600000; return Math.max(60, Math.floor((86400000 - (k % 86400000)) / 1000)); }
 function ip(req) { return (req.headers.get('x-forwarded-for') || '').split(',')[0].trim(); }
+function env(a, b) { try { return (typeof process !== 'undefined' && process.env && (process.env[a] || process.env[b])) || ''; } catch (e) { return ''; } }
+const KV_URL = env('KV_REST_API_URL', 'UPSTASH_REDIS_REST_URL'), KV_TOK = env('KV_REST_API_TOKEN', 'UPSTASH_REDIS_REST_TOKEN');
+const SECRET = env('GMS_SECRET', 'KV_REST_API_TOKEN') || SALT;
+async function kv(cmd) {
+  if (!KV_URL || !KV_TOK) throw new Error('nokv');
+  const r = await fetch(KV_URL, { method: 'POST', headers: { Authorization: 'Bearer ' + KV_TOK, 'Content-Type': 'application/json' }, body: JSON.stringify(cmd), cache: 'no-store' });
+  if (!r.ok) throw new Error('kv ' + r.status);
+  return (await r.json()).result;
+}
+let cache = null, cacheAt = 0;
+async function stored(fresh) {
+  if (!KV_URL) return [];
+  if (!fresh && cache && Date.now() - cacheAt < 10000) return cache;
+  try { const v = await kv(['GET', KEY]); cache = v ? JSON.parse(v) : []; cacheAt = Date.now(); } catch (e) { if (!cache) cache = []; }
+  return cache;
+}
+async function save(list) { await kv(['SET', KEY, JSON.stringify(list)]); cache = list; cacheAt = Date.now(); }
+/* 기본 계정 + 저장소 계정 (같은 아이디면 저장소 값이 우선, 단 사장님 기본 계정은 못 멈춰요) */
+async function allStaff(fresh) {
+  const st = await stored(fresh), map = new Map();
+  BASE.forEach((u) => map.set(u.id, { ...u, base: true }));
+  st.forEach((u) => { const b = map.get(u.id); if (b && b.role === 'admin' && b.base) return; map.set(u.id, b ? { ...b, ...u, base: true } : u); });
+  return [...map.values()];
+}
+function tok(u, day) { return sha(SECRET + ':' + u.id + ':' + (u.pw || u.pin) + ':' + (u.v || 0) + ':' + day); }
+function cookies(u, t) {
+  const age = toMidnight();
+  const nm = encodeURIComponent(JSON.stringify({ n: u.name, s: u.store, r: u.role, i: u.id }));
+  return [COOKIE + '=' + encodeURIComponent(u.id) + '.' + t + '; Path=/; Max-Age=' + age + '; HttpOnly; Secure; SameSite=Lax', NAMEC + '=' + nm + '; Path=/; Max-Age=' + age + '; Secure; SameSite=Lax'];
+}
+function page(msg, id) {
+  return new Response(LOGIN.replace('__MSG__', msg || '').replace('__ID__', String(id || '').replace(/[^\w.@-]/g, '')), { status: 401, headers: { ...SEC, 'Content-Type': 'text/html; charset=utf-8' } });
+}
+function json(o, status) { return new Response(JSON.stringify(o), { status: status || 200, headers: { ...SEC, 'Content-Type': 'application/json; charset=utf-8' } }); }
+async function me(req) {
+  const ck = getCookie(req, COOKIE), dot = ck.lastIndexOf('.');
+  if (dot <= 0) return null;
+  const id = decodeURIComponent(ck.slice(0, dot));
+  const u = (await allStaff()).find((x) => x.on && x.id === id);
+  return u && ck.slice(dot + 1) === (await tok(u, kstDay())) ? u : null;
+}
+const pub = (u) => ({ id: u.id, name: u.name, store: u.store, role: u.role, on: !!u.on, base: !!u.base, at: u.at || '' });
+async function admin(req, u) {
+  if (u.role !== 'admin') return json({ ok: false, msg: '사장님만 쓸 수 있어요' }, 403);
+  if (req.method === 'GET') return json({ ok: true, kv: !!(KV_URL && KV_TOK), list: (await allStaff(true)).map(pub) });
+  if (!KV_URL || !KV_TOK) return json({ ok: false, msg: '저장소가 아직 연결되지 않았어요' }, 503);
+  let b = {}; try { b = await req.json(); } catch (e) {}
+  const id = String(b.id || '').trim().toLowerCase();
+  if (!/^[a-z0-9._-]{3,20}$/.test(id)) return json({ ok: false, msg: '아이디는 영문 소문자 · 숫자 3~20자로 해주세요' }, 400);
+  const base = BASE.find((x) => x.id === id);
+  if (base && base.role === 'admin') return json({ ok: false, msg: '사장님 계정은 여기서 바꿀 수 없어요' }, 400);
+  const list = (await stored(true)).slice(), i = list.findIndex((x) => x.id === id), cur = i >= 0 ? list[i] : null;
+  if (b.op === 'del') {
+    if (base) { const x = { id, on: false, v: (cur && cur.v || 0) + 1 }; if (i >= 0) list[i] = { ...cur, ...x }; else list.push(x); }
+    else if (i >= 0) list.splice(i, 1);
+    await save(list); console.log('[직원 삭제]', id, 'by', u.id); return json({ ok: true });
+  }
+  if (b.op === 'on' || b.op === 'off') {
+    if (!cur && !base) return json({ ok: false, msg: '없는 아이디예요' }, 404);
+    const x = { ...(cur || { id }), on: b.op === 'on', v: (cur && cur.v || 0) + (b.op === 'off' ? 1 : 0) };
+    if (i >= 0) list[i] = x; else list.push(x);
+    await save(list); console.log('[직원 ' + (b.op === 'on' ? '사용' : '멈춤') + ']', id, 'by', u.id); return json({ ok: true });
+  }
+  if (b.op === 'save') {
+    const name = String(b.name || '').trim().slice(0, 20), store = ['bupyeong', 'sungui', 'ganseok', 'all'].includes(b.store) ? b.store : '', pw = String(b.pw || '');
+    if (!name || !store) return json({ ok: false, msg: '이름과 매장을 넣어주세요' }, 400);
+    if (!cur && !base && pw.length < 4) return json({ ok: false, msg: '비밀번호는 4자 이상으로 해주세요' }, 400);
+    if (pw && pw.length < 4) return json({ ok: false, msg: '비밀번호는 4자 이상으로 해주세요' }, 400);
+    if (!cur && !base && b.isNew === false) return json({ ok: false, msg: '없는 아이디예요' }, 404);
+    if ((cur || base) && b.isNew) return json({ ok: false, msg: '이미 있는 아이디예요' }, 409);
+    const x = { ...(cur || { id, on: true, at: kstDay() }), name, store, role: 'staff' };
+    if (pw) { x.pw = await sha(SALT + id + ':' + pw); x.v = (x.v || 0) + 1; }
+    if (i >= 0) list[i] = x; else list.push(x);
+    await save(list); console.log('[직원 저장]', id, name, store, 'by', u.id); return json({ ok: true });
+  }
+  return json({ ok: false, msg: '알 수 없는 요청' }, 400);
+}
 export default async function middleware(req) {
   const url = new URL(req.url);
   if (url.pathname === '/__login' && req.method === 'POST') {
     await new Promise((r) => setTimeout(r, 700));
-    let pin = '';
-    try { const f = await req.formData(); pin = String(f.get('pin') || '').trim(); } catch (e) {}
-    const h = pin ? await sha(SALT + pin) : '';
-    const u = STAFF.find((x) => x.on && x.pin === h);
-    if (u) {
+    let id = '', pw = '';
+    try { const f = await req.formData(); id = String(f.get('id') || '').trim().toLowerCase(); pw = String(f.get('pw') || ''); } catch (e) {}
+    const all = await allStaff(true), u = all.find((x) => x.on && x.id === id);
+    if (u && pw && (u.pw === (await sha(SALT + id + ':' + pw)) || (!u.pw && u.pin && u.pin === (await sha(SALT + pw))))) {
       console.log('[로그인]', u.id, u.name, u.store, ip(req), req.headers.get('user-agent') || '');
       const hd = new Headers({ Location: '/', 'Cache-Control': 'no-store' });
-      cookies(u, await tokOf(u)).forEach((c) => hd.append('Set-Cookie', c));
+      cookies(u, await tok(u, kstDay())).forEach((c) => hd.append('Set-Cookie', c));
       return new Response(null, { status: 303, headers: hd });
     }
-    console.log('[로그인 실패]', ip(req));
-    return page('비밀번호가 맞지 않아요');
+    console.log('[로그인 실패]', id, ip(req));
+    return page('아이디나 비밀번호가 맞지 않아요', id);
   }
   if (url.pathname === '/__logout') { const hd = new Headers({ Location: '/' }); hd.append('Set-Cookie', COOKIE + '=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax'); hd.append('Set-Cookie', NAMEC + '=; Path=/; Max-Age=0; Secure; SameSite=Lax'); return new Response(null, { status: 303, headers: hd }); }
   if (OPEN.includes(url.pathname) || url.pathname.startsWith('/assets/icons/') || url.pathname.startsWith('/assets/fonts/') || url.pathname === '/assets/logo-gold.png') return;
-  const ck = getCookie(req, COOKIE), dot = ck.indexOf('.');
-  const u = dot > 0 ? STAFF.find((x) => x.on && x.id === ck.slice(0, dot)) : null;
-  if (u && ck.slice(dot + 1) === (await tokOf(u))) {
+  const u = await me(req);
+  if (u) {
+    if (url.pathname === '/__admin/staff') return admin(req, u);
     if (url.pathname === '/' || url.pathname === '/index.html') console.log('[접속]', u.id, u.name, ip(req));
     return;
   }
-  if (url.pathname === '/' || url.pathname.endsWith('.html')) return page('');
+  if (url.pathname === '/' || url.pathname.endsWith('.html')) return page('', '');
   return new Response('로그인이 필요해요', { status: 401, headers: { ...SEC, 'Content-Type': 'text/plain; charset=utf-8' } });
 }

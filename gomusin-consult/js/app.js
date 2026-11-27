@@ -1197,7 +1197,7 @@
     usims: { title: '유심 비용', help: '통신사별 유심 종류와 비용이에요. 상담 화면 C칸에서 골라요. 통신사를 <b>공통</b>으로 두면 알뜰폰에 쓰여요.', fields: [['carrier', '통신사', 'carrierAll', 100], ['name', '이름', 'text', 220], ['fee', '비용', 'num', 100], ['cond', '메모', 'text', 220]] },
     notices: { title: '알림 (처음 화면)', help: '처음 화면 <b>알림</b> 칸에 보이는 글이에요.', fields: [['date', '날짜', 'text', 110], ['text', '내용', 'text', 640]] }
   };
-  var ADMIN_TABS = [['subsidy', '공통지원금 (12시 변경)'], ['devices', '용량 · 출고가'], ['models', '모델 · 색상 · 사진'], ['plans', '요금제'], ['wired', '인터넷 · TV 요금'], ['usedStock', '중고폰 재고'], ['bundles', '결합 할인'], ['cards', '청구할인 카드'], ['lightCards', '라이트할부카드'], ['welfare', '복지 할인'], ['addons', '부가서비스 · 보험'], ['usims', '유심 비용'], ['notices', '알림'], ['basic', '매장 · 기본값'], ['sources', '자료 출처 · 기준일'], ['backup', '백업 · 옮기기']];
+  var ADMIN_TABS = [['staff', '직원 계정'], ['subsidy', '공통지원금 (12시 변경)'], ['devices', '용량 · 출고가'], ['models', '모델 · 색상 · 사진'], ['plans', '요금제'], ['wired', '인터넷 · TV 요금'], ['usedStock', '중고폰 재고'], ['bundles', '결합 할인'], ['cards', '청구할인 카드'], ['lightCards', '라이트할부카드'], ['welfare', '복지 할인'], ['addons', '부가서비스 · 보험'], ['usims', '유심 비용'], ['notices', '알림'], ['basic', '매장 · 기본값'], ['sources', '자료 출처 · 기준일'], ['backup', '백업 · 옮기기']];
 
   function renderAdmin() {
     if (window.GMS_ME && window.GMS_ME.r !== 'admin') { location.hash = '#/home'; return; }
@@ -1210,7 +1210,44 @@
     else if (adminTab === 'backup') adminBackup(box);
     else if (adminTab === 'wired') adminWired(box);
     else if (adminTab === 'sources') adminSources(box);
+    else if (adminTab === 'staff') adminStaff(box);
     else adminTable(box, adminTab);
+  }
+
+  /* 직원 계정: 만들기 · 멈추기 · 지우기 (서버 저장소 · 바로 적용) */
+  var STORE_NM = { bupyeong: '부평본점', sungui: '숭의점', ganseok: '간석점', all: '전체 (사장님)' };
+  function adminStaff(box) {
+    box.innerHTML = '<section class="card"><div class="card-h"><h2>직원 계정</h2></div><div class="help">불러오는 중…</div></section>';
+    fetch('/__admin/staff', { credentials: 'same-origin', cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (d) { drawStaff(box, d); }).catch(function () { box.innerHTML = '<section class="card"><div class="card-h"><h2>직원 계정</h2></div><div class="help">인터넷 연결을 확인하고 다시 눌러주세요. (사이트 주소로 접속했을 때만 써요)</div></section>'; });
+  }
+  function drawStaff(box, d) {
+    if (!d || !d.ok) { box.innerHTML = '<section class="card"><div class="help">' + esc((d && d.msg) || '불러오지 못했어요') + '</div></section>'; return; }
+    var h = '<section class="card"><div class="card-h"><h2>직원 계정</h2><div class="r"><span style="font-size:var(--fs-1);color:var(--sub)">' + d.list.length + '명</span></div></div>';
+    if (!d.kv) h += '<div class="help" style="background:#FFF7ED;border-color:#FDBA74"><b>저장소 연결이 아직 안 됐어요.</b> 연결 전에는 아래 기본 계정만 쓸 수 있고, 새 직원을 만들 수 없어요.</div>';
+    h += '<div class="help">직원을 <b>멈추거나 지우면</b> 그 직원은 바로 다음 화면부터 못 들어와요. 비밀번호를 바꾸면 그 직원은 다시 로그인해야 해요.</div>';
+    h += '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>이름</th><th>아이디</th><th>매장</th><th>상태</th><th></th></tr></thead><tbody>' + d.list.map(function (u) {
+      var adm = u.role === 'admin';
+      return '<tr><td><b>' + esc(u.name || '') + '</b></td><td>' + esc(u.id) + '</td><td>' + esc(STORE_NM[u.store] || u.store || '') + '</td><td>' + (u.on ? '<span style="color:#16A34A;font-weight:700">사용 중</span>' : '<span style="color:#DC2626;font-weight:700">멈춤</span>') + '</td><td class="r" style="white-space:nowrap">' +
+        (adm ? '<span style="color:var(--sub);font-size:12px">사장님 계정</span>' : '<button class="btn sm" data-sedit="' + esc(u.id) + '">수정</button> <button class="btn sm" data-son="' + esc(u.id) + '" data-v="' + (u.on ? 'off' : 'on') + '">' + (u.on ? '멈추기' : '다시 사용') + '</button> <button class="btn sm" data-sdel="' + esc(u.id) + '" style="color:#DC2626">지우기</button>') + '</td></tr>';
+    }).join('') + '</tbody></table></div></section>';
+    h += '<section class="card" style="margin-top:16px"><div class="card-h"><h2 id="sfT">새 직원 만들기</h2></div><div class="sf-grid">' +
+      '<label class="fld"><span>이름</span><input id="sfName" placeholder="예: 홍길동" maxlength="20"></label>' +
+      '<label class="fld"><span>매장</span><select id="sfStore" class="sel"><option value="bupyeong">부평본점</option><option value="sungui">숭의점</option><option value="ganseok">간석점</option></select></label>' +
+      '<label class="fld"><span>아이디 (영문 · 숫자)</span><input id="sfId" placeholder="예: hong" maxlength="20" autocapitalize="none"></label>' +
+      '<label class="fld"><span>비밀번호 (4자 이상)</span><input id="sfPw" placeholder="비밀번호" maxlength="40"></label>' +
+      '</div><div class="bar"><span id="sfMsg" style="color:#DC2626;font-weight:600"></span><span style="flex:1"></span><button class="btn" id="sfCancel" style="display:none">취소</button> <button class="btn pri" id="sfSave"' + (d.kv ? '' : ' disabled') + '>저장</button></div></section>';
+    box.innerHTML = h;
+    var editing = null;
+    function api(body) { return fetch('/__admin/staff', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }); }
+    function done(r) { if (r && r.ok) { toast('저장했어요'); adminStaff(box); } else { $('#sfMsg').textContent = (r && r.msg) || '실패했어요'; toast((r && r.msg) || '실패했어요'); } }
+    box.onclick = function (e) {
+      var x;
+      if ((x = e.target.closest('[data-sedit]'))) { var u = d.list.find(function (z) { return z.id === x.getAttribute('data-sedit'); }); editing = u.id; $('#sfT').textContent = u.name + ' 수정'; $('#sfName').value = u.name || ''; $('#sfStore').value = u.store || 'bupyeong'; $('#sfId').value = u.id; $('#sfId').disabled = true; $('#sfPw').value = ''; $('#sfPw').placeholder = '바꿀 때만 넣어요'; $('#sfCancel').style.display = ''; $('#sfName').focus(); return; }
+      if ((x = e.target.closest('[data-son]'))) { api({ op: x.getAttribute('data-v'), id: x.getAttribute('data-son') }).then(done); return; }
+      if ((x = e.target.closest('[data-sdel]'))) { var id = x.getAttribute('data-sdel'); if (x.getAttribute('data-ok') !== '1') { x.setAttribute('data-ok', '1'); x.textContent = '정말 지우기'; return; } api({ op: 'del', id: id }).then(done); return; }
+      if (e.target.closest('#sfCancel')) { adminStaff(box); return; }
+      if (e.target.closest('#sfSave')) { $('#sfMsg').textContent = ''; api({ op: 'save', isNew: !editing, id: editing || $('#sfId').value, name: $('#sfName').value, store: $('#sfStore').value, pw: $('#sfPw').value }).then(done); }
+   };
   }
 
   var subCar = 'lgu';
