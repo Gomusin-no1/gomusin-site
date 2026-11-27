@@ -894,3 +894,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: var(--fs-2); }
   .ml-box { margin: 10px var(--s-4) 0; padding: 12px 14px; font-size: var(--fs-2); } .ml-amt { margin: 12px var(--s-4); } .ml-amt span { font-size: 16px; } .ml-amt b { font-size: 20px; padding: 8px 14px; }
   .modal-f.two .btn { min-width: 0; flex: 1; }
 }
+
+/* 글자 끌어서 복사 막기 (입력칸 제외) */
+body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+input, textarea, select, [contenteditable="true"] { -webkit-user-select: text; user-select: text; }
+img { -webkit-user-drag: none; }

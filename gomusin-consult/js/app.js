@@ -98,13 +98,13 @@
 
   /* ---------- 상단 ---------- */
   function header(r) {
-    var nav = [['home', '처음'], ['phone', '휴대폰'], ['wired', '인터넷 · TV'], ['mvno', '알뜰폰'], ['used', '중고폰'], ['records', '상담기록'], ['admin', '관리']];
+    var nav = [['home', '처음'], ['phone', '휴대폰'], ['wired', '인터넷 · TV'], ['mvno', '알뜰폰'], ['used', '중고폰'], ['records', '상담기록']];
     $('#nav').innerHTML = nav.map(function (n) { return '<a href="#/' + n[0] + '" class="' + (r === n[0] ? 'on' : '') + '">' + n[1] + '</a>'; }).join('');
     var sel = $('#store');
     var SO = { bupyeong: 1, sungui: 2, ganseok: 3 };
     sel.innerHTML = DB.data.stores.slice().sort(function (a, b) { return (SO[a.id] || 9) - (SO[b.id] || 9); }).map(function (s) { return '<option value="' + s.id + '"' + (DB.prefs.store === s.id ? ' selected' : '') + '>' + esc(s.name) + '</option>'; }).join('');
     var b = DB.subsidyBase();
-    $('#basetime').innerHTML = '공통지원금 기준 <b>' + b.slice(5, 7) + '/' + b.slice(8, 10) + ' ' + b.slice(11) + '</b>';
+    $('#basetime').innerHTML = '';
   }
   function steps(n, m, cid) {
     var root = ROOT[m] || 'phone';
@@ -126,7 +126,7 @@
     var todayN = (DB.records || []).filter(function (x) { return (x.store || 'bupyeong') === DB.prefs.store && String(x.at || x.date || x.savedAt || '').indexOf(iso) === 0; }).length;
     var stName = (DB.store(DB.prefs.store) || {}).name || '';
     var h = '<div class="home-hero"><div class="hh-l"><div class="date">' + today() + (stName ? ' · ' + esc(stName) : '') + '</div><h1>무엇을 상담할까요?</h1><div class="sub">큰 칸 하나를 누르면 다음 단계로 넘어가요.</div></div>' +
-      '<div class="hh-r"><div class="hh-s"><span>오늘 상담</span><b class="num">' + todayN + '<small>건</small></b></div><div class="hh-s"><span>매장 전화</span><b class="num hh-ph">' + esc((DB.store(DB.prefs.store) || {}).phone || '') + '</b></div><div class="hh-s"><span>지원금 기준 (매일)</span><b class="num">12:00</b></div></div></div>';
+      '</div>';
     h += '<div class="home-tiles">';
     h += tile('#/phone', 'p', '휴대폰', 'SKT · KT · LG U+', '새 휴대폰 · 번호이동 · 기기변경');
     h += tile('#/wired', 'w', '인터넷 · TV', '인터넷 · IPTV · 결합', '휴대폰과 묶으면 얼마나 싸지는지');
@@ -135,8 +135,7 @@
     h += '</div>';
     h += '<div class="home-low">';
     h += '<section class="card"><div class="card-h"><h2>처음 쓰는 분은 이렇게</h2></div><ol class="howto"><li><b>휴대폰</b>을 눌러요.</li><li>고객님이 쓸 <b>통신사</b>를 눌러요.</li><li>원하는 <b>모델</b>을 눌러요.</li><li><b>색상 · 용량</b>을 고르고 아래 <b>요금제</b>를 고르면 매달 내는 돈이 바로 나와요.</li><li><b>상담 저장</b> 또는 <b>견적서 인쇄</b>로 마무리해요.</li></ol></section>';
-    h += '<section class="card"><div class="card-h"><h2>알림</h2><div class="r"><a class="btn sm" href="#/admin" data-admintab="sources">자료 출처 보기</a></div></div><div class="notes">' + (D.notices || []).map(function (n) { return '<div class="note-i"><span class="d">' + esc(String(n.date).slice(5).replace('-', '/')) + '</span>' + esc(n.text) + '</div>'; }).join('') + '</div>';
-    h += '<div class="quick"><a class="btn" href="#/records">상담 기록</a><a class="btn" href="#/admin">관리 (단가 · 지원금)</a></div></section>';
+    h += '<section class="card"><div class="card-h"><h2>바로 가기</h2></div><div class="quick"><a class="btn" href="#/records">상담 기록</a><a class="btn" href="#/used">중고폰</a></div><div style="margin-top:14px;text-align:right"><a href="#/admin" style="font-size:12px;color:#9AA3B5;text-decoration:none">사장님 메뉴</a></div></section>';
     h += '</div>';
     app.innerHTML = '<div class="wrap">' + h + '</div>';
     function tile(href, k, t, s1, s2) { return '<a class="tile t-' + k + '" href="' + href + '"><div class="ic">' + icon(k) + '</div><div class="tt">' + t + '</div><div class="s1">' + s1 + '</div><div class="s2">' + s2 + '</div><div class="go">시작하기 →</div></a>'; }
@@ -1454,4 +1453,17 @@
       sb.innerHTML = hs;
     }
   });
+})();
+
+/* 복사 · 저장 막기 (입력칸은 그대로 쓸 수 있어요) */
+(function () {
+  function editable(t) { return t && t.closest && t.closest('input, textarea, select, [contenteditable="true"]'); }
+  ['contextmenu', 'copy', 'cut', 'dragstart', 'selectstart'].forEach(function (ev) {
+    document.addEventListener(ev, function (e) { if (!editable(e.target)) e.preventDefault(); }, true);
+  });
+  document.addEventListener('keydown', function (e) {
+    var k = (e.key || '').toLowerCase(), c = e.ctrlKey || e.metaKey;
+    if (k === 'f12' || (c && (k === 'u' || k === 's')) || (c && e.shiftKey && (k === 'i' || k === 'j' || k === 'c'))) { e.preventDefault(); e.stopPropagation(); }
+    if (c && (k === 'c' || k === 'x' || k === 'a') && !editable(e.target)) e.preventDefault();
+  }, true);
 })();
