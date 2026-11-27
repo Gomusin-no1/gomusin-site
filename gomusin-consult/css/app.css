@@ -931,3 +931,20 @@ body.no-admin .adm-link { display: none; }
 .bs-src { margin-top: 8px; font-size: 11.5px; color: #8A93A6; }
 .bs-note { text-align: right; font-size: 12.5px; color: #6B7280; margin: -4px 4px 4px; }
 @media (max-width: 600px) { .bs-t { font-size: 11px; } .bs-t th, .bs-t td { padding: 5px 3px; } }
+
+/* 통신사 카드: 통신사 색으로 이름만 (깔끔하게) */
+.car { min-height: 240px; border: 1.5px solid #E6E8EE; border-top-width: 1.5px !important; border-radius: 20px; box-shadow: 0 1px 2px rgba(17,24,39,.04); transition: transform .15s, box-shadow .2s, border-color .2s; }
+.car:hover { transform: translateY(-3px); box-shadow: 0 14px 34px rgba(17,24,39,.10); }
+.car:active { transform: translateY(0) scale(.99); }
+.car .nm { font-size: 56px; font-weight: 900; letter-spacing: -0.04em; }
+.car .go { color: #9AA3B5; }
+.car.c-skt .nm { background: linear-gradient(90deg, #EA002C 0%, #FF5A00 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.car.c-kt .nm { color: #E4002B; }
+.car.c-lgu .nm { color: #E6007E; }
+.car.c-mvno .nm, .car.c-mv .nm { color: #7C3AED; }
+.car.c-mvno, .car.c-mv { background: #fff; }
+.car.c-skt:hover { border-color: #FF8A66; } .car.c-kt:hover { border-color: #F08A9A; } .car.c-lgu:hover { border-color: #F27DBD; } .car.c-mvno:hover, .car.c-mv:hover { border-color: #B79AF5; }
+@media (max-width: 900px) { .car { min-height: 150px; } .car .nm { font-size: 40px; } }
+@media (max-width: 600px) { .car { min-height: 120px; border-radius: 16px; } .car .nm { font-size: 32px; } }
+.car.c-skt .go { color: #F0391A; } .car.c-kt .go { color: #E4002B; } .car.c-lgu .go { color: #E6007E; } .car.c-mvno .go, .car.c-mv .go { color: #7C3AED; }
+.car.c-skt, .car.c-kt, .car.c-lgu, .car.c-mvno, .car.c-mv { border-top-color: #E6E8EE; }
