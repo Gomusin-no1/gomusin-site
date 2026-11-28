@@ -1,5 +1,5 @@
 /* =========================================================
-   고무신 컨설팅 · 화면
+   컨설팅 · 화면
    순서: 처음 화면 → 통신사 → 모델 목록 → 구매 안내서 (색상 · 용량 · 스펙) → 상담 계산
    ========================================================= */
 (function () {
@@ -552,7 +552,7 @@
   /* 앱으로 설치 (안드로이드 · PC 크롬/엣지는 바로 설치, 아이폰은 사파리 안내) */
   var instEvt = null;
   window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); instEvt = e; });
-  window.addEventListener('appinstalled', function () { instEvt = null; toast('설치됐어요! 바탕화면 · 홈 화면의 "고무신 컨설팅" 아이콘으로 열어요'); $$('.inst-card').forEach(function (x) { x.style.display = 'none'; }); });
+  window.addEventListener('appinstalled', function () { instEvt = null; toast('설치됐어요! 바탕화면 · 홈 화면의 "컨설팅" 아이콘으로 열어요'); $$('.inst-card').forEach(function (x) { x.style.display = 'none'; }); });
   function isApp() { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; }
   function devKind() {
     var u = navigator.userAgent || '';
@@ -565,12 +565,12 @@
     if (instEvt) { var ev = instEvt; instEvt = null; ev.prompt(); ev.userChoice.then(function (c) { if (c && c.outcome !== 'accepted') instEvt = ev; }).catch(function () {}); return; }
     var k = devKind(), link = location.origin + '/';
     var steps = {
-      ios: ['아래쪽(아이패드는 위쪽) <b>공유 버튼</b> <span class="inst-ic">⬆︎</span> 을 눌러요.', '목록을 내려서 <b>홈 화면에 추가</b>를 눌러요.', '오른쪽 위 <b>추가</b>를 누르면 끝! 홈 화면의 <b>고무신 컨설팅</b> 아이콘으로 열어요.'],
+      ios: ['아래쪽(아이패드는 위쪽) <b>공유 버튼</b> <span class="inst-ic">⬆︎</span> 을 눌러요.', '목록을 내려서 <b>홈 화면에 추가</b>를 눌러요.', '오른쪽 위 <b>추가</b>를 누르면 끝! 홈 화면의 <b>컨설팅</b> 아이콘으로 열어요.'],
       'ios-other': ['아이폰은 <b>사파리(Safari)</b>에서만 설치돼요.', '아래 <b>주소 복사</b>를 누르고 사파리를 열어 주소창에 붙여 넣어요.', '사파리에서 <b>공유 버튼</b> → <b>홈 화면에 추가</b>를 눌러요.'],
       inapp: ['카카오톡 · 네이버 같은 앱 안에서는 설치가 안 돼요.', '오른쪽 위 <b>⋮</b> 또는 <b>공유</b>에서 <b>다른 브라우저로 열기</b>(크롬 · 사파리)를 눌러요.', '열린 화면에서 다시 <b>앱 설치하기</b>를 눌러요.'],
-      android: ['크롬 오른쪽 위 <b>⋮</b> (점 세 개)를 눌러요.', '<b>앱 설치</b> 또는 <b>홈 화면에 추가</b>를 눌러요.', '<b>설치</b>를 누르면 끝! 홈 화면의 <b>고무신 컨설팅</b> 아이콘으로 열어요.'],
-      samsung: ['아래쪽 <b>≡</b> (메뉴)를 눌러요.', '<b>현재 페이지 추가</b> → <b>홈 화면</b>을 눌러요.', '홈 화면의 <b>고무신 컨설팅</b> 아이콘으로 열어요.'],
-      pc: ['크롬 · 엣지 주소창 오른쪽 끝의 <b>설치 아이콘</b> <span class="inst-ic">⊕</span> 을 눌러요.', '안 보이면 오른쪽 위 <b>⋮</b> → <b>전송, 저장, 공유</b>(엣지는 <b>앱</b>) → <b>설치</b>를 눌러요.', '바탕화면 · 시작 메뉴의 <b>고무신 컨설팅</b>으로 열어요.']
+      android: ['크롬 오른쪽 위 <b>⋮</b> (점 세 개)를 눌러요.', '<b>앱 설치</b> 또는 <b>홈 화면에 추가</b>를 눌러요.', '<b>설치</b>를 누르면 끝! 홈 화면의 <b>컨설팅</b> 아이콘으로 열어요.'],
+      samsung: ['아래쪽 <b>≡</b> (메뉴)를 눌러요.', '<b>현재 페이지 추가</b> → <b>홈 화면</b>을 눌러요.', '홈 화면의 <b>컨설팅</b> 아이콘으로 열어요.'],
+      pc: ['크롬 · 엣지 주소창 오른쪽 끝의 <b>설치 아이콘</b> <span class="inst-ic">⊕</span> 을 눌러요.', '안 보이면 오른쪽 위 <b>⋮</b> → <b>전송, 저장, 공유</b>(엣지는 <b>앱</b>) → <b>설치</b>를 눌러요.', '바탕화면 · 시작 메뉴의 <b>컨설팅</b>으로 열어요.']
     }[k];
     var body = '<div class="modal-b one inst-m"><ol class="inst-ol">' + steps.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ol>' +
       '<div class="inst-link"><span>' + esc(link) + '</span><button class="btn" data-copy>주소 복사</button></div>' +
@@ -1533,8 +1533,8 @@
     h += '<div class="bar"><span style="color:var(--sub);font-size:var(--fs-2)">처음 상태로 되돌리기 (' + esc(DB.data.updatedAt || '') + ' 기준 값으로 바뀌어요)</span><span class="grow"></span><button class="btn red" id="bk4">초기화</button></div></section>';
     box.innerHTML = h;
     var day = G.kst().date;
-    $('#bk1').onclick = function () { G.download('고무신컨설팅-단가-' + day + '.json', JSON.stringify({ type: 'gms-consult', data: DB.data }, null, 1)); };
-    $('#bk2').onclick = function () { G.download('고무신컨설팅-전체-' + day + '.json', JSON.stringify({ type: 'gms-consult', data: DB.data, records: DB.records }, null, 1)); };
+    $('#bk1').onclick = function () { G.download('컨설팅-단가-' + day + '.json', JSON.stringify({ type: 'gms-consult', data: DB.data }, null, 1)); };
+    $('#bk2').onclick = function () { G.download('컨설팅-전체-' + day + '.json', JSON.stringify({ type: 'gms-consult', data: DB.data, records: DB.records }, null, 1)); };
     $('#bk3').onchange = function (e) {
       var f = e.target.files[0]; if (!f) return; var rd = new FileReader();
       rd.onload = function () {
