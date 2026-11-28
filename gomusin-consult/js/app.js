@@ -1100,11 +1100,13 @@
   var TM_KEY = 'gms-tm-key', TM_URL = 'https://trustflow.co.kr/intake/api/records';
   function tmKey() { try { return localStorage.getItem(TM_KEY) || ''; } catch (e) { return ''; } }
   function tmSend(rec, kind, model, color) {
-    var k = tmKey(); if (!k) return;
+    var k = tmKey();
     var body = { id: rec.id, store: DB.store(rec.store).name, kind: kind, carrier: rec.carrier || '', model: model || '', color: color || '', plan: rec.plan || '', monthly: n0(rec.monthly), staff: rec.staff || '' };
-    fetch(TM_URL, { method: 'POST', credentials: 'omit', headers: { 'Authorization': 'Bearer ' + k, 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-      .then(function (r) { if (!r.ok) throw new Error(r.status); rec.tmAt = G.nowStr(); DB.saveRecords(); toast('트러스트맵으로 보냈어요'); })
-      .catch(function () { toast('트러스트맵 전송 실패(저장은 됨)'); });
+    /* 기본: 우리 서버(로그인 확인)가 대신 보내요 → 매장 기기에 열쇠를 넣을 필요 없음. 기기에 열쇠를 넣었으면 그걸로 바로 보내요. */
+    var req = k ? fetch(TM_URL, { method: 'POST', credentials: 'omit', headers: { 'Authorization': 'Bearer ' + k, 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      : fetch('/__tm', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    req.then(function (r) { if (!k && r.status === 503) return 'skip'; if (!r.ok) throw new Error(r.status); rec.tmAt = G.nowStr(); DB.saveRecords(); toast('트러스트맵으로 보냈어요'); })
+      .catch(function () { if (location.protocol === 'https:') toast('트러스트맵 전송 실패(저장은 됨)'); });
   }
   function doSave() {
     /* 상담 저장: 고객 정보 창 없이 바로 저장하고, 공통지원금이면 요금제 변경 안내를 바로 띄워요 */
@@ -1536,7 +1538,7 @@
     h += '<div class="field"><label>할부 이자 (연 %)</label><input id="b-rate" inputmode="decimal" value="' + ((D.carriers[0] || {}).rate || 5.9) + '"></div>';
     h += '<div class="field"><label>프리미엄패스 기본 금액 (원)</label><input id="b-pass" inputmode="numeric" value="' + num(((D.passes || [])[0] || {}).off) + '"></div>';
     var tk = tmKey();
-    h += '<div class="field full"><label>트러스트맵 연결 열쇠 <span style="font-weight:500;color:var(--mute)">(이 기기에만 저장 · ' + (tk ? '지금 ••••' + esc(tk.slice(-4)) : '아직 없음') + ')</span></label><div style="display:flex;gap:8px"><input id="b-tm" type="password" autocomplete="off" placeholder="새 열쇠를 넣으면 바뀌어요 (비우면 그대로)"><button class="btn" id="b-tm-del" type="button">지우기</button></div></div>';
+    h += '<div class="field full"><label>트러스트맵 연결 열쇠 <span style="font-weight:500;color:var(--mute)">(보통은 비워 두세요. 서버가 자동으로 보내요 · 이 기기에만 저장 · ' + (tk ? '지금 ••••' + esc(tk.slice(-4)) : '없음') + ')</span></label><div style="display:flex;gap:8px"><input id="b-tm" type="password" autocomplete="off" placeholder="새 열쇠를 넣으면 바뀌어요 (비우면 그대로)"><button class="btn" id="b-tm-del" type="button">지우기</button></div></div>';
     h += '<div class="field full"><label>견적서 아래 안내 문구</label><textarea id="b-caut" style="height:120px">' + esc(D.cautions) + '</textarea></div>';
     h += '</div></div><div class="bar"><span class="grow"></span><button class="btn pri" id="bsave">저장</button></div></section>';
     box.innerHTML = h;

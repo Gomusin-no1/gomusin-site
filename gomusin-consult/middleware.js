@@ -100,6 +100,23 @@ async function admin(req, u) {
   }
   return json({ ok: false, msg: '알 수 없는 요청' }, 400);
 }
+/* 트러스트맵으로 보내기: 매장 기기에 열쇠를 넣지 않아도 되게, 열쇠는 Vercel 환경변수 TRUSTMAP_KEY 에만 둬요.
+   로그인한 기기만 쓸 수 있고, 고객 이름 · 번호 · 메모는 받지도 보내지도 않아요. */
+const TM_URL = 'https://trustflow.co.kr/intake/api/records';
+async function tm(req, u) {
+  const key = env('TRUSTMAP_KEY', 'TM_KEY');
+  if (!key) return json({ ok: false, msg: 'nokey' }, 503);
+  let b = {}; try { b = await req.json(); } catch (e) {}
+  const o = {};
+  ['id', 'store', 'kind', 'carrier', 'model', 'color', 'plan', 'monthly', 'staff'].forEach((k) => { if (b[k] != null) o[k] = k === 'monthly' ? Number(b[k]) || 0 : String(b[k]).slice(0, 120); });
+  if (!o.id) return json({ ok: false, msg: 'noid' }, 400);
+  if (!o.staff) o.staff = u.name || '';
+  try {
+    const r = await fetch(TM_URL, { method: 'POST', headers: { Authorization: 'Bearer ' + key, 'Content-Type': 'application/json', Origin: 'https://gomusin-consult.vercel.app' }, body: JSON.stringify(o), cache: 'no-store' });
+    console.log('[트러스트맵]', o.id, o.kind, o.store, r.status, 'by', u.id);
+    return json({ ok: r.ok, status: r.status }, r.ok ? 200 : 502);
+  } catch (e) { console.log('[트러스트맵 실패]', o.id, String(e)); return json({ ok: false }, 502); }
+}
 export default async function middleware(req) {
   const url = new URL(req.url);
   if (url.pathname === '/__login' && req.method === 'POST') {
@@ -123,6 +140,7 @@ export default async function middleware(req) {
   const u = await me(req);
   if (u) {
     if (url.pathname === '/__admin/staff') return admin(req, u);
+    if (url.pathname === '/__tm' && req.method === 'POST') return tm(req, u);
     if (url.pathname === '/' || url.pathname === '/index.html') console.log('[접속]', u.id, u.name, ip(req));
     return;
   }
