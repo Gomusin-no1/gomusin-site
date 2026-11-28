@@ -1122,3 +1122,21 @@ body.no-admin .adm-link { display: none; }
   .rec-t td:nth-child(7) { grid-row: 3; grid-column: 2; }
   .rec-t td.empty-note { grid-column: 1 / -1; }
 }
+/* 매장별 색: 부평본점 검정 · 간석점 남색 · 숭의점 빨강 */
+.st-chip { display: inline-block; padding: 3px 9px; border-radius: 6px; color: #fff; font-size: 12.5px; font-weight: 800; white-space: nowrap; }
+.st-chip.st-bupyeong { background: #111111; } .st-chip.st-ganseok { background: #1B2A6B; } .st-chip.st-sungui { background: #DC2626; }
+.rec-t tbody tr td:first-child { box-shadow: none !important; }
+.rec-t tbody tr.st-bupyeong td:first-child { box-shadow: inset 5px 0 0 #111111 !important; }
+.rec-t tbody tr.st-ganseok td:first-child { box-shadow: inset 5px 0 0 #1B2A6B !important; }
+.rec-t tbody tr.st-sungui td:first-child { box-shadow: inset 5px 0 0 #DC2626 !important; }
+.rec-t tbody tr.done { opacity: .72; }
+.rc-wait { background: #111827; color: #fff; }
+@media (max-width: 600px) {
+  .rec-t tbody tr.wait { box-shadow: none; }
+  .rec-t tbody tr.st-bupyeong { box-shadow: inset 5px 0 0 #111111 !important; }
+  .rec-t tbody tr.st-ganseok { box-shadow: inset 5px 0 0 #1B2A6B !important; }
+  .rec-t tbody tr.st-sungui { box-shadow: inset 5px 0 0 #DC2626 !important; }
+  .rec-t tbody tr td:first-child { box-shadow: none !important; }
+  .rec-t td:nth-child(5) { display: block !important; grid-row: 4; grid-column: 1; }
+}
+@media (max-width: 600px) { .rec-t tbody tr.st-bupyeong td:first-child, .rec-t tbody tr.st-ganseok td:first-child, .rec-t tbody tr.st-sungui td:first-child { box-shadow: none !important; } }

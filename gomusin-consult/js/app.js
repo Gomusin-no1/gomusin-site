@@ -98,7 +98,7 @@
 
   /* ---------- 상단 ---------- */
   function header(r) {
-    var nav = [['home', '처음'], ['phone', '휴대폰'], ['wired', '인터넷 · TV'], ['mvno', '알뜰폰'], ['used', '중고폰'], ['records', '상담목록']];
+    var nav = [['home', '처음'], ['phone', '휴대폰'], ['wired', '인터넷 · TV'], ['mvno', '알뜰폰'], ['used', '중고폰'], ['records', '신규가입']];
     $('#nav').innerHTML = nav.map(function (n) { return '<a href="#/' + n[0] + '" class="' + (r === n[0] ? 'on' : '') + '">' + n[1] + '</a>'; }).join('');
     var sel = $('#store');
     var SO = { bupyeong: 1, sungui: 2, ganseok: 3 };
@@ -136,7 +136,7 @@
     h += '<div class="home-low">';
     h += '<section class="card"><div class="card-h"><h2>처음 쓰는 분은 이렇게</h2></div><ol class="howto"><li><b>휴대폰</b>을 눌러요.</li><li>고객님이 쓸 <b>통신사</b>를 눌러요.</li><li>원하는 <b>모델</b>을 눌러요.</li><li><b>색상 · 용량</b>을 고르고 아래 <b>요금제</b>를 고르면 매달 내는 돈이 바로 나와요.</li><li><b>상담 저장</b> 또는 <b>견적서 인쇄</b>로 마무리해요.</li></ol></section>';
     if (!isApp()) h += '<section class="card inst-card"><div class="card-h"><h2>앱으로 설치</h2></div><p class="inst-p">휴대폰 · PC 바탕화면에 아이콘을 만들어 두면 앱처럼 바로 열려요. 인터넷이 잠깐 끊겨도 열려요.</p><button class="btn pri inst-btn" data-act="install">앱 설치하기</button></section>';
-    h += '<section class="card"><div class="card-h"><h2>바로 가기</h2></div><div class="quick"><a class="btn" href="#/records">상담 목록</a><a class="btn" href="#/used">중고폰</a></div><div style="margin-top:14px;text-align:right"><a href="#/admin" class="adm-link" style="font-size:12px;color:#9AA3B5;text-decoration:none">사장님 메뉴</a>' + (window.GMS_ME ? ' <span style="font-size:12px;color:#9AA3B5">· ' + esc(window.GMS_ME.n) + ' · <a href="/__logout" style="color:#9AA3B5">로그아웃</a></span>' : '') + '</div></section>';
+    h += '<section class="card"><div class="card-h"><h2>바로 가기</h2></div><div class="quick"><a class="btn" href="#/records">신규 가입 목록</a><a class="btn" href="#/used">중고폰</a></div><div style="margin-top:14px;text-align:right"><a href="#/admin" class="adm-link" style="font-size:12px;color:#9AA3B5;text-decoration:none">사장님 메뉴</a>' + (window.GMS_ME ? ' <span style="font-size:12px;color:#9AA3B5">· ' + esc(window.GMS_ME.n) + ' · <a href="/__logout" style="color:#9AA3B5">로그아웃</a></span>' : '') + '</div></section>';
     h += '</div>';
     app.innerHTML = '<div class="wrap">' + h + '</div>';
     function tile(href, k, t, s1, s2) { return '<a class="tile t-' + k + '" href="' + href + '"><div class="ic">' + icon(k) + '</div><div class="tt">' + t + '</div><div class="s1">' + s1 + '</div><div class="s2">' + s2 + '</div><div class="go">시작하기 →</div></a>'; }
@@ -1229,12 +1229,12 @@
     var allSt = !!renderRecords.all, myN = DB.records.filter(function (x) { return (x.store || 'bupyeong') === DB.prefs.store; }).length;
     var list = DB.records.filter(function (x) { return (allSt || (x.store || 'bupyeong') === DB.prefs.store) && (!q || [x.state.customer, x.state.phone, x.device, x.staff, x.carrier].join(' ').indexOf(q) >= 0); });
     var wait = list.filter(function (x) { return !x.signedAt; }).length;
-    var h = '<div class="page-h"><h1>상담 목록</h1><div class="sub">' + esc(DB.store(DB.prefs.store).name) + ' ' + myN + '건 · 고객 정보 기다리는 상담 <b style="color:#E11D48">' + wait + '건</b> · 줄을 누르면 고객 정보 · 사인을 받아요</div></div>';
+    var h = '<div class="page-h"><h1>신규 가입 목록</h1><div class="sub">' + esc(DB.store(DB.prefs.store).name) + ' ' + myN + '건 · 개통 기다리는 고객 <b style="color:#E11D48">' + wait + '건</b> · 줄을 누르면 바로 개통 진행 (고객 정보 · 사인)</div></div>';
     h += '<section class="card"><div class="bar"><div class="seg" style="width:auto"><button id="rs1" class="' + (allSt ? '' : 'on') + '" style="padding:0 14px">이 매장</button><button id="rs2" class="' + (allSt ? 'on' : '') + '" style="padding:0 14px">전 매장</button></div><input class="search" id="rq" placeholder="모델, 통신사, 이름으로 찾기" value="' + esc(q) + '" style="flex:1;min-width:160px"><button class="btn" id="rcsv">엑셀(CSV) 받기</button></div>';
     h += '<div class="tbl-wrap"><table class="tbl rec-t"><thead><tr><th>시간</th><th>모델 · 색상</th><th class="hide-m">통신사</th><th class="r">월 요금</th><th class="hide-m">매장</th><th>고객</th><th></th></tr></thead><tbody>';
     h += list.map(function (x) {
-      var cu = x.signedAt ? '<span class="rc-ok">✓ ' + esc(maskName(x.state.customer) || '사인 완료') + '</span>' : '<span class="rc-wait">정보 받기</span>';
-      return '<tr data-rid="' + x.id + '" class="' + (x.signedAt ? 'done' : 'wait') + '"><td class="rc-time">' + esc(x.at.slice(5)) + '</td><td class="b">' + esc(x.device || '-') + '</td><td class="hide-m">' + esc(x.carrier) + '</td><td class="r b">' + num(x.monthly) + '원</td><td class="hide-m">' + esc(DB.store(x.store).name) + '</td><td>' + cu + '</td><td class="r rc-acts"><button class="btn sm" data-load="' + x.id + '">불러오기</button> <button class="btn sm red" data-del="' + x.id + '">삭제</button></td></tr>';
+      var cu = x.signedAt ? '<span class="rc-ok">✓ ' + esc(maskName(x.state.customer) || '사인 완료') + '</span>' : '<span class="rc-wait">개통 진행</span>';
+      return '<tr data-rid="' + x.id + '" class="st-' + esc(x.store || 'bupyeong') + ' ' + (x.signedAt ? 'done' : 'wait') + '"><td class="rc-time">' + esc(x.at.slice(5)) + '</td><td class="b">' + esc(x.device || '-') + '</td><td class="hide-m">' + esc(x.carrier) + '</td><td class="r b">' + num(x.monthly) + '원</td><td class="hide-m"><span class="st-chip st-' + esc(x.store || 'bupyeong') + '">' + esc(DB.store(x.store).name) + '</span></td><td>' + cu + '</td><td class="r rc-acts"><button class="btn sm" data-load="' + x.id + '">불러오기</button> <button class="btn sm red" data-del="' + x.id + '">삭제</button></td></tr>';
     }).join('') || '<tr><td colspan="7" class="empty-note">저장한 상담이 없어요. 상담 화면에서 [상담 저장]을 누르면 여기에 쌓여요.</td></tr>';
     h += '</tbody></table></div></section>';
     app.innerHTML = '<div class="wrap">' + h + '</div>';
@@ -1259,7 +1259,7 @@
       '<p class="pv-sm">동의하지 않으셔도 상담은 받으실 수 있어요.</p>' +
       '<label class="pv-ck"><input type="checkbox" id="c-agree"' + (x.agreeAt ? ' checked' : '') + '> 위 내용을 읽었고 <b>동의해요</b></label></div></div>' +
       '<div class="modal-f"><button class="btn" data-close>닫기</button><button class="btn pri" data-next>다음 (사인하기)</button></div>';
-    var m = modal('고객 정보', body, { size: 'sm' });
+    var m = modal('개통 진행 · 고객 정보', body, { size: 'sm' });
     $('[data-next]', m).onclick = function () {
       var nm = $('#c-name', m).value.trim(), ph = $('#c-phone', m).value.trim();
       if (!nm) { $('#c-name', m).focus(); toast('성함을 써 주세요'); return; }
