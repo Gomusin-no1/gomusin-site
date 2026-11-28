@@ -98,7 +98,7 @@
 
   /* ---------- 상단 ---------- */
   function header(r) {
-    var nav = [['home', '처음'], ['phone', '휴대폰'], ['wired', '인터넷 · TV'], ['mvno', '알뜰폰'], ['used', '중고폰'], ['records', '상담기록']];
+    var nav = [['home', '처음'], ['phone', '휴대폰'], ['wired', '인터넷 · TV'], ['mvno', '알뜰폰'], ['used', '중고폰'], ['records', '상담목록']];
     $('#nav').innerHTML = nav.map(function (n) { return '<a href="#/' + n[0] + '" class="' + (r === n[0] ? 'on' : '') + '">' + n[1] + '</a>'; }).join('');
     var sel = $('#store');
     var SO = { bupyeong: 1, sungui: 2, ganseok: 3 };
@@ -136,7 +136,7 @@
     h += '<div class="home-low">';
     h += '<section class="card"><div class="card-h"><h2>처음 쓰는 분은 이렇게</h2></div><ol class="howto"><li><b>휴대폰</b>을 눌러요.</li><li>고객님이 쓸 <b>통신사</b>를 눌러요.</li><li>원하는 <b>모델</b>을 눌러요.</li><li><b>색상 · 용량</b>을 고르고 아래 <b>요금제</b>를 고르면 매달 내는 돈이 바로 나와요.</li><li><b>상담 저장</b> 또는 <b>견적서 인쇄</b>로 마무리해요.</li></ol></section>';
     if (!isApp()) h += '<section class="card inst-card"><div class="card-h"><h2>앱으로 설치</h2></div><p class="inst-p">휴대폰 · PC 바탕화면에 아이콘을 만들어 두면 앱처럼 바로 열려요. 인터넷이 잠깐 끊겨도 열려요.</p><button class="btn pri inst-btn" data-act="install">앱 설치하기</button></section>';
-    h += '<section class="card"><div class="card-h"><h2>바로 가기</h2></div><div class="quick"><a class="btn" href="#/records">상담 기록</a><a class="btn" href="#/used">중고폰</a></div><div style="margin-top:14px;text-align:right"><a href="#/admin" class="adm-link" style="font-size:12px;color:#9AA3B5;text-decoration:none">사장님 메뉴</a>' + (window.GMS_ME ? ' <span style="font-size:12px;color:#9AA3B5">· ' + esc(window.GMS_ME.n) + ' · <a href="/__logout" style="color:#9AA3B5">로그아웃</a></span>' : '') + '</div></section>';
+    h += '<section class="card"><div class="card-h"><h2>바로 가기</h2></div><div class="quick"><a class="btn" href="#/records">상담 목록</a><a class="btn" href="#/used">중고폰</a></div><div style="margin-top:14px;text-align:right"><a href="#/admin" class="adm-link" style="font-size:12px;color:#9AA3B5;text-decoration:none">사장님 메뉴</a>' + (window.GMS_ME ? ' <span style="font-size:12px;color:#9AA3B5">· ' + esc(window.GMS_ME.n) + ' · <a href="/__logout" style="color:#9AA3B5">로그아웃</a></span>' : '') + '</div></section>';
     h += '</div>';
     app.innerHTML = '<div class="wrap">' + h + '</div>';
     function tile(href, k, t, s1, s2) { return '<a class="tile t-' + k + '" href="' + href + '"><div class="ic">' + icon(k) + '</div><div class="tt">' + t + '</div><div class="s1">' + s1 + '</div><div class="s2">' + s2 + '</div><div class="go">시작하기 →</div></a>'; }
@@ -1218,18 +1218,92 @@
   /* =========================================================
      상담 기록
      ========================================================= */
+  /* 상담 목록: 저장 → 목록 → 줄을 누르면 고객 정보 → 사인 */
+  function maskName(n) { n = String(n || ''); if (n.length < 2) return n; return n[0] + (n.length > 2 ? '*'.repeat(n.length - 2) : '*') + (n.length > 2 ? n[n.length - 1] : ''); }
+  function maskPhone(p) { var d = String(p || '').replace(/\D/g, ''); return d.length >= 8 ? d.slice(0, 3) + '-****-' + d.slice(-4) : (d ? '****' : ''); }
+  var SIGN_KEY = 'gms-consult-sign-';
+  function signGet(id) { try { return localStorage.getItem(SIGN_KEY + id) || ''; } catch (e) { return ''; } }
+  function signSet(id, v) { try { if (v) localStorage.setItem(SIGN_KEY + id, v); else localStorage.removeItem(SIGN_KEY + id); return true; } catch (e) { return false; } }
   function renderRecords() {
     var q = renderRecords.q || '';
     var allSt = !!renderRecords.all, myN = DB.records.filter(function (x) { return (x.store || 'bupyeong') === DB.prefs.store; }).length;
-    var list = DB.records.filter(function (x) { return (allSt || (x.store || 'bupyeong') === DB.prefs.store) && (!q || [x.state.customer, x.state.phone, x.device, x.staff].join(' ').indexOf(q) >= 0); });
-    var h = '<div class="page-h"><h1>상담 기록</h1><div class="sub">' + esc(DB.store(DB.prefs.store).name) + ' ' + myN + '건 · 이 기기 전체 ' + DB.records.length + '건 · 줄을 누르면 불러와요</div></div>';
-    h += '<section class="card"><div class="bar"><div class="seg" style="width:auto"><button id="rs1" class="' + (allSt ? '' : 'on') + '" style="padding:0 14px">이 매장</button><button id="rs2" class="' + (allSt ? 'on' : '') + '" style="padding:0 14px">전 매장</button></div><input class="search" id="rq" placeholder="이름, 전화번호, 모델로 찾기" value="' + esc(q) + '" style="flex:1;min-width:200px"><button class="btn" data-act="csv">엑셀(CSV) 받기</button></div>';
-    h += '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>날짜</th><th class="hide-m">매장</th><th>고객</th><th class="hide-m">전화번호</th><th class="hide-m">통신사</th><th>모델</th><th class="r">월 납부</th><th></th></tr></thead><tbody>';
-    h += list.map(function (x) { return '<tr data-rid="' + x.id + '"><td>' + esc(x.at.slice(5)) + '</td><td class="hide-m">' + esc(DB.store(x.store).name) + '</td><td class="b">' + esc(x.state.customer || '-') + '</td><td class="hide-m">' + esc(x.state.phone || '') + '</td><td class="hide-m">' + esc(x.carrier) + '</td><td>' + esc(x.device || '-') + '</td><td class="r b">' + num(x.monthly) + '</td><td class="r"><button class="btn sm red" data-del="' + x.id + '">삭제</button></td></tr>'; }).join('') || '<tr><td colspan="8" class="empty-note">저장한 상담이 없어요. 상담 화면에서 [상담 저장]을 누르면 여기에 쌓여요.</td></tr>';
+    var list = DB.records.filter(function (x) { return (allSt || (x.store || 'bupyeong') === DB.prefs.store) && (!q || [x.state.customer, x.state.phone, x.device, x.staff, x.carrier].join(' ').indexOf(q) >= 0); });
+    var wait = list.filter(function (x) { return !x.signedAt; }).length;
+    var h = '<div class="page-h"><h1>상담 목록</h1><div class="sub">' + esc(DB.store(DB.prefs.store).name) + ' ' + myN + '건 · 고객 정보 기다리는 상담 <b style="color:#E11D48">' + wait + '건</b> · 줄을 누르면 고객 정보 · 사인을 받아요</div></div>';
+    h += '<section class="card"><div class="bar"><div class="seg" style="width:auto"><button id="rs1" class="' + (allSt ? '' : 'on') + '" style="padding:0 14px">이 매장</button><button id="rs2" class="' + (allSt ? 'on' : '') + '" style="padding:0 14px">전 매장</button></div><input class="search" id="rq" placeholder="모델, 통신사, 이름으로 찾기" value="' + esc(q) + '" style="flex:1;min-width:160px"><button class="btn" id="rcsv">엑셀(CSV) 받기</button></div>';
+    h += '<div class="tbl-wrap"><table class="tbl rec-t"><thead><tr><th>시간</th><th>모델 · 색상</th><th class="hide-m">통신사</th><th class="r">월 요금</th><th class="hide-m">매장</th><th>고객</th><th></th></tr></thead><tbody>';
+    h += list.map(function (x) {
+      var cu = x.signedAt ? '<span class="rc-ok">✓ ' + esc(maskName(x.state.customer) || '사인 완료') + '</span>' : '<span class="rc-wait">정보 받기</span>';
+      return '<tr data-rid="' + x.id + '" class="' + (x.signedAt ? 'done' : 'wait') + '"><td class="rc-time">' + esc(x.at.slice(5)) + '</td><td class="b">' + esc(x.device || '-') + '</td><td class="hide-m">' + esc(x.carrier) + '</td><td class="r b">' + num(x.monthly) + '원</td><td class="hide-m">' + esc(DB.store(x.store).name) + '</td><td>' + cu + '</td><td class="r rc-acts"><button class="btn sm" data-load="' + x.id + '">불러오기</button> <button class="btn sm red" data-del="' + x.id + '">삭제</button></td></tr>';
+    }).join('') || '<tr><td colspan="7" class="empty-note">저장한 상담이 없어요. 상담 화면에서 [상담 저장]을 누르면 여기에 쌓여요.</td></tr>';
     h += '</tbody></table></div></section>';
     app.innerHTML = '<div class="wrap">' + h + '</div>';
     if ($('#rs1')) { $('#rs1').onclick = function () { renderRecords.all = false; renderRecords(); }; $('#rs2').onclick = function () { renderRecords.all = true; renderRecords(); }; }
     $('#rq').oninput = function (e) { renderRecords.q = e.target.value.trim(); var p = e.target.selectionStart; renderRecords(); var i = $('#rq'); i.focus(); i.setSelectionRange(p, p); };
+    var cb = $('#rcsv'); if (cb) cb.onclick = recCsv;
+  }
+  function recCsv() {
+    var rows = [['시간', '매장', '모델', '통신사', '요금제', '월 요금', '고객', '전화번호', '동의', '사인']].concat(DB.records.map(function (x) { return [x.at, DB.store(x.store).name, x.device, x.carrier, x.plan, x.monthly, x.state.customer || '', x.state.phone || '', x.agreeAt || '', x.signedAt || '']; }));
+    G.download('상담목록-' + G.nowStr().slice(0, 10) + '.csv', '﻿' + rows.map(function (r) { return r.map(function (v) { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }).join('\n'), 'text/csv');
+  }
+  /* 고객 정보 창 (고객님이 직접 입력) → 사인 */
+  function custInfo(id) {
+    var x = DB.records.find(function (y) { return y.id === id; }); if (!x) return;
+    var sum = '<div class="ci-sum"><div><span>모델</span><b>' + esc(x.device || '-') + '</b></div><div><span>통신사 · 요금제</span><b>' + esc(x.carrier) + (x.plan ? ' · ' + esc(x.plan) : '') + '</b></div><div><span>매달 내는 돈 (예상)</span><b class="ci-amt">' + num(x.monthly) + '원</b></div></div>';
+    var body = '<div class="modal-p ci-p">' + sum +
+      '<div class="form"><div class="field full"><label>성함</label><input id="c-name" autocomplete="off" value="' + esc(x.state.customer || '') + '" placeholder="홍길동"></div>' +
+      '<div class="field full"><label>휴대폰 번호</label><input id="c-phone" inputmode="tel" autocomplete="off" value="' + esc(x.state.phone || '') + '" placeholder="010-0000-0000"></div></div>' +
+      '<div class="pv-box"><div class="pv-h">개인정보 수집 · 이용 동의 <span>(필수)</span></div>' +
+      '<table class="pv-t"><tr><th>수집 항목</th><td>성함, 휴대폰 번호, 사인, 상담 내용</td></tr><tr><th>이용 목적</th><td>상담 내용 안내, 개통 · 재상담 연락</td></tr>' +
+      '<tr><th>보관 기간</th><td>상담일로부터 <b>1년</b> (지나면 자동 삭제) · 요청하시면 바로 지워요</td></tr><tr><th>보관 장소</th><td>' + esc(DB.store(x.store).name) + ' 매장 기기 안</td></tr></table>' +
+      '<p class="pv-sm">동의하지 않으셔도 상담은 받으실 수 있어요.</p>' +
+      '<label class="pv-ck"><input type="checkbox" id="c-agree"' + (x.agreeAt ? ' checked' : '') + '> 위 내용을 읽었고 <b>동의해요</b></label></div></div>' +
+      '<div class="modal-f"><button class="btn" data-close>닫기</button><button class="btn pri" data-next>다음 (사인하기)</button></div>';
+    var m = modal('고객 정보', body, { size: 'sm' });
+    $('[data-next]', m).onclick = function () {
+      var nm = $('#c-name', m).value.trim(), ph = $('#c-phone', m).value.trim();
+      if (!nm) { $('#c-name', m).focus(); toast('성함을 써 주세요'); return; }
+      if (ph.replace(/\D/g, '').length < 10) { $('#c-phone', m).focus(); toast('휴대폰 번호를 확인해 주세요'); return; }
+      if (!$('#c-agree', m).checked) { var b = $('.pv-box', m); b.classList.add('need'); b.scrollIntoView({ block: 'center', behavior: 'smooth' }); toast('동의에 체크해 주세요'); return; }
+      custSign(x, nm, ph);
+    };
+  }
+  function custSign(x, nm, ph) {
+    var body = '<div class="modal-p sg-p"><div class="sg-who"><b>' + esc(nm) + '</b> 고객님, 아래 칸에 <b>성함</b>을 손가락으로 써 주세요</div>' +
+      '<div class="sg-wrap"><canvas id="sg"></canvas><div class="sg-ph">여기에 사인</div></div>' +
+      '<div class="sg-tools"><button class="btn" data-clear>다시 쓰기</button></div></div>' +
+      '<div class="modal-f"><button class="btn" data-back>이전</button><button class="btn pri" data-done>확인 (끝)</button></div>';
+    var m = modal('고객 사인', body, { size: 'sm' }); m.querySelector('.modal').classList.add('sg-modal');
+    var cv = $('#sg', m), ctx = cv.getContext('2d'), drawn = false, last = null, ph0 = $('.sg-ph', m);
+    function fit() { var r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1; cv.width = r.width * d; cv.height = r.height * d; ctx.setTransform(d, 0, 0, d, 0, 0); ctx.lineWidth = 3.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#111827'; }
+    fit();
+    function pt(e) { var r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+    cv.addEventListener('pointerdown', function (e) { e.preventDefault(); cv.setPointerCapture(e.pointerId); last = pt(e); ctx.beginPath(); ctx.arc(last.x, last.y, 1.4, 0, 7); ctx.fillStyle = '#111827'; ctx.fill(); drawn = true; ph0.style.display = 'none'; });
+    cv.addEventListener('pointermove', function (e) { if (!last) return; e.preventDefault(); var p = pt(e); ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last = p; });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (t) { cv.addEventListener(t, function () { last = null; }); });
+    $('[data-clear]', m).onclick = function () { ctx.clearRect(0, 0, cv.width, cv.height); drawn = false; ph0.style.display = ''; };
+    $('[data-back]', m).onclick = function () { x.state.customer = nm; x.state.phone = ph; custInfo(x.id); };
+    $('[data-done]', m).onclick = function () {
+      if (!drawn) { toast('사인을 해 주세요'); return; }
+      /* 작게 줄여서 저장 (흰 바탕 JPG) */
+      var o = document.createElement('canvas'), w = 600, hh = Math.round(w * cv.height / cv.width); o.width = w; o.height = hh;
+      var oc = o.getContext('2d'); oc.fillStyle = '#fff'; oc.fillRect(0, 0, w, hh); oc.drawImage(cv, 0, 0, w, hh);
+      var data = o.toDataURL('image/jpeg', 0.6);
+      x.state.customer = nm; x.state.phone = ph; x.agreeAt = x.agreeAt || G.nowStr(); x.signedAt = G.nowStr();
+      if (!signSet(x.id, data)) { toast('기기 저장 공간이 부족해 사인을 못 남겼어요. 오래된 상담을 지워 주세요'); x.signedAt = ''; return; }
+      DB.saveRecords(); closeModal();
+      modal('완료', '<div class="modal-p sg-fin"><div class="sg-ck">✓</div><div class="sg-t">감사합니다, ' + esc(nm) + ' 고객님!</div><div class="sg-s">상담 내용과 사인이 저장됐어요.</div></div><div class="modal-f"><button class="btn pri" data-close style="width:100%">닫기</button></div>', { size: 'sm' });
+      if (location.hash.indexOf('records') >= 0) renderRecords();
+    };
+  }
+  function recView(x) {
+    var sg = signGet(x.id);
+    var body = '<div class="modal-p ci-p"><div class="ci-sum"><div><span>시간</span><b>' + esc(x.at) + '</b></div><div><span>모델</span><b>' + esc(x.device || '-') + '</b></div><div><span>통신사 · 요금제</span><b>' + esc(x.carrier) + (x.plan ? ' · ' + esc(x.plan) : '') + '</b></div><div><span>월 요금</span><b class="ci-amt">' + num(x.monthly) + '원</b></div>' +
+      '<div><span>고객</span><b>' + esc(x.state.customer || '') + ' · ' + esc(x.state.phone || '') + '</b></div><div><span>동의 · 사인</span><b>' + esc(x.signedAt || '') + '</b></div></div>' +
+      (sg ? '<img class="sg-img" alt="고객 사인" src="' + sg + '">' : '') + '</div>' +
+      '<div class="modal-f"><button class="btn" data-redo>정보 다시 받기</button><button class="btn pri" data-close>닫기</button></div>';
+    var m = modal('상담 · 고객 정보', body, { size: 'sm' });
+    $('[data-redo]', m).onclick = function () { custInfo(x.id); };
   }
 
   /* =========================================================
@@ -1530,8 +1604,9 @@
       var t2 = e.target.closest('[data-tab]'); if (t2) { adminTab = t2.getAttribute('data-tab'); renderAdmin(); return; }
       var at = e.target.closest('[data-admintab]'); if (at) { adminTab = at.getAttribute('data-admintab'); }
       var del = e.target.closest('[data-del]');
-      if (del) { e.stopPropagation(); if (!confirm('이 상담 기록을 지울까요?')) return; DB.records = DB.records.filter(function (x) { return x.id !== del.getAttribute('data-del'); }); DB.saveRecords(); renderRecords(); return; }
-      var rec = e.target.closest('tr[data-rid]'); if (rec) { loadRecord(rec.getAttribute('data-rid')); return; }
+      if (del) { e.stopPropagation(); if (!confirm('이 상담 기록을 지울까요?')) return; signSet(del.getAttribute('data-del'), ''); DB.records = DB.records.filter(function (x) { return x.id !== del.getAttribute('data-del'); }); DB.saveRecords(); renderRecords(); return; }
+      var ld = e.target.closest('[data-load]'); if (ld && e.target.closest('.rec-t')) { e.stopPropagation(); loadRecord(ld.getAttribute('data-load')); return; }
+      var rec = e.target.closest('tr[data-rid]'); if (rec) { var rx = DB.records.find(function (y) { return y.id === rec.getAttribute('data-rid'); }); if (rx && rx.signedAt) recView(rx); else custInfo(rec.getAttribute('data-rid')); return; }
       var a = e.target.closest('[data-act]'); if (!a) return;
       var act = a.getAttribute('data-act');
       if (act === 'install') { doInstall(); return; }
@@ -1596,6 +1671,10 @@
   document.addEventListener('DOMContentLoaded', function () {
     app = $('#app');
     DB.init();
+    /* 개인정보 보관 1년: 지난 상담의 성함 · 번호 · 사인 자동 삭제 */
+    (function () { var cut = new Date(Date.now() + 9 * 3600e3 - 365 * 864e5).toISOString().slice(0, 10), ch = 0;
+      DB.records.forEach(function (x) { if (x.at && x.at.slice(0, 10) < cut && x.state && (x.state.customer || x.state.phone || x.signedAt)) { x.state.customer = ''; x.state.phone = ''; x.purged = 1; signSet(x.id, ''); ch++; } });
+      if (ch) DB.saveRecords(); })();
     var qs = /[?&]store=([a-z]+)/.exec(location.search); if (qs && DB.data.stores.some(function (x) { return x.id === qs[1]; })) { DB.prefs.store = qs[1]; DB.savePrefs(); }
     var ME = null; try { var mc = /(?:^|;\s*)gms_n=([^;]+)/.exec(document.cookie); if (mc) ME = JSON.parse(decodeURIComponent(mc[1])); } catch (e) {}
     window.GMS_ME = ME;
