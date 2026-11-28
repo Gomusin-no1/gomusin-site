@@ -1097,23 +1097,13 @@
   }
   function copySummary() { G.copyText(summaryLines(st(), G.calc(st())).join('\n')).then(function (ok) { toast(ok ? '복사했어요. 문자나 카톡에 붙여넣기 하세요' : '복사가 안 됐어요'); }); }
   function doSave() {
-    var s = st();
-    var body = '<div class="modal-p"><div class="form">' +
-      '<div class="field"><label>고객 이름</label><input id="f-name" value="' + esc(s.customer) + '"></div>' +
-      '<div class="field"><label>전화번호</label><input id="f-phone" inputmode="tel" value="' + esc(s.phone) + '"></div>' +
-      '<div class="field full"><label>상담 직원</label><input id="f-staff" value="' + esc(DB.prefs.staff || '') + '"></div>' +
-      '<div class="field full"><label>메모</label><textarea id="f-memo">' + esc(s.memo) + '</textarea></div></div></div>' +
-      '<div class="modal-f"><button class="btn" data-close>취소</button><button class="btn pri" data-ok>저장</button></div>';
-    var m = modal('상담 저장', body, { size: 'sm' });
-    $('[data-ok]', m).onclick = function () {
-      s.customer = $('#f-name').value.trim(); s.phone = $('#f-phone').value.trim(); s.memo = $('#f-memo').value;
-      DB.prefs.staff = $('#f-staff').value.trim(); DB.savePrefs();
-      var r = G.calc(s);
-      DB.records.unshift({ id: G.uid(), at: G.nowStr(), store: DB.prefs.store, staff: DB.prefs.staff, state: G.clone(s), monthly: r.monthly, carrier: r.car.name, device: r.dev ? r.dev.name + (s.color && s.mode !== 'used' ? ' ' + s.color : '') : '', plan: r.plan ? r.plan.name : '' });
-      if (DB.records.length > 2000) DB.records.length = 2000;
-      DB.saveRecords(); closeModal(); toast('상담을 저장했어요'); saveDraft();
-      if (r.subMode === 'common' && r.common && pcRule(s.carrier)) pcWarn(s.carrier);
-    };
+    /* 상담 저장: 고객 정보 창 없이 바로 저장하고, 공통지원금이면 요금제 변경 안내를 바로 띄워요 */
+    var s = st(), r = G.calc(s);
+    var staff = (window.GMS_ME && window.GMS_ME.n) || DB.prefs.staff || '';
+    DB.records.unshift({ id: G.uid(), at: G.nowStr(), store: DB.prefs.store, staff: staff, state: G.clone(s), monthly: r.monthly, carrier: r.car.name, device: r.dev ? r.dev.name + (s.color && s.mode !== 'used' ? ' ' + s.color : '') : '', plan: r.plan ? r.plan.name : '' });
+    if (DB.records.length > 2000) DB.records.length = 2000;
+    DB.saveRecords(); closeModal(); toast('상담을 저장했어요'); saveDraft();
+    if (r.subMode === 'common' && r.common && pcRule(s.carrier)) pcWarn(s.carrier);
   }
   function loadRecord(id) {
     var x = DB.records.find(function (y) { return y.id === id; }); if (!x) return;

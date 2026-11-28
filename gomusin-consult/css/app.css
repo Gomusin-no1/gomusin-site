@@ -1069,3 +1069,5 @@ body.no-admin .adm-link { display: none; }
   .steps li { flex: none; }
   .car-grid.mv .car .ds { font-size: 13px; padding: 0 8px; }
 }
+/* 작은 안내창(저장 안내 · 요금제 변경 안내)은 휴대폰 · 태블릿에서도 가운데 카드로 */
+@media (max-width: 760px) { .modal-bg:has(.modal.sm) { align-items: center; padding: 12px; } .modal.sm { height: auto !important; border-radius: 16px; max-height: calc(100vh - 24px); } }
