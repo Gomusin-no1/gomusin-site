@@ -1096,6 +1096,16 @@
     return L;
   }
   function copySummary() { G.copyText(summaryLines(st(), G.calc(st())).join('\n')).then(function (ok) { toast(ok ? '복사했어요. 문자나 카톡에 붙여넣기 하세요' : '복사가 안 됐어요'); }); }
+  /* 트러스트맵으로 보내기 (연결 열쇠가 이 기기에 있을 때만 · 고객 이름 · 번호 · 메모는 절대 안 보냄) */
+  var TM_KEY = 'gms-tm-key', TM_URL = 'https://trustflow.co.kr/intake/api/records';
+  function tmKey() { try { return localStorage.getItem(TM_KEY) || ''; } catch (e) { return ''; } }
+  function tmSend(rec, kind, model, color) {
+    var k = tmKey(); if (!k) return;
+    var body = { id: rec.id, store: DB.store(rec.store).name, kind: kind, carrier: rec.carrier || '', model: model || '', color: color || '', plan: rec.plan || '', monthly: n0(rec.monthly), staff: rec.staff || '' };
+    fetch(TM_URL, { method: 'POST', credentials: 'omit', headers: { 'Authorization': 'Bearer ' + k, 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); rec.tmAt = G.nowStr(); DB.saveRecords(); toast('트러스트맵으로 보냈어요'); })
+      .catch(function () { toast('트러스트맵 전송 실패(저장은 됨)'); });
+  }
   function doSave() {
     /* 상담 저장: 고객 정보 창 없이 바로 저장하고, 공통지원금이면 요금제 변경 안내를 바로 띄워요 */
     var s = st(), r = G.calc(s);
@@ -1103,10 +1113,20 @@
     DB.records.unshift({ id: G.uid(), at: G.nowStr(), store: DB.prefs.store, staff: staff, state: G.clone(s), monthly: r.monthly, carrier: r.car.name, device: r.dev ? r.dev.name + (s.color && s.mode !== 'used' ? ' ' + s.color : '') : '', plan: r.plan ? r.plan.name : '' });
     if (DB.records.length > 2000) DB.records.length = 2000;
     DB.saveRecords(); closeModal(); toast('상담을 저장했어요'); saveDraft();
+    tmSend(DB.records[0], 'mobile', r.dev ? r.dev.name : '', s.mode !== 'used' ? (s.color || '') : '');
     if (r.subMode === 'common' && r.common && pcRule(s.carrier)) pcWarn(s.carrier);
+  }
+  function wSave() {
+    var x = wcalc(), w = x.w, nm = w.name + ' ' + w.inet[W.speed] + (x.tv ? ' + ' + tvLabel(x.tv) : '') + (W.tel ? ' + 인터넷 전화' : '');
+    var staff = (window.GMS_ME && window.GMS_ME.n) || DB.prefs.staff || '';
+    var rec = { id: G.uid(), at: G.nowStr(), store: DB.prefs.store, staff: staff, kind: 'wired', state: { mode: 'wired', w: G.clone(W), customer: '', phone: '', memo: '' }, monthly: x.after + x.mob, carrier: w.name, device: nm, plan: w.inet[W.speed] + (x.tv ? ' · ' + tvLabel(x.tv) : '') };
+    DB.records.unshift(rec); if (DB.records.length > 2000) DB.records.length = 2000;
+    DB.saveRecords(); toast('상담을 저장했어요');
+    tmSend(rec, 'wired', nm, '');
   }
   function loadRecord(id) {
     var x = DB.records.find(function (y) { return y.id === id; }); if (!x) return;
+    if (x.state && x.state.mode === 'wired') { W = G.clone(x.state.w); location.hash = '#/wired'; renderWired(); toast('상담을 불러왔어요'); return; }
     var st0 = G.clone(x.state); if (st0.mode === 'wireless' && !ROOT.wireless) st0.mode = 'wireless';
     S[st0.mode] = st0;
     var d = DB.device(st0.device);
@@ -1210,7 +1230,7 @@
     if (W.gift) h += row('사은품', '<span class="num">' + won(W.gift) + '</span>', 'minus');
     if (W.addMobile) h += row('휴대폰 (휴대폰 상담)', '<span class="num">' + won(x.mob) + '</span>');
     h += '<div class="row big b fin"><div class="k">' + (W.addMobile ? '집 전체 월 납부' : '월 납부') + '</div><div class="v"><span class="num">' + won(x.after + x.mob) + '</span></div></div>';
-    h += '</div>' + insBox + '<div class="cnote l" style="padding:0 16px">' + esc(D.wiredNote || '') + '</div><div class="acts"><button class="btn" data-act="wcopy">문자로 복사</button><button class="btn red" data-act="wreset">지우기</button></div></section></div>';
+    h += '</div>' + insBox + '<div class="cnote l" style="padding:0 16px">' + esc(D.wiredNote || '') + '</div><div class="acts"><button class="btn pri" data-act="wsave" style="grid-column:1/-1">상담 저장</button><button class="btn" data-act="wcopy">문자로 복사</button><button class="btn red" data-act="wreset">지우기</button></div></section></div>';
     app.innerHTML = '<div class="wrap">' + h + '</div><div class="mbar"><div><div class="lb">결합 후 월 납부</div><div class="m num">' + num(x.after + x.mob) + '원</div></div></div>';
     renderWired.text = '[고무신모바일 인터넷 · TV 상담]\n' + w.name + ' ' + w.inet[W.speed] + (x.tv ? ' + ' + tvLabel(x.tv) + (x.stbSel ? ' (' + x.stbSel.name + ')' : '') : '') + (W.tel ? ' + 인터넷 전화' : '') + '\n설치비 ' + (W.day ? '주말 · 공휴일 ' : '평일 ') + won(x.install[W.day || 0]) + ' (한 번)' + '\n결합 전 월 ' + won(x.before) + '\n결합 후 월 ' + won(x.after) + (W.bundle ? ' (' + w.bundleName + ')' : '') + '\n3년 할인 ' + won((x.inetOff + x.mobOff) * 36) + (W.gift ? '\n사은품 ' + won(W.gift) : '') + '\n문의 ' + DB.data.mainPhone;
   }
@@ -1515,15 +1535,20 @@
     h += '<div class="field"><label>군인 할인 (%)</label><input id="b-mil" inputmode="numeric" value="' + n0(D.militaryRate) + '"></div>';
     h += '<div class="field"><label>할부 이자 (연 %)</label><input id="b-rate" inputmode="decimal" value="' + ((D.carriers[0] || {}).rate || 5.9) + '"></div>';
     h += '<div class="field"><label>프리미엄패스 기본 금액 (원)</label><input id="b-pass" inputmode="numeric" value="' + num(((D.passes || [])[0] || {}).off) + '"></div>';
+    var tk = tmKey();
+    h += '<div class="field full"><label>트러스트맵 연결 열쇠 <span style="font-weight:500;color:var(--mute)">(이 기기에만 저장 · ' + (tk ? '지금 ••••' + esc(tk.slice(-4)) : '아직 없음') + ')</span></label><div style="display:flex;gap:8px"><input id="b-tm" type="password" autocomplete="off" placeholder="새 열쇠를 넣으면 바뀌어요 (비우면 그대로)"><button class="btn" id="b-tm-del" type="button">지우기</button></div></div>';
     h += '<div class="field full"><label>견적서 아래 안내 문구</label><textarea id="b-caut" style="height:120px">' + esc(D.cautions) + '</textarea></div>';
     h += '</div></div><div class="bar"><span class="grow"></span><button class="btn pri" id="bsave">저장</button></div></section>';
     box.innerHTML = h;
+    $('#b-tm-del').onclick = function () { if (!confirm('이 기기의 트러스트맵 연결 열쇠를 지울까요?')) return; try { localStorage.removeItem(TM_KEY); } catch (e) {} toast('열쇠를 지웠어요'); adminBasic(box); };
     $('#bsave').onclick = function () {
       $$('[data-st]', box).forEach(function (el) { D.stores[Number(el.getAttribute('data-st'))].phone = el.value.trim(); });
       D.mainPhone = $('#b-main').value.trim(); D.usimFee = n0($('#b-usim').value); D.lowPlanFee = { skt: n0($('#b-lp-skt').value), kt: n0($('#b-lp-kt').value), lgu: n0($('#b-lp-lgu').value) }; D.militaryRate = n0($('#b-mil').value);
       var rate = Number($('#b-rate').value) || 5.9; D.carriers.forEach(function (c) { c.rate = rate; });
       if (D.passes && D.passes[0]) D.passes[0].off = n0($('#b-pass').value);
-      D.cautions = $('#b-caut').value; DB.saveData(); toast('저장했어요');
+      D.cautions = $('#b-caut').value; DB.saveData();
+      var nk = $('#b-tm').value.trim(); if (nk) { try { localStorage.setItem(TM_KEY, nk); } catch (e) {} }
+      toast('저장했어요'); if (nk) adminBasic(box);
     };
   }
 
@@ -1629,6 +1654,7 @@
       else if (act === 'copy') copySummary();
       else if (act === 'reset') { if (confirm('입력한 내용을 모두 지울까요?')) { var keep = st(); S[mode] = newState(mode); if (mode !== 'used') { S[mode].carrier = keep.carrier; S[mode].plan = keep.plan; S[mode].device = keep.device; S[mode].color = keep.color; } render(); } }
       else if (act === 'toTotal') { var tc = $('.total-card'); if (tc) tc.scrollIntoView({ behavior: 'smooth' }); }
+      else if (act === 'wsave') { wSave(); }
       else if (act === 'wcopy') { G.copyText(renderWired.text).then(function (ok) { toast(ok ? '복사했어요' : '복사가 안 됐어요'); }); }
       else if (act === 'wreset') { W = null; renderWired(); }
       else if (act === 'csv') {
