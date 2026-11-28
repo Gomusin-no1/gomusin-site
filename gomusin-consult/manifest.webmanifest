@@ -1,7 +1,7 @@
 {
  "id": "./",
- "name": "고무신 상담",
- "short_name": "고무신 상담",
+ "name": "고무신 컨설팅",
+ "short_name": "고무신 컨설팅",
  "description": "고무신모바일 매장 판매상담 프로그램",
  "start_url": "./#/home",
  "scope": "./",
